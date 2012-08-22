@@ -30,7 +30,7 @@ authors = [Author('Arne Hilmann', 'arne.hilmann@gmail.com'),
 license = 'GNU GPL v3'
 summary = 'yadtreceiver'
 url = 'https://github.com/yadt/yadtreceiver'
-version = '0.1.2'
+version = '0.1.3'
 
 default_task = ['analyze', 'publish']
 
