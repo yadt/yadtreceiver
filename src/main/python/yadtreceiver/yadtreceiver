@@ -1,0 +1,69 @@
+#!/bin/sh
+#
+# Init script for yadtreceiver
+#
+# Description: Startup script for yadtserver. 
+#
+# Author: Michael Gruber <aelgru@gmail.com>
+
+TWISTD=/usr/local/bin/twistd
+
+LOGFILE=/var/logs/yadtreceiver/activity.log
+PIDFILE=/var/run/yadtreceiver.pid
+TACFILE=/etc/twisted-taps/yadtreceiver.tac
+ 
+check_twisted_exists() {
+    if [ ! -x $TWISTD ]
+    then
+        echo "$TWISTD does not exist."
+        exit 1
+    fi
+}
+ 
+check_pid_file_exists() {
+    if [ ! -x $PIDFILE ]
+    then
+        echo "$PIDFILE does not exist."
+        exit 1
+    fi
+}
+ 
+start_daemon() {
+    check_twisted_exists
+    
+    $TWISTD --pidfile=$PIDFILE \
+            --python=$TACFILE \
+            --logfile=$LOGFILE
+}
+ 
+stop_daemon() {
+    check_pid_file_exists
+    
+    kill -QUIT `cat $PIDFILE`
+}
+
+case "$1" in
+    start)
+        echo -n "Starting yadtreceiver: "
+        start_daemon
+        echo "started."
+    ;;
+    stop)
+        echo -n "Stopping yadtreceiver: "
+        stop_daemon
+        echo "stopped."
+    ;;
+    restart)
+        echo -n "Restarting yadtreceiver: "
+        d_stop
+        sleep 1
+        d_start
+        echo "restarted."
+    ;;
+    *)
+        echo "Usage: ${0} {start|stop|restart}" >&2
+        exit 3
+    ;;
+esac
+ 
+exit 0
