@@ -17,17 +17,11 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
+    Handles start-up and configuration of the yadtreceiver application.
 """
 
 __author__ = 'Arne Hilmann, Michael Gruber'
 
-
-import os
-import re
-import socket
-import subprocess
-import sys
-import time
 
 from twisted.application import service
 from twisted.internet import reactor, protocol

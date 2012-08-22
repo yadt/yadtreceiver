@@ -16,6 +16,8 @@
 
 from pythonbuilder.core import use_plugin, init, Author
 
+use_plugin('filter_resources')
+
 use_plugin('python.core')
 use_plugin('python.coverage')
 use_plugin('python.unittest')
@@ -23,7 +25,6 @@ use_plugin('python.integrationtest')
 use_plugin('python.distutils')
 use_plugin('python.pep8')
 use_plugin('python.pydev')
-
 
 authors = [Author('Arne Hilmann', 'arne.hilmann@gmail.com'),
            Author('Michael Gruber', 'aelgru@gmail.com')]
@@ -40,5 +41,8 @@ def set_properties (project):
     project.set_property('pychecker_break_build', False)
     project.set_property('pep8_break_build', True)
     project.get_property('distutils_commands').append('bdist_rpm')
+
+    project.get_property('filter_resources_glob').append('**/yadtreceiver/yadtreceiver.tac')
+
     project.install_file('/etc/twisted-taps/', 'yadtreceiver/yadtreceiver.tac')
     project.install_file('/etc/init.d/', 'yadtreceiver/yadtreceiver')
