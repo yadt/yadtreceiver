@@ -51,7 +51,7 @@ DEFAULT_GRAPHITE_ACTIVE = False
 DEFAULT_LOG_FILENAME = '/var/log/yadtreceiver.log'
 DEFAULT_PYTHON_COMMAND = '/usr/bin/python'
 DEFAULT_SCRIPT_TO_EXECUTE = '/usr/bin/yadtshell'
-DEFAULT_TARGETS = {}
+DEFAULT_TARGETS = set()
 DEFAULT_TARGETS_DIRECTORY = '/etc/yadtshell/targets/'
 
 SECTION_BROADCASTER = 'broadcaster'
