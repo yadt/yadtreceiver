@@ -13,7 +13,7 @@ TACFILE=/etc/twisted-taps/yadtreceiver.tac
 check_twistd_exists() {
     if [ ! -x $TWISTD ]
     then
-        echo "$TWISTD does not exist."
+        echo "$TWISTD does not exist or is not executable."
         exit 1
     fi
 }
@@ -34,7 +34,7 @@ start_daemon() {
  
 stop_daemon() {
     check_pid_file_exists    
-    kill -QUIT `cat $PIDFILE`
+    kill -QUIT `cat $PIDFILE` && rm $PIDFILE
 }
 
 case "$1" in
