@@ -145,8 +145,11 @@ class Receiver(service.Service):
 
 
     def onEvent(self, target, event):
-        event_id = event.get('id')
-        if event_id == 'request':
+        """
+            will be called when receiving an event: handling requests.
+        """
+
+        if event.get('id') == 'request':
             command = event['cmd']
             arguments = event['args']
 
@@ -197,4 +200,3 @@ class Receiver(service.Service):
         self.broadcaster = WampBroadcaster(host, port, 'yadtreceiver')
         self.broadcaster.addOnSessionOpenHandler(self.onConnect)
         self.broadcaster.connect()
-
