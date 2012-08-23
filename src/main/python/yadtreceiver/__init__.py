@@ -1,4 +1,4 @@
-#   yadt receiver
+#   yadtreceiver
 #   Copyright (C) 2012 Immobilien Scout GmbH
 #
 #   This program is free software: you can redistribute it and/or modify
@@ -22,6 +22,7 @@
 
 __author__ = 'Arne Hilmann, Michael Gruber'
 
+import logging
 import os
 
 from twisted.application import service
@@ -48,6 +49,7 @@ class Receiver(service.Service):
         for the targets that it subscribed to.
     """
 
+
     def get_target_directory(self, target):
         """
             appends the given target name to the targets_directory.
@@ -61,11 +63,11 @@ class Receiver(service.Service):
         target_directory = os.path.join(targets_directory, target)
 
         if not os.path.exists(target_directory):
-            raise ReceiverException('(%s) target[%s] request failed: target '
-                                    'directory "%s" does not exist.'
+            raise ReceiverException('(%s) target[%s] request failed: target directory "%s" does not exist.'
                                     % (hostname, target, target_directory))
 
         return target_directory
+
 
     def handle_request(self, target, command, arguments):
         """
@@ -75,28 +77,25 @@ class Receiver(service.Service):
         """
 
         self.publish_start(target, command, arguments)
+        self.notify_graphite(target, arguments[0])
 
+        hostname = self.configuration.hostname
         python_command = self.configuration.python_command
         script_to_execute = self.configuration.script_to_execute
-        command_and_arguments = [python_command, script_to_execute] + arguments
+
+        command_and_arguments_list = [python_command, script_to_execute] + arguments
+        command_with_arguments = ' '.join(command_and_arguments_list)
+
+
+        process_protocol = ProcessProtocol(hostname, self.broadcaster, target, command_with_arguments)
+
         target_dir = self.get_target_directory(target)
-        readable_command_and_arguments = ' '.join(command_and_arguments)
+        reactor.spawnProcess(process_protocol, python_command, command_and_arguments_list, env={}, path=target_dir)
 
-        self.notify_graphite(target, arguments)
-
-        process_protocol = ProcessProtocol(self.configuration.hostname,
-                                           self.broadcaster,
-                                           target,
-                                           readable_command_and_arguments)
-
-        reactor.spawnProcess(process_protocol,
-                             python_command,
-                             command_and_arguments,
-                             env={},
-                             path=target_dir)
 
     def log_broadcaster_notification(self, message):
         log.msg('(broadcaster) %s' % message)
+
 
     def log_command_notification(self, target, event):
         command = event['cmd']
@@ -104,50 +103,42 @@ class Receiver(service.Service):
 
         if 'message' in event:
             message = event['message']
-            self.log_broadcaster_notification(
-                'target[%s] command "%s" %s: %s'
-                % (target, command, state, message)
-            )
+            self.log_broadcaster_notification('target[%s] command "%s" %s: %s' % (target, command, state, message))
         else:
-            self.log_broadcaster_notification(
-                'target[%s] command "%s" %s.' % (target, command, state)
-            )
+            self.log_broadcaster_notification('target[%s] command "%s" %s.' % (target, command, state))
 
-    def notify_graphite(self, target, arguments):
+
+    def notify_graphite(self, target, action):
         """
             notifies the configured graphite server about events (currently
             only update events).
         """
 
-        if arguments[0] == 'update':
-            port = self.configuration.graphite_port
+        if action == 'update':
             host = self.configuration.graphite_host
+            port = self.configuration.graphite_port
 
             send_update_notification_to_graphite(target, host, port)
 
+
     def publish_failed(self, target, command, message):
         """
-
+            publishes a failed event
         """
         log.err(_stuff=Exception(message), _why=message)
-        self.broadcaster.publish_cmd_for_target(target,
-                                                command,
-                                                Event.FAILED,
-                                                message)
+        self.broadcaster.publish_cmd_for_target(target, command, Event.FAILED, message)
+
 
     def publish_start(self, target, command, arguments):
         """
-            publishes the start of the
+            publishes a started event
         """
 
         hostname = self.configuration.hostname
-        message = '(%s) target[%s] request: command="%s", arguments=%s' \
-                  % (hostname, target, command, arguments)
+        message = '(%s) target[%s] request: command="%s", arguments=%s' % (hostname, target, command, arguments)
         log.msg(message)
-        self.broadcaster.publish_cmd_for_target(target,
-                                                command,
-                                                Event.STARTED,
-                                                message)
+        self.broadcaster.publish_cmd_for_target(target, command, Event.STARTED, message)
+
 
     def onConnect(self):
         """
@@ -156,9 +147,14 @@ class Receiver(service.Service):
 
         sorted_targets = sorted(self.configuration.targets)
 
+        if len(sorted_targets) == 0:
+            log.err('No targets configured.')
+            exit(1)
+
         for target in sorted_targets:
             log.msg('subscribing to target "%s".' % target)
             self.broadcaster.client.subscribe(target, self.onEvent)
+
 
     def onEvent(self, target, event):
         event_id = event.get('id')
@@ -172,9 +168,7 @@ class Receiver(service.Service):
                 self.publish_failed(target, command, exception.message)
 
         elif event_id == 'full-update':
-            self.log_broadcaster_notification(
-                'target[%s] update of status information.' % target
-            )
+            self.log_broadcaster_notification('target[%s] update of status information.' % target)
 
         elif event_id == 'cmd':
             self.log_command_notification(target, event)
@@ -183,14 +177,11 @@ class Receiver(service.Service):
             for payload in event['payload']:
                 uri = payload['uri']
                 state = payload['state']
-                self.log_broadcaster_notification(
-                    'target[%s] %s is %s.' % (target, uri, state)
-                )
+                self.log_broadcaster_notification('target[%s] %s is %s.' % (target, uri, state))
 
         else:
-            self.log_broadcaster_notification(
-                'target[%s] unknown event "%s".' % (target, event_id)
-            )
+            self.log_broadcaster_notification('target[%s] unknown event "%s".' % (target, event_id))
+
 
     def set_configuration(self, configuration):
         """
@@ -199,7 +190,26 @@ class Receiver(service.Service):
 
         self.configuration = configuration
 
+
     def startService(self):
+        """
+            Initializes logging and establishes connection to broadcaster.
+        """
+
+        self._initialize_logging()
+        self._connect_broadcaster()
+
+
+    def _initialize_logging(self):
+        """
+            Starts logging as configured.
+        """
+
+        log_file = open(self.configuration.log_filename, 'w+')
+        log.startLogging(log_file)
+
+
+    def _connect_broadcaster(self):
         """
             Establishes a connection to the broadcaster as found in the
             configuration.
@@ -213,3 +223,4 @@ class Receiver(service.Service):
         self.broadcaster = WampBroadcaster(host, port, 'yadtreceiver')
         self.broadcaster.addOnSessionOpenHandler(self.onConnect)
         self.broadcaster.connect()
+

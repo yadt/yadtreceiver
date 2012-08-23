@@ -1,4 +1,4 @@
-#   yadt receiver
+#   yadtreceiver
 #   Copyright (C) 2012 Immobilien Scout GmbH
 #
 #   This program is free software: you can redistribute it and/or modify
@@ -38,22 +38,23 @@ __author__ = 'Michael Gruber'
 
 import os
 import socket
+import sys
 
-from twisted.python import log
-from ConfigParser import SafeConfigParser, DEFAULTSECT
+from ConfigParser import SafeConfigParser
 
 DEFAULT_BROADCASTER_HOST = 'localhost'
 DEFAULT_BROADCASTER_PORT = 8081
 DEFAULT_GRAPHITE_HOST = 'localhost'
 DEFAULT_GRAPHITE_PORT = 2003
 DEFAULT_GRAPHITE_ACTIVE = False
+DEFAULT_LOG_FILENAME = '/var/log/yadtreceiver.log'
 DEFAULT_PYTHON_COMMAND = '/usr/bin/python'
 DEFAULT_SCRIPT_TO_EXECUTE = '/usr/bin/yadtshell'
 DEFAULT_TARGETS = {}
 DEFAULT_TARGETS_DIRECTORY = '/etc/yadtshell/targets/'
 
 SECTION_BROADCASTER = 'broadcaster'
-SECTION_DEFAULT = DEFAULTSECT
+SECTION_RECEIVER = 'receiver'
 SECTION_GRAPHITE = 'graphite'
 
 
@@ -63,10 +64,10 @@ class ConfigurationException (Exception):
     """
 
 class ReceiverConfigParser (object):
-
     """
         uses a SafeConfigParser to offer some convenience methods.
     """
+
 
     def __init__(self):
         """
@@ -76,15 +77,15 @@ class ReceiverConfigParser (object):
 
         self.parser = SafeConfigParser()
 
+
     def get_broadcaster_host(self):
         """
             @return: the broadcaster host from the configuration file,
                      otherwise DEFAULT_BROADCASTER_HOST.
         """
 
-        return self._get_option(SECTION_BROADCASTER,
-                                'host',
-                                DEFAULT_BROADCASTER_HOST)
+        return self._get_option(SECTION_BROADCASTER, 'host', DEFAULT_BROADCASTER_HOST)
+
 
     def get_broadcaster_port(self):
         """
@@ -92,9 +93,8 @@ class ReceiverConfigParser (object):
                      otherwise DEFAULT_BROADCASTER_PORT.
         """
 
-        return self._get_option_as_int(SECTION_BROADCASTER,
-                                       'port',
-                                       DEFAULT_BROADCASTER_PORT)
+        return self._get_option_as_int(SECTION_BROADCASTER, 'port', DEFAULT_BROADCASTER_PORT)
+
 
     def get_graphite_active(self):
         """
@@ -102,9 +102,8 @@ class ReceiverConfigParser (object):
                      as bool, otherwise DEFAULT_GRAPHITE_ACTIVE.
         """
 
-        return self._get_option_as_yes_or_no_boolean(SECTION_GRAPHITE,
-                                                     'active',
-                                                     DEFAULT_GRAPHITE_ACTIVE)
+        return self._get_option_as_yes_or_no_boolean(SECTION_GRAPHITE, 'active', DEFAULT_GRAPHITE_ACTIVE)
+
 
     def get_graphite_host(self):
         """
@@ -112,9 +111,8 @@ class ReceiverConfigParser (object):
                      otherwise DEFAULT_GRAPHITE_HOST.
         """
 
-        return self._get_option(SECTION_GRAPHITE,
-                                'host',
-                                DEFAULT_GRAPHITE_HOST)
+        return self._get_option(SECTION_GRAPHITE, 'host', DEFAULT_GRAPHITE_HOST)
+
 
     def get_graphite_port(self):
         """
@@ -122,9 +120,8 @@ class ReceiverConfigParser (object):
                      otherwise DEFAULT_GRAPHITE_PORT.
         """
 
-        return self._get_option_as_int(SECTION_GRAPHITE,
-                                       'port',
-                                       DEFAULT_GRAPHITE_PORT)
+        return self._get_option_as_int(SECTION_GRAPHITE, 'port', DEFAULT_GRAPHITE_PORT)
+
 
     def get_hostname(self):
         """
@@ -133,11 +130,21 @@ class ReceiverConfigParser (object):
                      given by socket.gethostname
         """
 
-        if self.parser.has_section(SECTION_DEFAULT):
-            if self.parser.has_option(SECTION_DEFAULT, 'hostname'):
-                return self.parser.get(SECTION_DEFAULT, 'hostname')
+        if self.parser.has_section(SECTION_RECEIVER):
+            if self.parser.has_option(SECTION_RECEIVER, 'hostname'):
+                return self.parser.get(SECTION_RECEIVER, 'hostname')
 
         return socket.gethostname()
+
+
+    def get_log_filename(self):
+        """
+            @return: the log filename from the configuration file if given,
+                     otherwise DEFAULT_LOG_FILENAME
+        """
+
+        return self._get_option(SECTION_RECEIVER, 'log_filename', DEFAULT_LOG_FILENAME)
+
 
     def get_python_command(self):
         """
@@ -145,9 +152,8 @@ class ReceiverConfigParser (object):
                      otherwise DEFAULT_PYTHON_COMMAND
         """
 
-        return self._get_option(SECTION_DEFAULT,
-                                'python_command',
-                                DEFAULT_PYTHON_COMMAND)
+        return self._get_option(SECTION_RECEIVER, 'python_command', DEFAULT_PYTHON_COMMAND)
+
 
     def get_script_to_execute(self):
         """
@@ -155,9 +161,8 @@ class ReceiverConfigParser (object):
                      otherwise DEFAULT_SCRIPT_TO_EXECUTE.
         """
 
-        return self._get_option(SECTION_DEFAULT,
-                                'script_to_execute',
-                                DEFAULT_SCRIPT_TO_EXECUTE)
+        return self._get_option(SECTION_RECEIVER, 'script_to_execute', DEFAULT_SCRIPT_TO_EXECUTE)
+
 
     def get_targets(self):
         """
@@ -165,9 +170,8 @@ class ReceiverConfigParser (object):
                      otherwise DEFAULT_TARGETS.
         """
 
-        return self._get_option_as_set(SECTION_DEFAULT,
-                                       'targets',
-                                       DEFAULT_TARGETS)
+        return self._get_option_as_set(SECTION_RECEIVER, 'targets', DEFAULT_TARGETS)
+
 
     def get_targets_directory(self):
         """
@@ -175,9 +179,8 @@ class ReceiverConfigParser (object):
                      otherwise DEFAULT_TARGETS_DIRECTORY.
         """
 
-        return self._get_option(SECTION_DEFAULT,
-                                'targets_directory',
-                                DEFAULT_TARGETS_DIRECTORY)
+        return self._get_option(SECTION_RECEIVER, 'targets_directory', DEFAULT_TARGETS_DIRECTORY)
+
 
     def read_configuration_file(self, filename):
         """
@@ -186,12 +189,13 @@ class ReceiverConfigParser (object):
         """
 
         if not os.path.exists(filename):
-            log.err('Configuration file "%s" does not exist.' % filename)
+            sys.stderr.write('Configuration file "%s" does not exist.\n' % filename)
             exit(1)
             return
 
-        log.msg('Loading configuration file "%s"' % filename)
+        sys.stdout.write('Loading configuration file "%s"' % filename)
         self.parser.read([filename])
+
 
     def _get_option(self, section, option, default_value):
         """
@@ -205,6 +209,7 @@ class ReceiverConfigParser (object):
 
         return default_value
 
+
     def _get_option_as_yes_or_no_boolean(self, section, option, default_value):
         """
             @return: the boolean option from the section if it exists,
@@ -214,11 +219,11 @@ class ReceiverConfigParser (object):
         option_value = self._get_option(section, option, default_value)
 
         if option_value != 'yes' and option_value != 'no':
-            raise ConfigurationException('Option %s in section %s expected '
-                                         '"yes" or "no", but got %s'
+            raise ConfigurationException('Option %s in section %s expected "yes" or "no", but got %s'
                                          % (option, section, option_value))
 
         return option_value == 'yes'
+
 
     def _get_option_as_int(self, section, option, default_value):
         """
@@ -229,10 +234,10 @@ class ReceiverConfigParser (object):
         option_value = self._get_option(section, option, default_value)
 
         if not option_value.isdigit():
-            raise ConfigurationException('Option %s in section %s expected '
-                                         'a integer value, but got %s'
+            raise ConfigurationException('Option %s in section %s expected a integer value, but got %s'
                                          % (option, section, option_value))
         return int(option_value)
+
 
     def _get_option_as_list(self, section, option, default_value):
         """
@@ -252,6 +257,7 @@ class ReceiverConfigParser (object):
             result.append(unstripped_option.strip())
 
         return result
+
 
     def _get_option_as_set(self, section, option, default_value):
         """
@@ -276,6 +282,7 @@ class Configuration(object):
     graphite_port = DEFAULT_GRAPHITE_PORT
 
     hostname = 'localhost'
+    log_filename = DEFAULT_LOG_FILENAME
     python_command = DEFAULT_PYTHON_COMMAND
     script_to_execute = DEFAULT_SCRIPT_TO_EXECUTE
     targets = DEFAULT_TARGETS
@@ -298,16 +305,17 @@ class Configuration(object):
         parser = ReceiverConfigParser()
         parser.read_configuration_file(filename)
 
-        config = Configuration()
-        config.broadcaster_host = parser.get_broadcaster_host()
-        config.broadcaster_port = parser.get_broadcaster_port()
-        config.graphite_active = parser.get_graphite_active()
-        config.graphite_host = parser.get_graphite_host()
-        config.graphite_port = parser.get_graphite_port()
-        config.hostname = parser.get_hostname()
-        config.python_command = parser.get_python_command()
-        config.script_to_execute = parser.get_script_to_execute()
-        config.targets = parser.get_targets()
-        config.targets_directory = parser.get_targets_directory()
+        configuration = Configuration()
+        configuration.broadcaster_host = parser.get_broadcaster_host()
+        configuration.broadcaster_port = parser.get_broadcaster_port()
+        configuration.graphite_active = parser.get_graphite_active()
+        configuration.graphite_host = parser.get_graphite_host()
+        configuration.graphite_port = parser.get_graphite_port()
+        configuration.hostname = parser.get_hostname()
+        configuration.log_filename = parser.get_log_filename()
+        configuration.python_command = parser.get_python_command()
+        configuration.script_to_execute = parser.get_script_to_execute()
+        configuration.targets = parser.get_targets()
+        configuration.targets_directory = parser.get_targets_directory()
 
-        return config
+        return configuration

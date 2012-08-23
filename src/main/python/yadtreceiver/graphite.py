@@ -1,4 +1,4 @@
-#   yadt receiver
+#   yadtreceiver
 #   Copyright (C) 2012 Immobilien Scout GmbH
 #
 #   This program is free software: you can redistribute it and/or modify
@@ -32,8 +32,7 @@ def send_update_notification_to_graphite(target, host, port):
         graphite_socket.connect(graphite_address)
 
         timestamp = int(time())
-        log.msg('sending update of target %s notification to graphite on %s:%s'
-                % (target, host, port))
+        log.msg('sending update of target %s notification to graphite on %s:%s' % (target, host, port))
         graphite_socket.send('yadt.%s.update 1 %d\n' % (target, timestamp))
 
     except Exception as e:

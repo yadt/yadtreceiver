@@ -1,4 +1,4 @@
-#   yadt receiver
+#   yadtreceiver
 #   Copyright (C) 2012 Immobilien Scout GmbH
 #
 #   This program is free software: you can redistribute it and/or modify
@@ -13,8 +13,6 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from yadtreceiver.configuration import (ConfigurationException,
-                                        ReceiverConfigParser)
 
 
 __author__ = 'Michael Gruber'
@@ -23,18 +21,20 @@ import unittest
 
 from mock import Mock, call, patch
 
-from yadtreceiver.configuration import (DEFAULT_BROADCASTER_HOST,
+from yadtreceiver.configuration import (ConfigurationException,
+                                        DEFAULT_BROADCASTER_HOST,
                                         DEFAULT_BROADCASTER_PORT,
                                         DEFAULT_GRAPHITE_ACTIVE,
                                         DEFAULT_GRAPHITE_HOST,
                                         DEFAULT_GRAPHITE_PORT,
+                                        DEFAULT_LOG_FILENAME,
                                         DEFAULT_PYTHON_COMMAND,
                                         DEFAULT_SCRIPT_TO_EXECUTE,
                                         DEFAULT_TARGETS,
                                         DEFAULT_TARGETS_DIRECTORY,
                                         SECTION_BROADCASTER,
                                         SECTION_GRAPHITE,
-                                        SECTION_DEFAULT,
+                                        SECTION_RECEIVER,
                                         ReceiverConfigParser)
 
 class ConfigurationTests (unittest.TestCase):
@@ -90,9 +90,9 @@ class ConfigurationTests (unittest.TestCase):
         actual_hostname = ReceiverConfigParser.get_hostname(mock_parser)
 
         self.assertEquals('hostname', actual_hostname)
-        self.assertEquals(call(SECTION_DEFAULT), mock_wrapped_parser.has_section.call_args)
-        self.assertEquals(call(SECTION_DEFAULT, 'hostname'), mock_wrapped_parser.has_option.call_args)
-        self.assertEquals(call(SECTION_DEFAULT, 'hostname'), mock_wrapped_parser.get.call_args)
+        self.assertEquals(call(SECTION_RECEIVER), mock_wrapped_parser.has_section.call_args)
+        self.assertEquals(call(SECTION_RECEIVER, 'hostname'), mock_wrapped_parser.has_option.call_args)
+        self.assertEquals(call(SECTION_RECEIVER, 'hostname'), mock_wrapped_parser.get.call_args)
 
     @patch('yadtreceiver.configuration.socket')
     def test_should_return_hostname_from_socket_when_section_does_not_contain_option (self, mock_socket):
@@ -106,8 +106,8 @@ class ConfigurationTests (unittest.TestCase):
         actual_hostname = ReceiverConfigParser.get_hostname(mock_parser)
 
         self.assertEquals('hostname', actual_hostname)
-        self.assertEquals(call(SECTION_DEFAULT), mock_wrapped_parser.has_section.call_args)
-        self.assertEquals(call(SECTION_DEFAULT, 'hostname'), mock_wrapped_parser.has_option.call_args)
+        self.assertEquals(call(SECTION_RECEIVER), mock_wrapped_parser.has_section.call_args)
+        self.assertEquals(call(SECTION_RECEIVER, 'hostname'), mock_wrapped_parser.has_option.call_args)
         self.assertEquals(call(), mock_socket.gethostname.call_args)
 
     @patch('yadtreceiver.configuration.socket')
@@ -121,38 +121,45 @@ class ConfigurationTests (unittest.TestCase):
         actual_hostname = ReceiverConfigParser.get_hostname(mock_parser)
 
         self.assertEquals('hostname', actual_hostname)
-        self.assertEquals(call(SECTION_DEFAULT), mock_wrapped_parser.has_section.call_args)
+        self.assertEquals(call(SECTION_RECEIVER), mock_wrapped_parser.has_section.call_args)
         self.assertEquals(call(), mock_socket.gethostname.call_args)
+
+    def test_should_return_log_filename (self):
+        mock_parser = Mock(ReceiverConfigParser)
+
+        ReceiverConfigParser.get_log_filename(mock_parser)
+
+        self.assertEquals(call(SECTION_RECEIVER, 'log_filename', DEFAULT_LOG_FILENAME), mock_parser._get_option.call_args)
 
     def test_should_return_python_command (self):
         mock_parser = Mock(ReceiverConfigParser)
 
         ReceiverConfigParser.get_python_command(mock_parser)
 
-        self.assertEquals(call(SECTION_DEFAULT, 'python_command', DEFAULT_PYTHON_COMMAND), mock_parser._get_option.call_args)
+        self.assertEquals(call(SECTION_RECEIVER, 'python_command', DEFAULT_PYTHON_COMMAND), mock_parser._get_option.call_args)
 
     def test_should_return_script_to_execute (self):
         mock_parser = Mock(ReceiverConfigParser)
 
         ReceiverConfigParser.get_script_to_execute(mock_parser)
 
-        self.assertEquals(call(SECTION_DEFAULT, 'script_to_execute', DEFAULT_SCRIPT_TO_EXECUTE), mock_parser._get_option.call_args)
+        self.assertEquals(call(SECTION_RECEIVER, 'script_to_execute', DEFAULT_SCRIPT_TO_EXECUTE), mock_parser._get_option.call_args)
 
     def test_should_return_targets (self):
         mock_parser = Mock(ReceiverConfigParser)
 
         ReceiverConfigParser.get_targets(mock_parser)
 
-        self.assertEquals(call(SECTION_DEFAULT, 'targets', DEFAULT_TARGETS), mock_parser._get_option_as_set.call_args)
+        self.assertEquals(call(SECTION_RECEIVER, 'targets', DEFAULT_TARGETS), mock_parser._get_option_as_set.call_args)
 
     def test_should_return_targets_directory (self):
         mock_parser = Mock(ReceiverConfigParser)
 
         ReceiverConfigParser.get_targets_directory(mock_parser)
 
-        self.assertEquals(call(SECTION_DEFAULT, 'targets_directory', DEFAULT_TARGETS_DIRECTORY), mock_parser._get_option.call_args)
+        self.assertEquals(call(SECTION_RECEIVER, 'targets_directory', DEFAULT_TARGETS_DIRECTORY), mock_parser._get_option.call_args)
 
-    @patch('yadtreceiver.configuration.log')
+    @patch('yadtreceiver.configuration.sys')
     @patch('yadtreceiver.configuration.os.path.exists')
     @patch('__builtin__.exit')
     def test_should_exit_when_configuration_file_does_not_exist (self, mock_exit, mock_exists, mock_log):
@@ -164,7 +171,7 @@ class ConfigurationTests (unittest.TestCase):
         self.assertEquals(call('some.cfg'), mock_exists.call_args)
         self.assertEquals(call(1), mock_exit.call_args)
 
-    @patch('yadtreceiver.configuration.log')
+    @patch('yadtreceiver.configuration.sys')
     @patch('yadtreceiver.configuration.os.path.exists')
     def test_should_read_configuration_file (self, mock_exists, mock_log):
         mock_parser = Mock(ReceiverConfigParser)

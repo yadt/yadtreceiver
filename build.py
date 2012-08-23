@@ -1,4 +1,4 @@
-#   yadt receiver
+#   yadtreceiver
 #   Copyright (C) 2012 Immobilien Scout GmbH
 #
 #   This program is free software: you can redistribute it and/or modify
@@ -31,7 +31,7 @@ authors = [Author('Arne Hilmann', 'arne.hilmann@gmail.com'),
 license = 'GNU GPL v3'
 summary = 'yadtreceiver'
 url = 'https://github.com/yadt/yadtreceiver'
-version = '0.1.3'
+version = '0.1.4'
 
 default_task = ['analyze', 'publish']
 

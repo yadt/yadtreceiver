@@ -1,4 +1,4 @@
-#   yadt receiver
+#   yadtreceiver
 #   Copyright (C) 2012 Immobilien Scout GmbH
 #
 #   This program is free software: you can redistribute it and/or modify
@@ -37,6 +37,7 @@ class GraphiteTests(unittest.TestCase):
         self.assertEquals(call(('host', 123)), mock_graphite_socket.connect.call_args)
         self.assertEquals(call('yadt.target.update 1 1\n'), mock_graphite_socket.send.call_args)
         self.assertEquals(call(), mock_graphite_socket.close.call_args)
+
 
     @patch('yadtreceiver.graphite.log')
     @patch('yadtreceiver.graphite.time')

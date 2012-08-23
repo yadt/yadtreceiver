@@ -1,12 +1,12 @@
 #!/bin/sh
 #
-# Init script for yadtreceiver
+# Description: Dummy init script for yadtreceiver.
+#              You may want/need to modify this file to fit your needs.
 #
-# Author: Michael Gruber <aelgru@gmail.com>
+# Author:      Michael Gruber <aelgru@gmail.com>
 
-TWISTD=/usr/local/bin/twistd
+TWISTD=/usr/bin/twistd
 
-LOGFILE=/var/logs/yadtreceiver/activity.log
 PIDFILE=/var/run/yadtreceiver.pid
 TACFILE=/etc/twisted-taps/yadtreceiver.tac
  
@@ -19,41 +19,40 @@ check_twistd_exists() {
 }
  
 check_pid_file_exists() {
-    if [ ! -x $PIDFILE ]
+    if [ ! -f $PIDFILE ]
     then
         echo "$PIDFILE does not exist."
         exit 1
     fi
 }
- 
+
 start_daemon() {
     check_twistd_exists
     
-    $TWISTD --pidfile=$PIDFILE \
-            --python=$TACFILE \
-            --logfile=$LOGFILE
+    $TWISTD --pidfile=$PIDFILE --python=$TACFILE
 }
  
 stop_daemon() {
-    check_pid_file_exists
-    
+    check_pid_file_exists    
     kill -QUIT `cat $PIDFILE`
 }
 
 case "$1" in
     start)
-        echo -n "Starting yadtreceiver: "
+	    echo -n "Starting yadtreceiver: "
         start_daemon
+        echo ""
     ;;
     stop)
-        echo -n "Stopping yadtreceiver: "
+	    echo -n "Stopping yadtreceiver: "
         stop_daemon
+        echo ""
     ;;
     restart)
-        echo -n "Restarting yadtreceiver: "
-        d_stop
+        echo "Restarting yadtreceiver: "
+        stop_daemon
         sleep 1
-        d_start
+        start_daemon
     ;;
     *)
         echo "Usage: ${0} {start|stop|restart}" >&2

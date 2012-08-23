@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#   yadt receiver
+#   yadtreceiver
 #   Copyright (C) 2012 Immobilien Scout GmbH
 #
 #   This program is free software: you can redistribute it and/or modify
@@ -17,7 +17,7 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-    Handles start-up and configuration of the yadtreceiver application.
+    Start-up and configuration of the yadtreceiver application.
 """
 
 __author__ = 'Arne Hilmann, Michael Gruber'
@@ -34,7 +34,7 @@ VERSION = '${version}'
 
 
 configuration = Configuration.load('/etc/yadtshell/receiver.cfg')
-application = service.Application('yadt-receiver version %s' % VERSION)
+application = service.Application('yadtreceiver version %s' % VERSION)
 
 receiver = Receiver()
 receiver.set_configuration(configuration)
