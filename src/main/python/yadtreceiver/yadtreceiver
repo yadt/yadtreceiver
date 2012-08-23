@@ -39,12 +39,12 @@ stop_daemon() {
 
 case "$1" in
     start)
-	    echo -n "Starting yadtreceiver... "
+        echo -n "Starting yadtreceiver... "
         start_daemon
         echo ""
     ;;
     stop)
-	    echo -n "Stopping yadtreceiver... "
+        echo -n "Stopping yadtreceiver... "
         stop_daemon
         echo ""
     ;;
