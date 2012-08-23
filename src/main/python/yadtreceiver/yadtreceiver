@@ -5,10 +5,10 @@
 #
 # Author:      Michael Gruber <aelgru@gmail.com>
 
-TWISTD=/usr/bin/twistd
 
 PIDFILE=/var/run/yadtreceiver.pid
 TACFILE=/etc/twisted-taps/yadtreceiver.tac
+TWISTD=/usr/bin/twistd
  
 check_twistd_exists() {
     if [ ! -x $TWISTD ]
