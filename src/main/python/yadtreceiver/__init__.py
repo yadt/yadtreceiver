@@ -37,6 +37,9 @@ from yadtreceiver.protocols import ProcessProtocol
 from yadtreceiver.events import Event
 
 
+VERSION = '${version}'
+
+
 class ReceiverException(Exception):
     """
         to be raised when an exception occurs within the receiver.
@@ -175,8 +178,9 @@ class Receiver(service.Service):
             Starts logging as configured.
         """
 
-        log_file = open(self.configuration.log_filename, 'w+')
+        log_file = open(self.configuration.log_filename, 'a+')
         log.startLogging(log_file)
+        log.msg('yadtreceiver version %s' % VERSION)
 
 
     def _connect_broadcaster(self):

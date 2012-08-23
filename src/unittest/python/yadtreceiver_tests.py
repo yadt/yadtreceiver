@@ -48,7 +48,7 @@ class YadtReceiverTests (unittest.TestCase):
 
         receiver._initialize_logging()
 
-        self.assertEquals(call('/this/is/a/test.log', 'w+'), mock_open.call_args)
+        self.assertEquals(call('/this/is/a/test.log', 'a+'), mock_open.call_args)
         self.assertEquals(call(mock_file), mock_log.startLogging.call_args)
 
 
