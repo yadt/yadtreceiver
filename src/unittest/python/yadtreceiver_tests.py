@@ -25,6 +25,7 @@ from StringIO import StringIO
 from yadtreceiver import Receiver, ReceiverException
 from yadtreceiver.configuration import Configuration
 
+
 class YadtReceiverTests (unittest.TestCase):
     def test_should_set_configuration (self):
         configuration = 'configuration'
@@ -59,7 +60,7 @@ class YadtReceiverTests (unittest.TestCase):
         receiver = Receiver()
         receiver.set_configuration(configuration)
 
-        receiver._connect_broadcaster()()
+        receiver._connect_broadcaster()
 
         self.assertEquals(call('broadcaster-host', 1234, 'yadtreceiver'), mock_wamb.call_args)
 
@@ -67,7 +68,10 @@ class YadtReceiverTests (unittest.TestCase):
     @patch('yadtreceiver.WampBroadcaster')
     def test_should_add_session_handler_to_broadcaster_when_starting_service (self, mock_wamb):
         receiver = Receiver()
-        receiver.set_configuration(Mock(Configuration))
+        mock_configuration = Mock(Configuration)
+        mock_configuration.broadcaster_host = 'broadcasterhost'
+        mock_configuration.broadcaster_port = 1234
+        receiver.set_configuration(mock_configuration)
         mock_broadcaster_client = Mock()
         mock_wamb.return_value = mock_broadcaster_client
 
@@ -79,7 +83,10 @@ class YadtReceiverTests (unittest.TestCase):
     @patch('yadtreceiver.WampBroadcaster')
     def test_should_connect_broadcaster_when_starting_service (self, mock_wamb):
         receiver = Receiver()
-        receiver.set_configuration(Mock(Configuration))
+        mock_configuration = Mock(Configuration)
+        mock_configuration.broadcaster_host = 'broadcaster-host'
+        mock_configuration.broadcaster_port = 1234
+        receiver.set_configuration(mock_configuration)
         mock_broadcaster_client = Mock()
         mock_wamb.return_value = mock_broadcaster_client
 
@@ -90,11 +97,11 @@ class YadtReceiverTests (unittest.TestCase):
 
     @patch('yadtreceiver.WampBroadcaster')
     def test_should_initialize_broadcaster_when_starting_service (self, mock_wamb):
-        configuration = Mock(Configuration)
-        configuration.broadcaster_host = 'broadcaster-host'
-        configuration.broadcaster_port = 1234
+        mock_configuration = Mock(Configuration)
+        mock_configuration.broadcaster_host = 'broadcaster-host'
+        mock_configuration.broadcaster_port = 1234
         receiver = Receiver()
-        receiver.set_configuration(configuration)
+        receiver.set_configuration(mock_configuration)
 
         receiver._connect_broadcaster()
 
@@ -109,8 +116,10 @@ class YadtReceiverTests (unittest.TestCase):
         self.assertEquals(call(), mock_receiver._initialize_logging.call_args)
         self.assertEquals(call(), mock_receiver._connect_broadcaster.call_args)
 
+
+    @patch('yadtreceiver.log')
     @patch('__builtin__.exit')
-    def test_should_exit_when_no_ (self, mock_exit):
+    def test_should_exit_when_no_target_configured (self, mock_exit, mock_log):
         configuration = Mock(Configuration)
         configuration.targets = set()
         receiver = Receiver()
@@ -155,6 +164,7 @@ class YadtReceiverTests (unittest.TestCase):
         mock_exists.return_value = False
         receiver = Receiver()
         mock_configuration = Mock(Configuration)
+        mock_configuration.hostname = 'hostname'
         mock_configuration.targets_directory = '/etc/yadtshell/targets/'
         receiver.set_configuration(mock_configuration)
 
@@ -166,6 +176,7 @@ class YadtReceiverTests (unittest.TestCase):
         mock_exists.return_value = True
         receiver = Receiver()
         mock_configuration = Mock(Configuration)
+        mock_configuration.hostname = 'hostname'
         mock_configuration.targets_directory = '/etc/yadtshell/targets/'
         receiver.set_configuration(mock_configuration)
 
@@ -179,6 +190,7 @@ class YadtReceiverTests (unittest.TestCase):
         mock_exists.return_value = True
         receiver = Receiver()
         mock_configuration = Mock(Configuration)
+        mock_configuration.hostname = 'hostname'
         mock_configuration.targets_directory = '/etc/yadtshell/targets'
         receiver.set_configuration(mock_configuration)
 
@@ -192,6 +204,7 @@ class YadtReceiverTests (unittest.TestCase):
         mock_receiver = Mock(Receiver)
         mock_receiver.broadcaster = Mock()
         mock_configuration = Mock(Configuration)
+        mock_configuration.hostname = 'hostname'
         mock_configuration.python_command = '/usr/bin/python'
         mock_configuration.script_to_execute = '/usr/bin/yadtshell'
         mock_receiver.configuration = mock_configuration
@@ -206,6 +219,7 @@ class YadtReceiverTests (unittest.TestCase):
         mock_receiver = Mock(Receiver)
         mock_receiver.broadcaster = Mock()
         mock_configuration = Mock(Configuration)
+        mock_configuration.hostname = 'hostname'
         mock_configuration.python_command = '/usr/bin/python'
         mock_configuration.script_to_execute = '/usr/bin/yadtshell'
         mock_receiver.configuration = mock_configuration
@@ -300,5 +314,3 @@ class YadtReceiverTests (unittest.TestCase):
         Receiver.onEvent(mock_receiver, 'target', mock_event)
 
         self.assertEquals(call('target', 'command', 'It failed!'), mock_receiver.publish_failed.call_args)
-
-

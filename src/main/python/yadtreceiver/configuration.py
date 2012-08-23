@@ -275,25 +275,24 @@ class Configuration(object):
         represents the configuration data for a yadtreceiver.
     """
 
-    broadcaster_host = DEFAULT_BROADCASTER_HOST
-    broadcaster_port = DEFAULT_BROADCASTER_PORT
-
-    graphite_active = DEFAULT_GRAPHITE_ACTIVE
-    graphite_host = DEFAULT_GRAPHITE_HOST
-    graphite_port = DEFAULT_GRAPHITE_PORT
-
-    hostname = 'localhost'
-    log_filename = DEFAULT_LOG_FILENAME
-    python_command = DEFAULT_PYTHON_COMMAND
-    script_to_execute = DEFAULT_SCRIPT_TO_EXECUTE
-    targets = DEFAULT_TARGETS
-    targets_directory = DEFAULT_TARGETS_DIRECTORY
-
     def __init__(self):
         """
             initializes a instance with default values and hostname is
             'localhost'.
         """
+
+        self.broadcaster_host = DEFAULT_BROADCASTER_HOST
+        self.broadcaster_port = DEFAULT_BROADCASTER_PORT
+        self.graphite_active = DEFAULT_GRAPHITE_ACTIVE
+        self.graphite_host = DEFAULT_GRAPHITE_HOST
+        self.graphite_port = DEFAULT_GRAPHITE_PORT
+        self.hostname = 'localhost'
+        self.log_filename = DEFAULT_LOG_FILENAME
+        self.python_command = DEFAULT_PYTHON_COMMAND
+        self.script_to_execute = DEFAULT_SCRIPT_TO_EXECUTE
+        self.targets = DEFAULT_TARGETS
+        self.targets_directory = DEFAULT_TARGETS_DIRECTORY
+
 
     @staticmethod
     def load(filename):
