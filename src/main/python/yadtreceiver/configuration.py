@@ -19,7 +19,8 @@
 
     example configuration file receiver.cfg:
 
-        [DEFAULT]
+        [receiver]
+        log_filename = /var/log/yadtreceiver.log
         targets = devyadt, proyadt
         targets_directory = /etc/yadtshell/targets
         script_to_execute = /usr/bin/yadtshell

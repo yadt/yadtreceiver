@@ -235,33 +235,6 @@ class YadtReceiverTests (unittest.TestCase):
         self.assertEquals(call('mock-protocol', '/usr/bin/python', ['/usr/bin/python', '/usr/bin/yadtshell', 'update'], path='/etc/yadtshell/targets/devabc123', env={}), mock_reactor.spawnProcess.call_args)
 
 
-    @patch('yadtreceiver.log')
-    def test_should_log_broadcaster_message (self, mock_log):
-        mock_receiver = Mock(Receiver)
-
-        Receiver.log_broadcaster_notification(mock_receiver, 'Everything is fine.')
-
-        self.assertEquals(call('(broadcaster) Everything is fine.'), mock_log.msg.call_args)
-
-
-    def test_should_log_command_notification (self):
-        mock_receiver = Mock(Receiver)
-        mock_event = {'cmd': 'command', 'state': 'state'}
-
-        Receiver.log_command_notification(mock_receiver, 'devabc123', mock_event)
-
-        self.assertEquals(call('target[devabc123] command "command" state.'), mock_receiver.log_broadcaster_notification.call_args)
-
-
-    def test_should_log_command_notification_with_message (self):
-        mock_receiver = Mock(Receiver)
-        mock_event = {'cmd': 'command', 'message': 'message', 'state': 'state'}
-
-        Receiver.log_command_notification(mock_receiver, 'devabc123', mock_event)
-
-        self.assertEquals(call('target[devabc123] command "command" state: message'), mock_receiver.log_broadcaster_notification.call_args)
-
-
     @patch('yadtreceiver.send_update_notification_to_graphite')
     def test_should_not_notify_graphite_on_update_if_command_is_status (self, mock_send):
         mock_receiver = Mock(Receiver)
@@ -329,38 +302,3 @@ class YadtReceiverTests (unittest.TestCase):
         self.assertEquals(call('target', 'command', 'It failed!'), mock_receiver.publish_failed.call_args)
 
 
-    def test_should_log_broadcaster_notification_of_full_update (self):
-        mock_receiver = Mock(Receiver)
-        mock_event = {'id': 'full-update'}
-
-        Receiver.onEvent(mock_receiver, 'dev123', mock_event)
-
-        self.assertEquals(call('target[dev123] update of status information.'), mock_receiver.log_broadcaster_notification.call_args)
-
-
-    def test_should_log_broadcaster_notification_of_command_execution (self):
-        mock_receiver = Mock(Receiver)
-        mock_event = {'id': 'cmd'}
-
-        Receiver.onEvent(mock_receiver, 'dev123', mock_event)
-
-        self.assertEquals(call('dev123', {'id': 'cmd'}), mock_receiver.log_command_notification.call_args)
-
-
-    def test_should_log_command_notification_of_ (self):
-        mock_receiver = Mock(Receiver)
-        mock_event = {'id': 'service-change',
-                      'payload': [{'uri': 'service://host01/abc', 'state': 'up'}]}
-
-        Receiver.onEvent(mock_receiver, 'dev123', mock_event)
-
-        self.assertEquals(call('target[dev123] service://host01/abc is up.'), mock_receiver.log_broadcaster_notification.call_args)
-
-
-    def test_should_log_unkown_event (self):
-        mock_receiver = Mock(Receiver)
-        mock_event = {'id': 'tralala'}
-
-        Receiver.onEvent(mock_receiver, 'dev123', mock_event)
-
-        self.assertEquals(call('target[dev123] unknown event "tralala".'), mock_receiver.log_broadcaster_notification.call_args)

@@ -93,21 +93,6 @@ class Receiver(service.Service):
         reactor.spawnProcess(process_protocol, python_command, command_and_arguments_list, env={}, path=target_dir)
 
 
-    def log_broadcaster_notification(self, message):
-        log.msg('(broadcaster) %s' % message)
-
-
-    def log_command_notification(self, target, event):
-        command = event['cmd']
-        state = event['state']
-
-        if 'message' in event:
-            message = event['message']
-            self.log_broadcaster_notification('target[%s] command "%s" %s: %s' % (target, command, state, message))
-        else:
-            self.log_broadcaster_notification('target[%s] command "%s" %s.' % (target, command, state))
-
-
     def notify_graphite(self, target, action):
         """
             notifies the configured graphite server about events (currently
@@ -166,21 +151,6 @@ class Receiver(service.Service):
                 self.handle_request(target, command, arguments)
             except BaseException as exception:
                 self.publish_failed(target, command, exception.message)
-
-        elif event_id == 'full-update':
-            self.log_broadcaster_notification('target[%s] update of status information.' % target)
-
-        elif event_id == 'cmd':
-            self.log_command_notification(target, event)
-
-        elif event_id == 'service-change':
-            for payload in event['payload']:
-                uri = payload['uri']
-                state = payload['state']
-                self.log_broadcaster_notification('target[%s] %s is %s.' % (target, uri, state))
-
-        else:
-            self.log_broadcaster_notification('target[%s] unknown event "%s".' % (target, event_id))
 
 
     def set_configuration(self, configuration):
