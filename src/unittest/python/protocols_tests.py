@@ -32,3 +32,50 @@ class ProcessProtocolTests (unittest.TestCase):
         self.assertEquals(mock_broadcaster, protocol.broadcaster)
         self.assertEquals('devabc123', protocol.target)
         self.assertEquals('/usr/bin/python abc 123', protocol.readable_command)
+
+
+    def test_should_publish_as_failed_event_when_return_code_not_zero (self):
+        mock_reason = Mock()
+        mock_reason.value.exitCode = 123
+        mock_protocol = Mock(ProcessProtocol)
+
+        ProcessProtocol.processExited(mock_protocol, mock_reason)
+
+        self.assertEquals(call(123), mock_protocol.publish_failed.call_args)
+
+
+    def test_should_publish_as_finished_event_when_return_code_is_zero (self):
+        mock_reason = Mock()
+        mock_reason.value.exitCode = 0
+        mock_protocol = Mock(ProcessProtocol)
+
+        ProcessProtocol.processExited(mock_protocol, mock_reason)
+
+        self.assertEquals(call(), mock_protocol.publish_finished.call_args)
+
+
+    def test_should_publish_finished_event (self):
+        mock_protocol = Mock(ProcessProtocol)
+        mock_broadcaster = Mock()
+        mock_protocol.broadcaster = mock_broadcaster
+        mock_protocol.hostname = 'hostname'
+        mock_protocol.target = 'dev123'
+        mock_protocol.readable_command = '/usr/bin/python abc'
+
+        ProcessProtocol.publish_finished(mock_protocol)
+
+        self.assertEquals(call('dev123', '/usr/bin/python abc', 'finished', '(hostname) target[dev123] request finished: "/usr/bin/python abc" succeeded.'), mock_broadcaster.publish_cmd_for_target.call_args)
+
+    @patch('yadtreceiver.protocols.log')
+    def test_should_publish_failed_event (self, mock_log):
+        mock_protocol = Mock(ProcessProtocol)
+        mock_broadcaster = Mock()
+        mock_protocol.broadcaster = mock_broadcaster
+        mock_protocol.hostname = 'hostname'
+        mock_protocol.target = 'dev123'
+        mock_protocol.readable_command = '/usr/bin/python abc'
+
+        ProcessProtocol.publish_failed(mock_protocol, 123)
+
+        self.assertEquals(call('dev123', '/usr/bin/python abc', 'failed', '(hostname) target[dev123] request "/usr/bin/python abc" failed: return code was 123.'), mock_broadcaster.publish_cmd_for_target.call_args)
+
