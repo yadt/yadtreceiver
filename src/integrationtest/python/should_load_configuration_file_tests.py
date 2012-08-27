@@ -1,3 +1,21 @@
+#   yadtreceiver
+#   Copyright (C) 2012 Immobilien Scout GmbH
+#
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+__author__ = 'Michael Gruber'
+
 from unittest import TestCase, main
 
 from os.path import join
@@ -24,6 +42,8 @@ log_filename = /spam/eggs/yadtreceiver.log
 targets = spam, eggs
 targets_directory = /spam/eggs/targets
 script_to_execute = /spam/eggs/yadtshell
+python_command = /spam/eggs/python
+hostname = spameggs
 
 [broadcaster]
 host = broadcaster.domain.tld
@@ -41,6 +61,8 @@ port = 2003
         self.assertEqual(set(['spam', 'eggs']), actual_configuration.targets)
         self.assertEqual('/spam/eggs/targets', actual_configuration.targets_directory)
         self.assertEqual('/spam/eggs/yadtshell', actual_configuration.script_to_execute)
+        self.assertEqual('/spam/eggs/python', actual_configuration.python_command)
+        self.assertEqual('spameggs', actual_configuration.hostname)
 
         self.assertEqual('broadcaster.domain.tld', actual_configuration.broadcaster_host)
         self.assertEqual(8081, actual_configuration.broadcaster_port)
