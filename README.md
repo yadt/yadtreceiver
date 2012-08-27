@@ -1,4 +1,4 @@
-# yadtreceiver
+# yadtreceiver [![Build Status](https://secure.travis-ci.org/yadt/yadtreceiver.png?branch=master)](http://travis-ci.org/yadt/yadtreceiver)
 
 Using yadtreceiver should make it easy to integrate yadt into your build
 infrastructure.
