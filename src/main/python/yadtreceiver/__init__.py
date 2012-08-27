@@ -15,9 +15,11 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-    This module provides the YADT receiver, the configuration, a simple event
-    class, a ProcessProtocol implementation and a module to send notifications
-    to a graphite server.
+    Provides the Receiver class which implements a twisted service
+    application. The receiver allows to start processes triggered by
+    broadcast events. It is configured using the class Configuration from
+    the configuration module. When activated in the configuration the
+    receiver will send update notifications to a graphite server.
 """
 
 __author__ = 'Arne Hilmann, Michael Gruber'
@@ -42,22 +44,22 @@ VERSION = '${version}'
 
 class ReceiverException(Exception):
     """
-        to be raised when an exception occurs within the receiver.
+        To be raised when an exception occurs within the receiver.
     """
 
 
 class Receiver(service.Service):
     """
-        The YADT receiver connects to the YADT broadcaster and receives events
+        The receiver connects to the broadcaster and receives events
         for the targets that it subscribed to.
     """
 
 
     def get_target_directory(self, target):
         """
-            appends the given target name to the targets_directory.
+            Appends the given target name to the targets_directory.
 
-            @raise Exception: if the target directory does not exist.
+            @raise ReceiverException: if the target directory does not exist.
         """
 
         hostname = self.configuration.hostname
@@ -74,7 +76,7 @@ class Receiver(service.Service):
 
     def handle_request(self, target, command, arguments):
         """
-            handles an request for the given target by executing the given
+            Handles a request for the given target by executing the given
             command (using the python_command and script_to_execute from
             the configuration).
         """
@@ -98,8 +100,7 @@ class Receiver(service.Service):
 
     def notify_graphite(self, target, action):
         """
-            notifies the configured graphite server about events (currently
-            only update events).
+            Notifies the configured graphite server about events (update events).
         """
 
         if action == 'update':
@@ -111,15 +112,16 @@ class Receiver(service.Service):
 
     def publish_failed(self, target, command, message):
         """
-            publishes a failed event
+            Publishes a event to signal that the command on the target failed.
         """
+
         log.err(_stuff=Exception(message), _why=message)
         self.broadcaster.publish_cmd_for_target(target, command, Event.FAILED, message)
 
 
     def publish_start(self, target, command, arguments):
         """
-            publishes a started event
+            Publishes a event to signal that the command on the target started.
         """
 
         hostname = self.configuration.hostname
@@ -130,7 +132,9 @@ class Receiver(service.Service):
 
     def onConnect(self):
         """
-            Subscribes to the targets in the configuration..
+            Subscribes to the targets from the configuration. The receiver
+            is useless when no targets are configured, therefore it will exit
+            with error code 1 when no targets are configured.
         """
 
         sorted_targets = sorted(self.configuration.targets)
@@ -146,7 +150,8 @@ class Receiver(service.Service):
 
     def onEvent(self, target, event):
         """
-            will be called when receiving an event: handling requests.
+            Will be called when receiving an event from the broadcaster.
+            See onConnect which subscribes to the targets.
         """
 
         if event.get('id') == 'request':
@@ -161,7 +166,7 @@ class Receiver(service.Service):
 
     def set_configuration(self, configuration):
         """
-            assigns a configuration to this receiver instance.
+            Assigns a configuration to this receiver instance.
         """
 
         self.configuration = configuration
