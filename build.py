@@ -26,6 +26,7 @@ use_plugin('python.distutils')
 use_plugin('python.pep8')
 use_plugin('python.pydev')
 
+name = 'yadtreceiver'
 authors = [Author('Arne Hilmann', 'arne.hilmann@gmail.com'),
            Author('Michael Gruber', 'aelgru@gmail.com')]
 license = 'GNU GPL v3'
