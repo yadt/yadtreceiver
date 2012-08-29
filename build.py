@@ -22,22 +22,29 @@ use_plugin('python.core')
 use_plugin('python.coverage')
 use_plugin('python.unittest')
 use_plugin('python.integrationtest')
+use_plugin('python.install_dependencies')
 use_plugin('python.distutils')
 use_plugin('python.pep8')
 use_plugin('python.pydev')
 
-name = 'yadtreceiver'
 authors = [Author('Arne Hilmann', 'arne.hilmann@gmail.com'),
            Author('Michael Gruber', 'aelgru@gmail.com')]
 license = 'GNU GPL v3'
-summary = 'yadtreceiver'
+name    = 'yadtreceiver'
+summary = 'twisted application which executes yadtshell commands triggered by a yadtbroadcaster.'
 url     = 'https://github.com/yadt/yadtreceiver'
 version = '0.1.7'
 
-default_task = ['analyze', 'publish']
+default_task = ['install_dependencies', 'analyze', 'publish']
 
 @init
 def set_properties (project):
+    project.build_depends_on('coverage')
+    project.build_depends_on('Twisted')
+    project.build_depends_on('PyYAML')
+    project.build_depends_on('mock')
+    project.build_depends_on('https://github.com/downloads/yadt/yadtbroadcast-client/yadtbroadcast-client-1.1.1.tar.gz')
+
     project.set_property('coverage_break_build', False)
     project.set_property('pychecker_break_build', False)
     project.set_property('pep8_break_build', True)
