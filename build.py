@@ -30,7 +30,7 @@ authors = [Author('Arne Hilmann', 'arne.hilmann@gmail.com'),
            Author('Michael Gruber', 'aelgru@gmail.com')]
 license = 'GNU GPL v3'
 summary = 'yadtreceiver'
-url = 'https://github.com/yadt/yadtreceiver'
+url     = 'https://github.com/yadt/yadtreceiver'
 version = '0.1.7'
 
 default_task = ['analyze', 'publish']
@@ -42,7 +42,7 @@ def set_properties (project):
     project.set_property('pep8_break_build', True)
     project.get_property('distutils_commands').append('bdist_rpm')
 
-    project.get_property('filter_resources_glob').append('**/yadtreceiver/yadtreceiver.tac')
+    project.get_property('filter_resources_glob').append('**/yadtreceiver/__init__.py')
 
     project.install_file('/etc/twisted-taps/', 'yadtreceiver/yadtreceiver.tac')
     project.install_file('/etc/init.d/', 'yadtreceiver/yadtreceiver')

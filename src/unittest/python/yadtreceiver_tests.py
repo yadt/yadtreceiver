@@ -22,11 +22,15 @@ import unittest
 from mock import Mock, call, patch
 from StringIO import StringIO
 
-from yadtreceiver import Receiver, ReceiverException
+from yadtreceiver import VERSION, Receiver, ReceiverException
 from yadtreceiver.configuration import Configuration
 
 
 class YadtReceiverTests (unittest.TestCase):
+    def test_if_this_test_fails_maybe_you_have_yadtreceiver_installed_locally (self):
+        self.assertEqual('${version}', VERSION)
+
+
     def test_should_set_configuration (self):
         configuration = 'configuration'
         receiver = Receiver()
@@ -34,6 +38,7 @@ class YadtReceiverTests (unittest.TestCase):
         receiver.set_configuration(configuration)
 
         self.assertEquals(configuration, receiver.configuration)
+
 
     @patch('__builtin__.open')
     @patch('yadtreceiver.log')
