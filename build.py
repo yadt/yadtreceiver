@@ -43,7 +43,7 @@ def set_properties (project):
     project.build_depends_on('Twisted')
     project.build_depends_on('PyYAML')
     project.build_depends_on('mock')
-    project.build_depends_on('https://github.com/downloads/yadt/yadtbroadcast-client/yadtbroadcast-client-1.1.1.tar.gz')
+    project.build_depends_on('yadtbroadcaster-client', url='https://github.com/downloads/yadt/yadtbroadcast-client/yadtbroadcast-client-1.1.1.tar.gz')
 
     project.set_property('coverage_break_build', False)
     project.set_property('pychecker_break_build', False)
