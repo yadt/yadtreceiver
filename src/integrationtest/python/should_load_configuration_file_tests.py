@@ -22,7 +22,7 @@ from os.path import join
 from shutil import rmtree
 from tempfile import mkdtemp
 
-from yadtreceiver.configuration import Configuration
+from yadtreceiver.configuration import load
 
 class Test (TestCase):
     def setUp(self):
@@ -55,21 +55,21 @@ host = graphite.domain.tld
 port = 2003
 """)
 
-        actual_configuration = Configuration.load(configuration_filename)
+        actual_configuration = load(configuration_filename)
 
-        self.assertEqual('/spam/eggs/yadtreceiver.log', actual_configuration.log_filename)
-        self.assertEqual(set(['spam', 'eggs']), actual_configuration.targets)
-        self.assertEqual('/spam/eggs/targets', actual_configuration.targets_directory)
-        self.assertEqual('/spam/eggs/yadtshell', actual_configuration.script_to_execute)
-        self.assertEqual('/spam/eggs/python', actual_configuration.python_command)
-        self.assertEqual('spameggs', actual_configuration.hostname)
+        self.assertEqual('/spam/eggs/yadtreceiver.log', actual_configuration['log_filename'])
+        self.assertEqual(set(['spam', 'eggs']), actual_configuration['targets'])
+        self.assertEqual('/spam/eggs/targets', actual_configuration['targets_directory'])
+        self.assertEqual('/spam/eggs/yadtshell', actual_configuration['script_to_execute'])
+        self.assertEqual('/spam/eggs/python', actual_configuration['python_command'])
+        self.assertEqual('spameggs', actual_configuration['hostname'])
 
-        self.assertEqual('broadcaster.domain.tld', actual_configuration.broadcaster_host)
-        self.assertEqual(8081, actual_configuration.broadcaster_port)
+        self.assertEqual('broadcaster.domain.tld', actual_configuration['broadcaster_host'])
+        self.assertEqual(8081, actual_configuration['broadcaster_port'])
 
-        self.assertEqual('graphite.domain.tld', actual_configuration.graphite_host)
-        self.assertEqual(2003, actual_configuration.graphite_port)
-        self.assertEqual(True, actual_configuration.graphite_active)
+        self.assertEqual('graphite.domain.tld', actual_configuration['graphite_host'])
+        self.assertEqual(2003, actual_configuration['graphite_port'])
+        self.assertEqual(True, actual_configuration['graphite_active'])
 
 
 if __name__ == '__main__':

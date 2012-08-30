@@ -27,10 +27,10 @@ from twisted.application import service
 from twisted.internet import reactor, protocol
 
 from yadtreceiver import VERSION, Receiver
-from yadtreceiver.configuration import Configuration
+from yadtreceiver.configuration import load
 
 
-configuration = Configuration.load('/etc/yadtshell/receiver.cfg')
+configuration = load('/etc/yadtshell/receiver.cfg')
 application = service.Application('yadtreceiver version %s' % VERSION)
 
 receiver = Receiver()

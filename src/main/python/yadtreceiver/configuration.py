@@ -45,9 +45,11 @@ from ConfigParser import SafeConfigParser
 
 DEFAULT_BROADCASTER_HOST = 'localhost'
 DEFAULT_BROADCASTER_PORT = 8081
+
 DEFAULT_GRAPHITE_HOST = 'localhost'
 DEFAULT_GRAPHITE_PORT = 2003
 DEFAULT_GRAPHITE_ACTIVE = False
+
 DEFAULT_LOG_FILENAME = '/var/log/yadtreceiver.log'
 DEFAULT_PYTHON_COMMAND = '/usr/bin/python'
 DEFAULT_SCRIPT_TO_EXECUTE = '/usr/bin/yadtshell'
@@ -68,7 +70,6 @@ class ReceiverConfigParser (object):
     """
         uses a SafeConfigParser to offer some convenience methods.
     """
-
 
     def __init__(self):
         """
@@ -270,52 +271,26 @@ class ReceiverConfigParser (object):
         return set(option_values)
 
 
-class Configuration(object):
+def load(filename):
     """
-        represents the configuration data for a yadtreceiver.
+        loads configuration from a file.
+
+        @return: Configuration object containing the data from the file.
     """
 
-    def __init__(self):
-        """
-            initializes a instance with default values and hostname is
-            'localhost'.
-        """
+    parser = ReceiverConfigParser()
+    parser.read_configuration_file(filename)
 
-        self.broadcaster_host = DEFAULT_BROADCASTER_HOST
-        self.broadcaster_port = DEFAULT_BROADCASTER_PORT
-        self.graphite_active = DEFAULT_GRAPHITE_ACTIVE
-        self.graphite_host = DEFAULT_GRAPHITE_HOST
-        self.graphite_port = DEFAULT_GRAPHITE_PORT
-        self.hostname = 'localhost'
-        self.log_filename = DEFAULT_LOG_FILENAME
-        self.python_command = DEFAULT_PYTHON_COMMAND
-        self.script_to_execute = DEFAULT_SCRIPT_TO_EXECUTE
-        self.targets = DEFAULT_TARGETS
-        self.targets_directory = DEFAULT_TARGETS_DIRECTORY
+    configuration = {'broadcaster_host' : parser.get_broadcaster_host(),
+                     'broadcaster_port' : parser.get_broadcaster_port(),
+                     'graphite_active'  : parser.get_graphite_active(),
+                     'graphite_host'    : parser.get_graphite_host(),
+                     'graphite_port'    : parser.get_graphite_port(),
+                     'hostname'         : parser.get_hostname(),
+                     'log_filename'     : parser.get_log_filename(),
+                     'python_command'   : parser.get_python_command(),
+                     'script_to_execute': parser.get_script_to_execute(),
+                     'targets'          : parser.get_targets(),
+                     'targets_directory': parser.get_targets_directory()}
 
-
-    @staticmethod
-    def load(filename):
-        """
-            loads configuration from a file.
-
-            @return: Configuration object containing the data from the file.
-        """
-
-        parser = ReceiverConfigParser()
-        parser.read_configuration_file(filename)
-
-        configuration = Configuration()
-        configuration.broadcaster_host = parser.get_broadcaster_host()
-        configuration.broadcaster_port = parser.get_broadcaster_port()
-        configuration.graphite_active = parser.get_graphite_active()
-        configuration.graphite_host = parser.get_graphite_host()
-        configuration.graphite_port = parser.get_graphite_port()
-        configuration.hostname = parser.get_hostname()
-        configuration.log_filename = parser.get_log_filename()
-        configuration.python_command = parser.get_python_command()
-        configuration.script_to_execute = parser.get_script_to_execute()
-        configuration.targets = parser.get_targets()
-        configuration.targets_directory = parser.get_targets_directory()
-
-        return configuration
+    return configuration

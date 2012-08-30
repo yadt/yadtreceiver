@@ -17,9 +17,10 @@
 """
     Provides the Receiver class which implements a twisted service
     application. The receiver allows to start processes triggered by
-    broadcast events. It is configured using the class Configuration from
-    the configuration module. When activated in the configuration the
-    receiver will send update notifications to a graphite server.
+    broadcast events. It is configured using a dictionary. You can load
+    configuration files using the load method from the configuration
+    module. When activated in the configuration the receiver will send
+    update notifications to a graphite server.
 """
 
 __author__ = 'Arne Hilmann, Michael Gruber'
@@ -33,7 +34,6 @@ from twisted.python import log
 
 from yadtbroadcastclient import WampBroadcaster
 
-from yadtreceiver.configuration import Configuration
 from yadtreceiver.graphite import send_update_notification_to_graphite
 from yadtreceiver.protocols import ProcessProtocol
 from yadtreceiver.events import Event
@@ -62,8 +62,8 @@ class Receiver(service.Service):
             @raise ReceiverException: if the target directory does not exist.
         """
 
-        hostname = self.configuration.hostname
-        targets_directory = self.configuration.targets_directory
+        hostname          = self.configuration['hostname']
+        targets_directory = self.configuration['targets_directory']
 
         target_directory = os.path.join(targets_directory, target)
 
@@ -84,13 +84,12 @@ class Receiver(service.Service):
         self.publish_start(target, command, arguments)
         self.notify_graphite(target, arguments[0])
 
-        hostname = self.configuration.hostname
-        python_command = self.configuration.python_command
-        script_to_execute = self.configuration.script_to_execute
+        hostname          = self.configuration['hostname']
+        python_command    = self.configuration['python_command']
+        script_to_execute = self.configuration['script_to_execute']
 
         command_and_arguments_list = [python_command, script_to_execute] + arguments
         command_with_arguments = ' '.join(command_and_arguments_list)
-
 
         process_protocol = ProcessProtocol(hostname, self.broadcaster, target, command_with_arguments)
 
@@ -104,8 +103,8 @@ class Receiver(service.Service):
         """
 
         if action == 'update':
-            host = self.configuration.graphite_host
-            port = self.configuration.graphite_port
+            host = self.configuration['graphite_host']
+            port = self.configuration['graphite_port']
 
             send_update_notification_to_graphite(target, host, port)
 
@@ -124,8 +123,8 @@ class Receiver(service.Service):
             Publishes a event to signal that the command on the target started.
         """
 
-        hostname = self.configuration.hostname
-        message = '(%s) target[%s] request: command="%s", arguments=%s' % (hostname, target, command, arguments)
+        hostname = self.configuration['hostname']
+        message  = '(%s) target[%s] request: command="%s", arguments=%s' % (hostname, target, command, arguments)
         log.msg(message)
         self.broadcaster.publish_cmd_for_target(target, command, Event.STARTED, message)
 
@@ -137,7 +136,7 @@ class Receiver(service.Service):
             with error code 1 when no targets are configured.
         """
 
-        sorted_targets = sorted(self.configuration.targets)
+        sorted_targets = sorted(self.configuration['targets'])
 
         if len(sorted_targets) == 0:
             log.err('No targets configured.')
@@ -186,7 +185,7 @@ class Receiver(service.Service):
             Starts logging as configured.
         """
 
-        log_file = open(self.configuration.log_filename, 'a+')
+        log_file = open(self.configuration['log_filename'], 'a+')
         log.startLogging(log_file)
         log.msg('yadtreceiver version %s' % VERSION)
 
@@ -197,8 +196,8 @@ class Receiver(service.Service):
             configuration.
         """
 
-        host = self.configuration.broadcaster_host
-        port = self.configuration.broadcaster_port
+        host = self.configuration['broadcaster_host']
+        port = self.configuration['broadcaster_port']
 
         log.msg('Connecting to broadcaster on %s:%s' % (host, port))
 

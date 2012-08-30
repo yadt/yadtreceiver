@@ -34,9 +34,9 @@ from yadtreceiver.configuration import (DEFAULT_BROADCASTER_HOST,
                                         SECTION_BROADCASTER,
                                         SECTION_GRAPHITE,
                                         SECTION_RECEIVER,
-                                        Configuration,
                                         ConfigurationException,
-                                        ReceiverConfigParser)
+                                        ReceiverConfigParser,
+                                        load)
 
 class ConfigurationTests (unittest.TestCase):
     def test_should_create_instance_of_SafeConfigParser (self):
@@ -321,7 +321,7 @@ class ConfigurationTests (unittest.TestCase):
         mock_parser = Mock(ReceiverConfigParser)
         mock_parser_class.return_value = mock_parser
 
-        actual_configuration = Configuration.load('abc')
+        actual_configuration = load('abc')
 
         self.assertEquals(call('abc'), mock_parser.read_configuration_file.call_args)
 
@@ -333,13 +333,13 @@ class ConfigurationTests (unittest.TestCase):
         mock_parser.get_broadcaster_port.return_value = 12345
         mock_parser_class.return_value = mock_parser
 
-        actual_configuration = Configuration.load('abc')
+        actual_configuration = load('abc')
 
         self.assertEquals(call(), mock_parser.get_broadcaster_host.call_args)
-        self.assertEquals('broadcaster host', actual_configuration.broadcaster_host)
+        self.assertEquals('broadcaster host', actual_configuration['broadcaster_host'])
 
         self.assertEquals(call(), mock_parser.get_broadcaster_port.call_args)
-        self.assertEquals(12345, actual_configuration.broadcaster_port)
+        self.assertEquals(12345, actual_configuration['broadcaster_port'])
 
 
     @patch('yadtreceiver.configuration.ReceiverConfigParser')
@@ -350,16 +350,16 @@ class ConfigurationTests (unittest.TestCase):
         mock_parser.get_graphite_port.return_value = 54321
         mock_parser_class.return_value = mock_parser
 
-        actual_configuration = Configuration.load('abc')
+        actual_configuration = load('abc')
 
         self.assertEquals(call(), mock_parser.get_graphite_active.call_args)
-        self.assertEquals(True, actual_configuration.graphite_active)
+        self.assertEquals(True, actual_configuration['graphite_active'])
 
         self.assertEquals(call(), mock_parser.get_graphite_host.call_args)
-        self.assertEquals('graphite host', actual_configuration.graphite_host)
+        self.assertEquals('graphite host', actual_configuration['graphite_host'])
 
         self.assertEquals(call(), mock_parser.get_graphite_port.call_args)
-        self.assertEquals(54321, actual_configuration.graphite_port)
+        self.assertEquals(54321, actual_configuration['graphite_port'])
 
 
     @patch('yadtreceiver.configuration.ReceiverConfigParser')
@@ -374,22 +374,22 @@ class ConfigurationTests (unittest.TestCase):
         mock_parser.get_targets_directory.return_value = '/etc/yadtshell/targets'
         mock_parser_class.return_value = mock_parser
 
-        actual_configuration = Configuration.load('abc')
+        actual_configuration = load('abc')
 
         self.assertEquals(call(), mock_parser.get_hostname.call_args)
-        self.assertEquals('this is a name', actual_configuration.hostname)
+        self.assertEquals('this is a name', actual_configuration['hostname'])
 
         self.assertEquals(call(), mock_parser.get_log_filename.call_args)
-        self.assertEquals('/var/log/somewhere/rec.log', actual_configuration.log_filename)
+        self.assertEquals('/var/log/somewhere/rec.log', actual_configuration['log_filename'])
 
         self.assertEquals(call(), mock_parser.get_python_command.call_args)
-        self.assertEquals('/usr/bin/python', actual_configuration.python_command)
+        self.assertEquals('/usr/bin/python', actual_configuration['python_command'])
 
         self.assertEquals(call(), mock_parser.get_script_to_execute.call_args)
-        self.assertEquals('/usr/bin/yadtshell', actual_configuration.script_to_execute)
+        self.assertEquals('/usr/bin/yadtshell', actual_configuration['script_to_execute'])
 
         self.assertEquals(call(), mock_parser.get_targets.call_args)
-        self.assertEquals(set(['dev123']), actual_configuration.targets)
+        self.assertEquals(set(['dev123']), actual_configuration['targets'])
 
         self.assertEquals(call(), mock_parser.get_targets_directory.call_args)
-        self.assertEquals('/etc/yadtshell/targets', actual_configuration.targets_directory)
+        self.assertEquals('/etc/yadtshell/targets', actual_configuration['targets_directory'])
