@@ -30,7 +30,7 @@ authors = [Author('Arne Hilmann', 'arne.hilmann@gmail.com'),
            Author('Michael Gruber', 'aelgru@gmail.com')]
 license = 'GNU GPL v3'
 name    = 'yadtreceiver'
-summary = 'twisted application which executes yadtshell commands triggered by a yadtbroadcaster.'
+summary = 'Executes yadtshell commands triggered by a yadtbroadcaster.'
 url     = 'https://github.com/yadt/yadtreceiver'
 version = '0.1.7'
 
