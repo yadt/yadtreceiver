@@ -25,7 +25,6 @@
 
 __author__ = 'Arne Hilmann, Michael Gruber'
 
-import logging
 import os
 
 from twisted.application import service
