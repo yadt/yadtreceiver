@@ -24,7 +24,6 @@ use_plugin('python.unittest')
 use_plugin('python.integrationtest')
 use_plugin('python.install_dependencies')
 use_plugin('python.distutils')
-use_plugin('python.pep8')
 use_plugin('python.pydev')
 
 authors = [Author('Arne Hilmann', 'arne.hilmann@gmail.com'),
@@ -46,9 +45,9 @@ def set_properties (project):
     project.build_depends_on('mock')
     project.build_depends_on('coverage')
 
-    project.set_property('coverage_break_build', False)
-    project.set_property('pychecker_break_build', False)
-    project.set_property('pep8_break_build', True)
+    project.set_property('coverage_break_build', True)
+    project.set_property('coverage_threshold_warn', 100)
+    
     project.get_property('distutils_commands').append('bdist_rpm')
 
     project.get_property('filter_resources_glob').append('**/yadtreceiver/__init__.py')

@@ -178,8 +178,6 @@ class YadtConfigParserTests (unittest.TestCase):
         self.assertEqual(call('section', 'option', 'default_value'), mock_parser.get_option.call_args)
 
 
-
-
 class ReceiverConfigLoaderTests (unittest.TestCase):
     def test_should_create_instance_of_SafeConfigParser (self):
         parser = ReceiverConfigLoader()
