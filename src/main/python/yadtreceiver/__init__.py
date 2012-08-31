@@ -135,13 +135,13 @@ class Receiver(service.Service):
             with error code 1 when no targets are configured.
         """
 
-        sorted_targets = sorted(self.configuration['targets'])
+        targets = sorted(self.configuration['targets'])
 
-        if len(sorted_targets) == 0:
+        if not targets:
             log.err('No targets configured.')
             exit(1)
 
-        for target in sorted_targets:
+        for target in targets:
             log.msg('subscribing to target "%s".' % target)
             self.broadcaster.client.subscribe(target, self.onEvent)
 
@@ -153,7 +153,7 @@ class Receiver(service.Service):
         """
 
         if event.get('id') == 'request':
-            command = event['cmd']
+            command   = event['cmd']
             arguments = event['args']
 
             try:
