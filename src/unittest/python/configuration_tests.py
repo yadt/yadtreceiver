@@ -151,7 +151,6 @@ class YadtConfigParserTests (unittest.TestCase):
         actual_option = YadtConfigParser.get_option(mock_parser, 'section', 'option', 'default_value')
 
         self.assertEqual('the option', actual_option)
-        self.assertEqual(call('section'), mock_wrapped_parser.has_section.call_args)
         self.assertEqual(call('section', 'option'), mock_wrapped_parser.has_option.call_args)
         self.assertEqual(call('section', 'option'), mock_wrapped_parser.get.call_args)
 
@@ -166,20 +165,7 @@ class YadtConfigParserTests (unittest.TestCase):
         actual_option = YadtConfigParser.get_option(mock_parser, 'section', 'option', 'default_value')
 
         self.assertEqual('default_value', actual_option)
-        self.assertEqual(call('section'), mock_wrapped_parser.has_section.call_args)
         self.assertEqual(call('section', 'option'), mock_wrapped_parser.has_option.call_args)
-
-
-    def test_should_return_default_value_when_section_does_not_exist (self):
-        mock_parser = Mock(YadtConfigParser)
-        mock_wrapped_parser = Mock()
-        mock_wrapped_parser.has_section.return_value = False
-        mock_parser._parser = mock_wrapped_parser
-
-        actual_option = YadtConfigParser.get_option(mock_parser, 'section', 'option', 'default_value')
-
-        self.assertEqual('default_value', actual_option)
-        self.assertEqual(call('section'), mock_wrapped_parser.has_section.call_args)
 
 
     def test_should_return_option_as_int (self):

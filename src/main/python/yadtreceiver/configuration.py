@@ -84,9 +84,8 @@ class YadtConfigParser (object):
                      otherwise the given default value.
         """
 
-        if self._parser.has_section(section):
-            if self._parser.has_option(section, option):
-                return self._parser.get(section, option)
+        if self._parser.has_option(section, option):
+            return self._parser.get(section, option)
 
         return default_value
 
