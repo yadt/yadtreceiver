@@ -31,3 +31,12 @@ pip-log.txt
 
 # virtualenv
 ve
+
+# backups
+.*~
+
+# generated rpms
+dist-rpms
+
+# pid files
+*.pid

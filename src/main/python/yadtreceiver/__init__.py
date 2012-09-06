@@ -26,6 +26,7 @@
 __author__ = 'Arne Hilmann, Michael Gruber'
 
 import os
+import traceback
 
 from twisted.application import service
 from twisted.internet import reactor
@@ -81,6 +82,9 @@ class Receiver(service.Service):
         """
 
         self.publish_start(target, command, arguments)
+        if arguments:
+            # TODO why use arguments here? might be empty...
+            self.notify_graphite(target, arguments[0])
         self.notify_graphite(target, arguments[0])
 
         hostname          = self.configuration['hostname']
@@ -135,6 +139,13 @@ class Receiver(service.Service):
             with error code 1 when no targets are configured.
         """
 
+        self.broadcaster.client.connectionLost = self.onConnectionLost
+
+        host = self.configuration['broadcaster_host']
+        port = self.configuration['broadcaster_port']
+
+        log.msg('Successfully connected to broadcaster on %s:%s' % (host, port))
+
         targets = sorted(self.configuration['targets'])
 
         if not targets:
@@ -146,21 +157,68 @@ class Receiver(service.Service):
             self.broadcaster.client.subscribe(target, self.onEvent)
 
 
+
+    def _refresh_connection(self, delay=60 * 60, first_call=False):
+        """
+            When connected, closes connection to force a clean reconnect,
+            except on first_call
+        """
+        reactor.callLater(delay, self._refresh_connection)
+        if hasattr(self, 'broadcaster') and self.broadcaster.client:
+            if not first_call:
+                log.msg('refreshing connection')
+                self.broadcaster.client.sendClose()
+
+
+    def onConnectionLost(self, reason):
+        """
+            Allows for clean reconnect behaviour, because it 'none'ifies 
+            the client explicitly
+        """
+        log.err('connection lost: %s' % reason)
+        self.broadcaster.client = None
+        # TODO: superclass method should be called here?
+
+
+    def _client_watchdog(self, delay=1):
+        """
+            Checks periodically if broadcaster.client is set
+            (see also onConnectionLost), tries to reconnect after a 
+            delay (delay after failed connect: 1, 2, 4, 8, 16, 32, 60, 60, ... 
+            seconds)
+        """
+        if hasattr(self, 'broadcaster') and self.broadcaster.client:
+            reactor.callLater(1, self._client_watchdog)
+        else:
+            reactor.callLater(delay, self._client_watchdog, min(60, 2 * delay))
+            log.err('broadcast.client not set, trying to connect')
+            if delay > 1:
+                log.msg('(scheduling next try in %s seconds)' % delay)
+            return self._connect_broadcaster()
+
+
     def onEvent(self, target, event):
         """
             Will be called when receiving an event from the broadcaster.
             See onConnect which subscribes to the targets.
         """
 
+        log.msg(event)
         if event.get('id') == 'request':
             command   = event['cmd']
             arguments = event['args']
 
             try:
                 self.handle_request(target, command, arguments)
-            except BaseException as exception:
-                self.publish_failed(target, command, exception.message)
+            except Exception as e:
+                log.err(e.message)
+                log.err('-' * 40)
+                for line in traceback.format_exc().splitlines():
+                    log.err(line)
+                log.err('-' * 40)
+                self.publish_failed(target, command, e.message)
 
+        log.msg('onEvent finished')
 
     def set_configuration(self, configuration):
         """
@@ -176,7 +234,13 @@ class Receiver(service.Service):
         """
 
         self._initialize_logging()
-        self._connect_broadcaster()
+        #self._connect_broadcaster()
+        self._client_watchdog()
+        self._refresh_connection(first_call=True)
+
+
+    def stopService(self):
+        log.msg('shutting down service')
 
 
     def _initialize_logging(self):
@@ -185,6 +249,7 @@ class Receiver(service.Service):
         """
 
         log_file = open(self.configuration['log_filename'], 'a+')
+        os.chmod(self.configuration['log_filename'], 0660)
         log.startLogging(log_file)
         log.msg('yadtreceiver version %s' % VERSION)
 

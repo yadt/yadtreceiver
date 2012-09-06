@@ -10,6 +10,8 @@ PIDFILE=/var/run/yadtreceiver.pid
 TACFILE=/etc/twisted-taps/yadtreceiver.tac
 TWISTD=/usr/bin/twistd
  
+[ -r /etc/default/yadtshell-receiver ] && . /etc/default/yadtshell-receiver
+
 check_twistd_exists() {
     if [ ! -x $TWISTD ]
     then
@@ -29,7 +31,7 @@ check_pid_file_exists() {
 start_daemon() {
     check_twistd_exists
     
-    $TWISTD --pidfile=$PIDFILE --python=$TACFILE
+    $TWISTD --pidfile=$PIDFILE --python=$TACFILE ${uid:+--uid=$uid} ${gid:+--gid=$gid}
 }
  
 stop_daemon() {
