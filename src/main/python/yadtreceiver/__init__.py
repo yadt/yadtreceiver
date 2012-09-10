@@ -166,7 +166,7 @@ class Receiver(service.Service):
         reactor.callLater(delay, self._refresh_connection)
         if hasattr(self, 'broadcaster') and self.broadcaster.client:
             if not first_call:
-                log.msg('refreshing connection')
+                log.msg('Closing connection to broadcaster. This should force a connection-refresh.')
                 self.broadcaster.client.sendClose()
 
 

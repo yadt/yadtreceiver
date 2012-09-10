@@ -307,3 +307,34 @@ class YadtReceiverTests (unittest.TestCase):
         Receiver.onEvent(mock_receiver, 'target', mock_event)
 
         self.assertEquals(call('target', 'command', 'It failed!'), mock_receiver.publish_failed.call_args)
+
+
+    @patch('yadtreceiver.reactor')
+    def test_should_queue_call_to_refresh_connection (self, mock_reactor):
+        mock_receiver = Mock(Receiver)
+        
+        Receiver._refresh_connection(mock_receiver, 123)
+    
+        self.assertEquals(call(123, mock_receiver._refresh_connection), mock_reactor.callLater.call_args)
+
+
+    @patch('yadtreceiver.reactor')
+    def test_should_close_connection_to_broadcaster_when_not_first_call (self, mock_reactor):
+        mock_receiver = Mock(Receiver)
+        mock_broadcaster = Mock()
+        mock_receiver.broadcaster = mock_broadcaster
+
+        Receiver._refresh_connection(mock_receiver, 123)
+        
+        self.assertEquals(call(), mock_broadcaster.client.sendClose.call_args)
+
+
+    @patch('yadtreceiver.reactor')
+    def test_should_not_close_connection_to_broadcaster_when_first_call (self, mock_reactor):
+        mock_receiver = Mock(Receiver)
+        mock_broadcaster = Mock()
+        mock_receiver.broadcaster = mock_broadcaster
+
+        Receiver._refresh_connection(mock_receiver, 123, first_call=True)
+        
+        self.assertEquals(None, mock_broadcaster.client.sendClose.call_args)
