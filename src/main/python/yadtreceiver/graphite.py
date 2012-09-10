@@ -16,6 +16,9 @@
 
 """
     Provides a function to send graphite a update notification.
+    
+    For more information about graphite please visit:
+    http://graphite.wikidot.com/
 """
 
 __author__ = 'Michael Gruber'
@@ -26,6 +29,9 @@ from twisted.python import log
 
 
 def send_update_notification_to_graphite(target, host, port):
+    """
+        Sends a update notification to the graphite server at host:port.
+    """
     try:
         graphite_socket = socket()
         graphite_address = (host, port)
