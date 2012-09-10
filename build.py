@@ -50,7 +50,7 @@ def set_properties (project):
     project.set_property('coverage_threshold_warn', 100)
     
     project.get_property('distutils_commands').append('bdist_rpm')
-    project.set_property("copy_resources_target", "$dir_dist")
+    project.set_property('copy_resources_target', '$dir_dist')
     project.get_property('filter_resources_glob').append('**/yadtreceiver/__init__.py')
     project.get_property('copy_resources_glob').append('setup.cfg')
     project.set_property('dir_dist_scripts', 'scripts')

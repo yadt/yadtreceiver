@@ -240,6 +240,10 @@ class Receiver(service.Service):
 
 
     def stopService(self):
+        """
+            Writes 'shutting down service' to the log.
+        """
+        
         log.msg('shutting down service')
 
 
