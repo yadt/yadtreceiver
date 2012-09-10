@@ -338,3 +338,18 @@ class YadtReceiverTests (unittest.TestCase):
         Receiver._refresh_connection(mock_receiver, 123, first_call=True)
         
         self.assertEquals(None, mock_broadcaster.client.sendClose.call_args)
+
+
+    @patch('yadtreceiver.log')
+    def test_should_set_the_client_to_none (self, mock_log):
+        mock_receiver = Mock(Receiver)
+        mock_broadcaster = Mock()
+        mock_broadcaster.client = 'Test client'
+        mock_receiver.broadcaster = mock_broadcaster
+        
+        Receiver.onConnectionLost(mock_receiver, 'Spam eggs.')
+        
+        self.assertEquals(None, mock_broadcaster.client)
+        
+        
+        
