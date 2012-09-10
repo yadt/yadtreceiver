@@ -249,7 +249,7 @@ class Receiver(service.Service):
         """
 
         log_file = open(self.configuration['log_filename'], 'a+')
-        os.chmod(self.configuration['log_filename'], 0660)
+        os.chmod(self.configuration['log_filename'], 0o660)
         log.startLogging(log_file)
         log.msg('yadtreceiver version %s' % VERSION)
 
