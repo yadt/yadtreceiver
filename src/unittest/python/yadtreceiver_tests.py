@@ -352,4 +352,67 @@ class YadtReceiverTests (unittest.TestCase):
         self.assertEquals(None, mock_broadcaster.client)
         
         
+    @patch('yadtreceiver.log')
+    @patch('yadtreceiver.reactor')
+    def test_should_queue_call_to_client_watchdog_when_client_available (self, mock_reactor, mock_log):
+        mock_receiver = Mock(Receiver)
+        mock_broadcaster = Mock()
+        mock_broadcaster.client = 'Test client'
+        mock_receiver.broadcaster = mock_broadcaster
         
+        Receiver._client_watchdog(mock_receiver)
+        
+        self.assertEquals(call(1, mock_receiver._client_watchdog), mock_reactor.callLater.call_args)
+
+
+    @patch('yadtreceiver.log')
+    @patch('yadtreceiver.reactor')
+    def test_should_queue_call_to_client_watchdog_no_client_available (self, mock_reactor, mock_log):
+        mock_receiver = Mock(Receiver)
+        
+        Receiver._client_watchdog(mock_receiver)
+        
+        self.assertEquals(call(1, mock_receiver._client_watchdog, 2), mock_reactor.callLater.call_args)
+
+
+    @patch('yadtreceiver.log')
+    @patch('yadtreceiver.reactor')
+    def test_should_queue_call_to_client_watchdog_no_client_available_and_double_delay_when_delay_of_two_is_given (self, mock_reactor, mock_log):
+        mock_receiver = Mock(Receiver)
+        
+        Receiver._client_watchdog(mock_receiver, delay=2)
+        
+        self.assertEquals(call(2, mock_receiver._client_watchdog, 4), mock_reactor.callLater.call_args)
+
+
+    @patch('yadtreceiver.log')
+    @patch('yadtreceiver.reactor')
+    def test_should_queue_call_to_client_watchdog_no_client_available_and_double_delay_when_delay_of_four_is_given (self, mock_reactor, mock_log):
+        mock_receiver = Mock(Receiver)
+        
+        Receiver._client_watchdog(mock_receiver, delay=4)
+        
+        self.assertEquals(call(4, mock_receiver._client_watchdog, 8), mock_reactor.callLater.call_args)
+
+
+    @patch('yadtreceiver.log')
+    @patch('yadtreceiver.reactor')
+    def test_should_queue_call_to_client_watchdog_no_client_available_and_return_sixty_as_maximum_delay_when_delay_of_one_sixty_is_given (self, mock_reactor, mock_log):
+        mock_receiver = Mock(Receiver)
+        
+        Receiver._client_watchdog(mock_receiver, delay=60)
+        
+        self.assertEquals(call(60, mock_receiver._client_watchdog, 60), mock_reactor.callLater.call_args)
+
+
+    @patch('yadtreceiver.log')
+    @patch('yadtreceiver.reactor')
+    def test_should_return_result_of_connect_broadcaster (self, mock_reactor, mock_log):
+        mock_receiver = Mock(Receiver)
+        mock_receiver._connect_broadcaster.return_value = 'spam eggs'
+        
+        actual_result = Receiver._client_watchdog(mock_receiver)
+        
+        self.assertEquals('spam eggs', actual_result)
+        
+    
