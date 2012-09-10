@@ -416,3 +416,12 @@ class YadtReceiverTests (unittest.TestCase):
         self.assertEquals('spam eggs', actual_result)
         
     
+    @patch('yadtreceiver.log')
+    def test_should_log_shutting_down_of_service (self, mock_log):
+        mock_receiver = Mock(Receiver)
+    
+        Receiver.stopService(mock_receiver)
+        
+        # Since all the method does is logging we are asserting it here.
+        self.assertEquals(call('shutting down service'), mock_log.msg.call_args)
+    

@@ -47,7 +47,7 @@ def set_properties (project):
     project.build_depends_on('coverage')
 
     project.set_property('coverage_break_build', True)
-    project.set_property('coverage_threshold_warn', 86)
+    project.set_property('coverage_threshold_warn', 100)
     
     project.get_property('distutils_commands').append('bdist_rpm')
     project.set_property("copy_resources_target", "$dir_dist")
