@@ -3,14 +3,20 @@
 # Description: Dummy init script for yadtreceiver.
 #              You may want/need to modify this file to fit your needs.
 #
-# Author:      Michael Gruber <aelgru@gmail.com>
+# Author:      Arne Hilmann <arne.hilmann@gmail.com>
+#              Michael Gruber <aelgru@gmail.com>
 
 
 PIDFILE=/var/run/yadtreceiver.pid
 TACFILE=/etc/twisted-taps/yadtreceiver.tac
 TWISTD=/usr/bin/twistd
- 
-[ -r /etc/default/yadtshell-receiver ] && . /etc/default/yadtshell-receiver
+
+apply_default_script_if_readable() {
+	if [ -r /etc/default/yadtshell-receiver ]
+	then
+		source /etc/default/yadtshell-receiver
+	fi
+}
 
 check_twistd_exists() {
     if [ ! -x $TWISTD ]
@@ -38,6 +44,9 @@ stop_daemon() {
     check_pid_file_exists    
     kill -QUIT `cat $PIDFILE` && rm $PIDFILE
 }
+
+
+apply_default_script_if_readable
 
 case "$1" in
     start)
