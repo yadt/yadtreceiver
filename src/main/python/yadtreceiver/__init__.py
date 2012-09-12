@@ -82,10 +82,10 @@ class Receiver(service.Service):
         """
 
         self.publish_start(target, command, arguments)
+        
         if arguments:
-            # TODO why use arguments here? might be empty...
-            self.notify_graphite(target, arguments[0])
-        self.notify_graphite(target, arguments[0])
+            action = arguments[0]
+            self.notify_graphite(target, action)
 
         hostname          = self.configuration['hostname']
         python_command    = self.configuration['python_command']

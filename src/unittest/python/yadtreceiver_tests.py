@@ -227,6 +227,19 @@ class YadtReceiverTests (unittest.TestCase):
 
 
     @patch('yadtreceiver.reactor')
+    def test_not_should_notify_graphite_when_no_action_given (self, mock_reactor):
+        mock_receiver = Mock(Receiver)
+        mock_receiver.broadcaster = Mock()
+        mock_receiver.configuration = {'hostname'          : 'hostname',
+                                       'python_command'    : '/usr/bin/python',
+                                       'script_to_execute' : '/usr/bin/yadtshell'}
+
+        Receiver.handle_request(mock_receiver, 'devabc123', 'yadtshell', [])
+
+        self.assertEquals(None, mock_receiver.notify_graphite.call_args)
+
+
+    @patch('yadtreceiver.reactor')
     @patch('yadtreceiver.ProcessProtocol')
     def test_should_spawn_new_process_on_reactor (self, mock_protocol, mock_reactor):
         mock_protocol.return_value = 'mock-protocol'
