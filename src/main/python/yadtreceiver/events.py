@@ -22,6 +22,6 @@ __author__ = 'Arne Hilmann, Michael Gruber'
 
 
 class Event (object):
-    FAILED = 'failed'
+    FAILED   = 'failed'
     FINISHED = 'finished'
-    STARTED = 'started'
+    STARTED  = 'started'

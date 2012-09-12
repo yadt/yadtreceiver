@@ -33,7 +33,7 @@ def send_update_notification_to_graphite(target, host, port):
         Sends a update notification to the graphite server at host:port.
     """
     try:
-        graphite_socket = socket()
+        graphite_socket  = socket()
         graphite_address = (host, port)
         graphite_socket.connect(graphite_address)
 

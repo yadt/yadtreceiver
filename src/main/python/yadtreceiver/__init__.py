@@ -65,7 +65,7 @@ class Receiver(service.Service):
         hostname          = self.configuration['hostname']
         targets_directory = self.configuration['targets_directory']
 
-        target_directory = os.path.join(targets_directory, target)
+        target_directory  = os.path.join(targets_directory, target)
 
         if not os.path.exists(target_directory):
             raise ReceiverException('(%s) target[%s] request failed: target directory "%s" does not exist.'
