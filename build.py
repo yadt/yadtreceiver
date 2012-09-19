@@ -13,6 +13,7 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import os
 
 from pythonbuilder.core import use_plugin, init, Author
 
@@ -33,9 +34,9 @@ license = 'GNU GPL v3'
 name    = 'yadtreceiver'
 summary = 'Executes yadtshell commands triggered by a yadtbroadcaster.'
 url     = 'https://github.com/yadt/yadtreceiver'
-version = '0.1.8'
+version = '0.1.9-%s' % os.environ.get('BUILD_NUMBER', 0)
 
-default_task = ['install_dependencies', 'analyze', 'publish']
+default_task = ['analyze', 'publish']
 
 @init
 def set_properties (project):
