@@ -34,6 +34,7 @@ ve
 
 # backups
 .*~
+*~
 
 # generated rpms
 dist-rpms

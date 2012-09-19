@@ -13,8 +13,6 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import os
-
 from pythonbuilder.core import use_plugin, init, Author
 
 use_plugin('filter_resources')
@@ -34,7 +32,7 @@ license = 'GNU GPL v3'
 name    = 'yadtreceiver'
 summary = 'Executes yadtshell commands triggered by a yadtbroadcaster.'
 url     = 'https://github.com/yadt/yadtreceiver'
-version = '0.1.9-%s' % os.environ.get('BUILD_NUMBER', 0)
+version = '0.1.9'
 
 default_task = ['analyze', 'publish']
 
@@ -59,4 +57,11 @@ def set_properties (project):
 
     project.install_file('/etc/twisted-taps/', 'yadtreceiver/yadtreceiver.tac')
     project.install_file('/etc/init.d/', 'yadtreceiver/yadtreceiver')
+
+
+@init(environments="teamcity")
+def set_properties_for_teamcity (project):
+    import os
+    project.version = '%s-%s' % (project.version, os.environ.get('BUILD_NUMBER', 0))
+    project.default_task = ['install_build_dependencies', 'analyze', 'package']
 
