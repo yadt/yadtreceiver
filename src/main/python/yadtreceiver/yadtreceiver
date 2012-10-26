@@ -11,10 +11,10 @@ PIDFILE=/var/run/yadtreceiver.pid
 TACFILE=/etc/twisted-taps/yadtreceiver.tac
 TWISTD=/usr/bin/twistd
 
-apply_default_script_if_readable() {
-	if [ -r /etc/default/yadtshell-receiver ]
+apply_config_script_if_readable() {
+	if [ -r /etc/sysconfig/yadtreceiver ]
 	then
-		source /etc/default/yadtshell-receiver
+		source /etc/sysconfig/yadtreceiver
 	fi
 }
 
@@ -46,7 +46,7 @@ stop_daemon() {
 }
 
 
-apply_default_script_if_readable
+apply_config_script_if_readable
 
 case "$1" in
     start)
