@@ -1,74 +1,36 @@
-#!/bin/sh
+#!/bin/bash
 #
-# Description: Dummy init script for yadtreceiver.
-#              You may want/need to modify this file to fit your needs.
+# Description: init script for the yadtreceiver.
 #
 # Author:      Arne Hilmann <arne.hilmann@gmail.com>
-#              Michael Gruber <aelgru@gmail.com>
 
+set -e -E -u
 
 PIDFILE=/var/run/yadtreceiver.pid
 TACFILE=/etc/twisted-taps/yadtreceiver.tac
 TWISTD=/usr/bin/twistd
+CONFIGFILE=/etc/sysconfig/yadtreceiver
 
-apply_config_script_if_readable() {
-	if [ -r /etc/sysconfig/yadtreceiver ]
-	then
-		source /etc/sysconfig/yadtreceiver
-	fi
-}
+[[ -r $CONFIGFILE ]] && source $CONFIGFILE
 
-check_twistd_exists() {
-    if [ ! -x $TWISTD ]
-    then
-        echo "$TWISTD does not exist or is not executable."
-        exit 1
-    fi
-}
- 
-check_pid_file_exists() {
-    if [ ! -f $PIDFILE ]
-    then
-        echo "$PIDFILE does not exist."
-        exit 1
-    fi
-}
-
-start_daemon() {
-    check_twistd_exists
-    
-    $TWISTD --pidfile=$PIDFILE --python=$TACFILE ${uid:+--uid=$uid} ${gid:+--gid=$gid}
-}
- 
-stop_daemon() {
-    check_pid_file_exists    
-    kill -QUIT `cat $PIDFILE` && rm $PIDFILE
-}
-
-
-apply_config_script_if_readable
-
-case "$1" in
+case "${1:-}" in
     start)
-        echo -n "Starting yadtreceiver... "
-        start_daemon
-        echo ""
+        echo "starting yadtreceiver"
+        $TWISTD --pidfile=$PIDFILE --python=$TACFILE ${uid:+--uid=$uid} ${gid:+--gid=$gid}
     ;;
     stop)
-        echo -n "Stopping yadtreceiver... "
-        stop_daemon
-        echo ""
+        [[ -e $PIDFILE ]] || { echo "no pid file, already stopped?!"; exit 0; }
+        PID=$(cat $PIDFILE)
+        echo "stopping yadtreceiver with pid $PID"
+        kill -QUIT $PID && rm -f $PIDFILE
     ;;
-    restart)
-        echo "Restarting yadtreceiver... "
-        stop_daemon
-        sleep 1
-        start_daemon
+    status)
+        [[ -e $PIDFILE ]] || exit 3
+        PID=$(cat $PIDFILE)
+        ps $PID > /dev/null && exit
     ;;
     *)
-        echo "Usage: ${0} {start|stop|restart}" >&2
+        echo "Usage: $0 {start|stop|status}" >&2
         exit 3
     ;;
 esac
- 
-exit 0
