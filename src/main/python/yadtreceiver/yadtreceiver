@@ -13,7 +13,7 @@ CONFIGFILE=/etc/sysconfig/yadtreceiver
 [[ -r $CONFIGFILE ]] && source $CONFIGFILE
 
 get_pid() {
-    ps -eopid,cmd | grep -v grep | grep $TACFILE | sed "s/^ *//;s/ .*//"
+    ps -eopid,cmd | grep -v grep | grep "python .*twistd .*$TACFILE" | sed "s/^ *//;s/ .*//"
 }
 PID=$(get_pid)
 
