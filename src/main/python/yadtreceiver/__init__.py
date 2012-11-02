@@ -41,7 +41,6 @@ from yadtreceiver.events import Event
 
 VERSION = '${version}'
 
-
 class ReceiverException(Exception):
     """
         To be raised when an exception occurs within the receiver.

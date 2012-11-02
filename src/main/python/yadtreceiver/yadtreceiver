@@ -3,7 +3,6 @@
 # Description: init script for the yadtreceiver.
 #
 # Author:      Arne Hilmann <arne.hilmann@gmail.com>
-
 set -e -E -u
 
 PIDFILE=/var/run/yadtreceiver.pid
@@ -13,24 +12,43 @@ CONFIGFILE=/etc/sysconfig/yadtreceiver
 
 [[ -r $CONFIGFILE ]] && source $CONFIGFILE
 
+get_pid() {
+    ps -eopid,cmd | grep -v grep | grep $TACFILE | sed "s/^ *//;s/ .*//"
+}
+PID=$(get_pid)
+
 case "${1:-}" in
     start)
-        echo "starting yadtreceiver"
-        $TWISTD --pidfile=$PIDFILE --python=$TACFILE ${uid:+--uid=$uid} ${gid:+--gid=$gid}
+        if [[ -z $PID ]]; then
+            $TWISTD --pidfile=$PIDFILE --python=$TACFILE ${uid:+--uid=$uid} ${gid:+--gid=$gid}
+            echo "$0 started, returning 0" && exit 0
+        else
+            echo "$0 already running (pid $PID), returning 0" && exit 0
+        fi
     ;;
     stop)
-        [[ -e $PIDFILE ]] || { echo "no pid file, already stopped?!"; exit 0; }
-        PID=$(cat $PIDFILE)
-        echo "stopping yadtreceiver with pid $PID"
-        kill -QUIT $PID && rm -f $PIDFILE
+        if [[ -z $PID ]]; then
+            echo "$0 not running, returning 0" && exit 0
+        else
+            kill -QUIT $PID
+            sleep 1
+            rm -f $PIDFILE
+            PID2=$(get_pid)
+            if [[ -z $PID2 ]]; then
+                echo "$0 stopped, returning 0" && exit 0
+            else
+                echo "$0 could not be stopped (pid $PID), returning 1" && exit 1
+            fi
+        fi
     ;;
     status)
-        [[ -e $PIDFILE ]] || exit 3
-        PID=$(cat $PIDFILE)
-        ps $PID > /dev/null && exit
+        if [[ -z $PID ]]; then
+            echo "$0 not running, returning 3" && exit 3
+        else
+            echo "$0 running (pid $PID), returning 0" && exit 0
+        fi
     ;;
     *)
-        echo "Usage: $0 {start|stop|status}" >&2
-        exit 3
+        echo "Usage: $0 {start|stop|status}" >&2 && exit 3
     ;;
 esac
