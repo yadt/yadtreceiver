@@ -9,6 +9,7 @@ PIDFILE=/var/run/yadtreceiver.pid
 TACFILE=/etc/twisted-taps/yadtreceiver.tac
 TWISTD=/usr/bin/twistd
 CONFIGFILE=/etc/sysconfig/yadtreceiver
+LOGFILE=/var/log/yadtreceiver.log
 
 [[ -r $CONFIGFILE ]] && source $CONFIGFILE
 
@@ -20,7 +21,7 @@ PID=$(get_pid)
 case "${1:-}" in
     start)
         if [[ -z $PID ]]; then
-            $TWISTD --pidfile=$PIDFILE --python=$TACFILE ${uid:+--uid=$uid} ${gid:+--gid=$gid}
+            $TWISTD --pidfile=$PIDFILE --python=$TACFILE --logfile=$LOGFILE ${uid:+--uid=$uid} ${gid:+--gid=$gid}
             echo "$0 started, returning 0" && exit 0
         else
             echo "$0 already running (pid $PID), returning 0" && exit 0

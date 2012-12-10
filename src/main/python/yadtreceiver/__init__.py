@@ -231,9 +231,7 @@ class Receiver(service.Service):
         """
             Initializes logging and establishes connection to broadcaster.
         """
-
-        self._initialize_logging()
-        #self._connect_broadcaster()
+        log.msg('yadtreceiver version %s' % VERSION)
         self._client_watchdog()
         self._refresh_connection(first_call=True)
 
@@ -244,17 +242,6 @@ class Receiver(service.Service):
         """
         
         log.msg('shutting down service')
-
-
-    def _initialize_logging(self):
-        """
-            Starts logging as configured.
-        """
-
-        log_file = open(self.configuration['log_filename'], 'a+')
-        os.chmod(self.configuration['log_filename'], 0o660)
-        log.startLogging(log_file)
-        log.msg('yadtreceiver version %s' % VERSION)
 
 
     def _connect_broadcaster(self):
