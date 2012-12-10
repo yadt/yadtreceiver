@@ -29,8 +29,9 @@ pip-log.txt
 #Mr Developer
 .mr.developer.cfg
 
-# virtualenv
+# commonly used virtualenv names
 ve
+venv
 
 # backups
 .*~
@@ -41,3 +42,6 @@ dist-rpms
 
 # pid files
 *.pid
+
+# IDEA pycharm files
+.idea
