@@ -74,7 +74,6 @@ class YadtConfigParser (object):
             Creates instance of SafeConfigParser which will be used to parse
             the configuration file.
         """
-
         self._parser = SafeConfigParser()
 
 
@@ -83,7 +82,6 @@ class YadtConfigParser (object):
             @return: the option from the section if it exists,
                      otherwise the given default value.
         """
-
         if self._parser.has_option(section, option):
             return self._parser.get(section, option)
 
@@ -95,7 +93,6 @@ class YadtConfigParser (object):
             @return: the boolean option from the section if it exists,
                      otherwise the given default value.
         """
-
         option_value = self.get_option(section, option, default_value)
 
         if option_value != 'yes' and option_value != 'no':
@@ -110,7 +107,6 @@ class YadtConfigParser (object):
             @return: the integer option from the section if it exists,
                      otherwise the given default value.
         """
-
         option_value = self.get_option(section, option, default_value)
 
         if not option_value.isdigit():
@@ -124,7 +120,6 @@ class YadtConfigParser (object):
             @return: the option (list of strings) from the section if it exists
                      otherwise the given default value.
         """
-
         option_value = self.get_option(section, option, '')
 
         if option_value == '':
@@ -144,7 +139,6 @@ class YadtConfigParser (object):
             @return: the option (set of strings) from the section if it exists,
                      otherwise the given default value.
         """
-
         option_values = self.get_option_as_list(section, option, default_value)
         return set(option_values)
 
@@ -154,7 +148,6 @@ class YadtConfigParser (object):
             reads the file into the parser. Will exit with error code 1 if
             the configuration file does not exist.
         """
-
         if not os.path.exists(filename):
             sys.stderr.write('Configuration file "%s" does not exist.\n' % filename)
             exit(1)
@@ -174,7 +167,6 @@ class ReceiverConfigLoader (object):
             Creates instance of YadtConfigParser which will be used to parse
             the configuration file.
         """
-
         self._parser = YadtConfigParser()
 
 
@@ -183,7 +175,6 @@ class ReceiverConfigLoader (object):
             @return: the broadcaster host from the configuration file,
                      otherwise DEFAULT_BROADCASTER_HOST.
         """
-
         return self._parser.get_option(SECTION_BROADCASTER, 'host', DEFAULT_BROADCASTER_HOST)
 
 
@@ -192,7 +183,6 @@ class ReceiverConfigLoader (object):
             @return: the broadcaster port from the configuration file as int,
                      otherwise DEFAULT_BROADCASTER_PORT.
         """
-
         return self._parser.get_option_as_int(SECTION_BROADCASTER, 'port', DEFAULT_BROADCASTER_PORT)
 
 
@@ -201,7 +191,6 @@ class ReceiverConfigLoader (object):
             @return: the graphite active porperty from the configuration file
                      as bool, otherwise DEFAULT_GRAPHITE_ACTIVE.
         """
-
         return self._parser.get_option_as_yes_or_no_boolean(SECTION_GRAPHITE, 'active', DEFAULT_GRAPHITE_ACTIVE)
 
 
@@ -210,7 +199,6 @@ class ReceiverConfigLoader (object):
             @return: the graphite host from the configuration file,
                      otherwise DEFAULT_GRAPHITE_HOST.
         """
-
         return self._parser.get_option(SECTION_GRAPHITE, 'host', DEFAULT_GRAPHITE_HOST)
 
 
@@ -219,7 +207,6 @@ class ReceiverConfigLoader (object):
             @return: the graphite port from the configuration file as int,
                      otherwise DEFAULT_GRAPHITE_PORT.
         """
-
         return self._parser.get_option_as_int(SECTION_GRAPHITE, 'port', DEFAULT_GRAPHITE_PORT)
 
 
@@ -229,7 +216,6 @@ class ReceiverConfigLoader (object):
                      return it, otherwise it will return the host name as
                      given by socket.gethostname
         """
-
         return self._parser.get_option(SECTION_RECEIVER, 'hostname', socket.gethostname())
 
 
@@ -238,7 +224,6 @@ class ReceiverConfigLoader (object):
             @return: the log filename from the configuration file if given,
                      otherwise DEFAULT_LOG_FILENAME
         """
-
         return self._parser.get_option(SECTION_RECEIVER, 'log_filename', DEFAULT_LOG_FILENAME)
 
 
@@ -247,7 +232,6 @@ class ReceiverConfigLoader (object):
             @return: the python command from the configuration file if given,
                      otherwise DEFAULT_PYTHON_COMMAND
         """
-
         return self._parser.get_option(SECTION_RECEIVER, 'python_command', DEFAULT_PYTHON_COMMAND)
 
 
@@ -256,7 +240,6 @@ class ReceiverConfigLoader (object):
             @return: if the configuration file provides a script to execute,
                      otherwise DEFAULT_SCRIPT_TO_EXECUTE.
         """
-
         return self._parser.get_option(SECTION_RECEIVER, 'script_to_execute', DEFAULT_SCRIPT_TO_EXECUTE)
 
 
@@ -265,7 +248,6 @@ class ReceiverConfigLoader (object):
             @return: the set of targets given in the configuration file,
                      otherwise DEFAULT_TARGETS.
         """
-
         return self._parser.get_option_as_set(SECTION_RECEIVER, 'targets', DEFAULT_TARGETS)
 
 
@@ -274,7 +256,6 @@ class ReceiverConfigLoader (object):
             @return: the targets directory from the configuration file,
                      otherwise DEFAULT_TARGETS_DIRECTORY.
         """
-
         return self._parser.get_option(SECTION_RECEIVER, 'targets_directory', DEFAULT_TARGETS_DIRECTORY)
 
     def read_configuration_file (self, filename):
@@ -283,7 +264,6 @@ class ReceiverConfigLoader (object):
             
             @return: configuration dictionary
         """
-        
         return self._parser.read_configuration_file(filename)
 
 
