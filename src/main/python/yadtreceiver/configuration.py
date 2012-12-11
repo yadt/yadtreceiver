@@ -273,7 +273,6 @@ def load(filename):
 
         @return: Configuration object containing the data from the file.
     """
-
     parser = ReceiverConfigLoader()
     parser.read_configuration_file(filename)
 

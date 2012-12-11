@@ -53,14 +53,12 @@ class Receiver(service.Service):
         for the targets that it subscribed to.
     """
 
-
     def get_target_directory(self, target):
         """
             Appends the given target name to the targets_directory.
 
             @raise ReceiverException: if the target directory does not exist.
         """
-
         hostname          = self.configuration['hostname']
         targets_directory = self.configuration['targets_directory']
 
@@ -79,7 +77,6 @@ class Receiver(service.Service):
             command (using the python_command and script_to_execute from
             the configuration).
         """
-
         self.publish_start(target, command, arguments)
 
         if self.configuration['graphite_active'] and len(arguments) > 0:
@@ -114,7 +111,6 @@ class Receiver(service.Service):
         """
             Publishes a event to signal that the command on the target failed.
         """
-
         log.err(_stuff=Exception(message), _why=message)
         self.broadcaster.publish_cmd_for_target(target, command, Event.FAILED, message)
 
@@ -123,7 +119,6 @@ class Receiver(service.Service):
         """
             Publishes a event to signal that the command on the target started.
         """
-
         hostname = self.configuration['hostname']
         message  = '(%s) target[%s] request: command="%s", arguments=%s' % (hostname, target, command, arguments)
         log.msg(message)
@@ -136,7 +131,6 @@ class Receiver(service.Service):
             is useless when no targets are configured, therefore it will exit
             with error code 1 when no targets are configured.
         """
-
         self.broadcaster.client.connectionLost = self.onConnectionLost
 
         host = self.configuration['broadcaster_host']
@@ -200,7 +194,6 @@ class Receiver(service.Service):
             Will be called when receiving an event from the broadcaster.
             See onConnect which subscribes to the targets.
         """
-
         log.msg(event)
         if event.get('id') == 'request':
             command   = event['cmd']
@@ -222,7 +215,6 @@ class Receiver(service.Service):
         """
             Assigns a configuration to this receiver instance.
         """
-
         self.configuration = configuration
 
 
@@ -239,7 +231,6 @@ class Receiver(service.Service):
         """
             Writes 'shutting down service' to the log.
         """
-        
         log.msg('shutting down service')
 
 
@@ -248,7 +239,6 @@ class Receiver(service.Service):
             Establishes a connection to the broadcaster as found in the
             configuration.
         """
-
         host = self.configuration['broadcaster_host']
         port = self.configuration['broadcaster_port']
 
