@@ -81,10 +81,11 @@ class Receiver(service.Service):
         """
 
         self.publish_start(target, command, arguments)
-        
-        if arguments:
-            action = arguments[0]
-            self.notify_graphite(target, action)
+
+        if 'graphite_active' in self.configuration and self.configuration['graphite_active']:
+            if arguments:
+                action = arguments[0]
+                self.notify_graphite(target, action)
 
         hostname          = self.configuration['hostname']
         python_command    = self.configuration['python_command']
@@ -103,7 +104,6 @@ class Receiver(service.Service):
         """
             Notifies the configured graphite server about events (update events).
         """
-
         if action == 'update':
             host = self.configuration['graphite_host']
             port = self.configuration['graphite_port']

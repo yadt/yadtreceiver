@@ -196,6 +196,7 @@ class YadtReceiverTests (unittest.TestCase):
         mock_receiver = Mock(Receiver)
         mock_receiver.broadcaster = Mock()
         mock_receiver.configuration = {'hostname'          : 'hostname',
+                                       'graphite_active'   : True,
                                        'python_command'    : '/usr/bin/python',
                                        'script_to_execute' : '/usr/bin/yadtshell'}
 
@@ -203,12 +204,38 @@ class YadtReceiverTests (unittest.TestCase):
 
         self.assertEquals(call('devabc123', 'update'), mock_receiver.notify_graphite.call_args)
 
-
     @patch('yadtreceiver.reactor')
-    def test_not_should_notify_graphite_when_no_action_given (self, mock_reactor):
+    def test_should_not_notify_graphite_if_deactivated (self, mock_reactor):
         mock_receiver = Mock(Receiver)
         mock_receiver.broadcaster = Mock()
         mock_receiver.configuration = {'hostname'          : 'hostname',
+                                       'graphite_active'   : False,
+                                       'python_command'    : '/usr/bin/python',
+                                       'script_to_execute' : '/usr/bin/yadtshell'}
+
+        Receiver.handle_request(mock_receiver, 'devabc123', 'yadtshell', ['update'])
+
+        self.assertEquals(None, mock_receiver.notify_graphite.call_args)
+
+    @patch('yadtreceiver.reactor')
+    def test_should_not_notify_graphite_if_graphite_not_configured (self, mock_reactor):
+        mock_receiver = Mock(Receiver)
+        mock_receiver.broadcaster = Mock()
+        mock_receiver.configuration = {'hostname'          : 'hostname',
+                                       'python_command'    : '/usr/bin/python',
+                                       'script_to_execute' : '/usr/bin/yadtshell'}
+
+        Receiver.handle_request(mock_receiver, 'devabc123', 'yadtshell', ['update'])
+
+        self.assertEquals(None, mock_receiver.notify_graphite.call_args)
+
+
+    @patch('yadtreceiver.reactor')
+    def test_should_not_notify_graphite_when_no_action_given (self, mock_reactor):
+        mock_receiver = Mock(Receiver)
+        mock_receiver.broadcaster = Mock()
+        mock_receiver.configuration = {'hostname'          : 'hostname',
+                                       'graphite_active'   : True,
                                        'python_command'    : '/usr/bin/python',
                                        'script_to_execute' : '/usr/bin/yadtshell'}
 
