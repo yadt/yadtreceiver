@@ -23,7 +23,7 @@
     update notifications to a graphite server.
 """
 
-__author__ = 'Arne Hilmann, Michael Gruber'
+__author__ = 'Arne Hilmann, Maximilien Riehl, Michael Gruber'
 
 import os
 import traceback

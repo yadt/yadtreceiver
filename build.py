@@ -27,6 +27,7 @@ use_plugin('python.pydev')
 use_plugin('copy_resources')
 
 authors = [Author('Arne Hilmann', 'arne.hilmann@gmail.com'),
+           Author('Maximilien Riehl', 'maximilien.riehl@gmail.com'),
            Author('Michael Gruber', 'aelgru@gmail.com')]
 license = 'GNU GPL v3'
 name    = 'yadtreceiver'
