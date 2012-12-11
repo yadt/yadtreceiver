@@ -80,8 +80,8 @@ class Receiver(service.Service):
         self.publish_start(target, command, arguments)
 
         if self.configuration['graphite_active'] and len(arguments) > 0:
-                action = arguments[0]
-                self.notify_graphite(target, action)
+            action = arguments[0]
+            self.notify_graphite(target, action)
 
         hostname          = self.configuration['hostname']
         python_command    = self.configuration['python_command']
