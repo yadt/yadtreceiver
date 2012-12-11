@@ -82,8 +82,7 @@ class Receiver(service.Service):
 
         self.publish_start(target, command, arguments)
 
-        if 'graphite_active' in self.configuration and self.configuration['graphite_active']:
-            if arguments:
+        if self.configuration['graphite_active'] and len(arguments) > 0:
                 action = arguments[0]
                 self.notify_graphite(target, action)
 

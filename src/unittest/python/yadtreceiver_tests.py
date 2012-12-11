@@ -179,11 +179,13 @@ class YadtReceiverTests (unittest.TestCase):
 
 
     @patch('yadtreceiver.reactor')
-    def test_should_publish_start_event (self, mock_reactor):
+    @patch('yadtreceiver.send_update_notification_to_graphite')
+    def test_should_publish_start_event (self, mock_reactor, mock_send):
         mock_receiver = Mock(Receiver)
         mock_receiver.broadcaster = Mock()
         mock_receiver.configuration = {'hostname' : 'hostname',
                                        'python_command' : '/usr/bin/python',
+                                       'graphite_active': True,
                                        'script_to_execute' : '/usr/bin/yadtshell'}
 
         Receiver.handle_request(mock_receiver, 'devabc123', 'yadtshell', ['update'])
@@ -217,18 +219,6 @@ class YadtReceiverTests (unittest.TestCase):
 
         self.assertEquals(None, mock_receiver.notify_graphite.call_args)
 
-    @patch('yadtreceiver.reactor')
-    def test_should_not_notify_graphite_if_graphite_not_configured (self, mock_reactor):
-        mock_receiver = Mock(Receiver)
-        mock_receiver.broadcaster = Mock()
-        mock_receiver.configuration = {'hostname'          : 'hostname',
-                                       'python_command'    : '/usr/bin/python',
-                                       'script_to_execute' : '/usr/bin/yadtshell'}
-
-        Receiver.handle_request(mock_receiver, 'devabc123', 'yadtshell', ['update'])
-
-        self.assertEquals(None, mock_receiver.notify_graphite.call_args)
-
 
     @patch('yadtreceiver.reactor')
     def test_should_not_notify_graphite_when_no_action_given (self, mock_reactor):
@@ -244,16 +234,18 @@ class YadtReceiverTests (unittest.TestCase):
         self.assertEquals(None, mock_receiver.notify_graphite.call_args)
 
 
+    @patch('yadtreceiver.send_update_notification_to_graphite')
     @patch('yadtreceiver.reactor')
     @patch('yadtreceiver.ProcessProtocol')
-    def test_should_spawn_new_process_on_reactor (self, mock_protocol, mock_reactor):
+    def test_should_spawn_new_process_on_reactor (self, mock_protocol, mock_reactor, mock_send):
         mock_protocol.return_value = 'mock-protocol'
         mock_receiver = Mock(Receiver)
         mock_broadcaster = Mock()
         mock_receiver.broadcaster = mock_broadcaster
         mock_receiver.get_target_directory.return_value = '/etc/yadtshell/targets/devabc123'
-        
+
         mock_receiver.configuration = {'hostname'          : 'hostname',
+                                       'graphite_active'   : True,
                                        'python_command'    : '/usr/bin/python',
                                        'script_to_execute' : '/usr/bin/yadtshell'}
 
