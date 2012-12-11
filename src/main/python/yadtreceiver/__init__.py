@@ -24,6 +24,7 @@
 """
 
 __author__ = 'Arne Hilmann, Maximilien Riehl, Michael Gruber'
+__version__ = '${version}'
 
 import os
 import traceback
@@ -39,7 +40,6 @@ from yadtreceiver.protocols import ProcessProtocol
 from yadtreceiver.events import Event
 
 
-VERSION = '${version}'
 
 class ReceiverException(Exception):
     """
@@ -222,7 +222,7 @@ class Receiver(service.Service):
         """
             Initializes logging and establishes connection to broadcaster.
         """
-        log.msg('yadtreceiver version %s' % VERSION)
+        log.msg('yadtreceiver version %s' % __version__)
         self._client_watchdog()
         self._refresh_connection(first_call=True)
 
