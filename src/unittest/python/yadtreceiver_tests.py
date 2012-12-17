@@ -20,9 +20,9 @@ __author__ = 'Michael Gruber'
 import unittest
 
 from mock import Mock, call, patch
-from StringIO import StringIO
 
 from yadtreceiver import __version__, Receiver, ReceiverException
+from yadtreceiver.events import Event
 
 
 class YadtReceiverTests (unittest.TestCase):
@@ -188,9 +188,14 @@ class YadtReceiverTests (unittest.TestCase):
                                        'graphite_active': True,
                                        'script_to_execute' : '/usr/bin/yadtshell'}
 
-        Receiver.handle_request(mock_receiver, 'devabc123', 'yadtshell', ['update'])
+        mock_event = Mock(Event)
+        mock_event.target = 'devabc123'
+        mock_event.command = 'yadtshell'
+        mock_event.arguments = ['update']
 
-        self.assertEquals(call('devabc123', 'yadtshell', ['update']), mock_receiver.publish_start.call_args)
+        Receiver.handle_request(mock_receiver, mock_event)
+
+        self.assertEquals(call(mock_event), mock_receiver.publish_start.call_args)
 
 
     @patch('yadtreceiver.reactor')
@@ -202,7 +207,12 @@ class YadtReceiverTests (unittest.TestCase):
                                        'python_command'    : '/usr/bin/python',
                                        'script_to_execute' : '/usr/bin/yadtshell'}
 
-        Receiver.handle_request(mock_receiver, 'devabc123', 'yadtshell', ['update'])
+        mock_event = Mock(Event)
+        mock_event.target = 'devabc123'
+        mock_event.command = 'yadtshell'
+        mock_event.arguments = ['update']
+
+        Receiver.handle_request(mock_receiver, mock_event)
 
         self.assertEquals(call('devabc123', 'update'), mock_receiver.notify_graphite.call_args)
 
@@ -214,8 +224,12 @@ class YadtReceiverTests (unittest.TestCase):
                                        'graphite_active'   : False,
                                        'python_command'    : '/usr/bin/python',
                                        'script_to_execute' : '/usr/bin/yadtshell'}
+        mock_event = Mock(Event)
+        mock_event.target = 'devabc123'
+        mock_event.command = 'yadtshell'
+        mock_event.arguments = ['update']
 
-        Receiver.handle_request(mock_receiver, 'devabc123', 'yadtshell', ['update'])
+        Receiver.handle_request(mock_receiver, mock_event)
 
         self.assertEquals(None, mock_receiver.notify_graphite.call_args)
 
@@ -229,7 +243,12 @@ class YadtReceiverTests (unittest.TestCase):
                                        'python_command'    : '/usr/bin/python',
                                        'script_to_execute' : '/usr/bin/yadtshell'}
 
-        Receiver.handle_request(mock_receiver, 'devabc123', 'yadtshell', [])
+        mock_event = Mock(Event)
+        mock_event.target = 'devabc123'
+        mock_event.command = 'yadtshell'
+        mock_event.arguments = []
+
+        Receiver.handle_request(mock_receiver, mock_event)
 
         self.assertEquals(None, mock_receiver.notify_graphite.call_args)
 
@@ -249,7 +268,12 @@ class YadtReceiverTests (unittest.TestCase):
                                        'python_command'    : '/usr/bin/python',
                                        'script_to_execute' : '/usr/bin/yadtshell'}
 
-        Receiver.handle_request(mock_receiver, 'devabc123', 'yadtshell', ['update'])
+        mock_event = Mock(Event)
+        mock_event.target = 'devabc123'
+        mock_event.command = 'yadtshell'
+        mock_event.arguments = ['update']
+
+        Receiver.handle_request(mock_receiver, mock_event)
 
         self.assertEquals(call('hostname', mock_broadcaster, 'devabc123', '/usr/bin/python /usr/bin/yadtshell update'), mock_protocol.call_args)
         self.assertEquals(call('mock-protocol', '/usr/bin/python', ['/usr/bin/python', '/usr/bin/yadtshell', 'update'], path='/etc/yadtshell/targets/devabc123', env={}), mock_reactor.spawnProcess.call_args)
@@ -281,7 +305,12 @@ class YadtReceiverTests (unittest.TestCase):
         mock_broadcaster = Mock()
         mock_receiver.broadcaster = mock_broadcaster
 
-        Receiver.publish_failed(mock_receiver, 'devabc123', 'yadtshell', 'It failed!')
+        mock_event = Mock(Event)
+        mock_event.target = 'devabc123'
+        mock_event.command = 'yadtshell'
+        mock_event.arguments = ['update']
+
+        Receiver.publish_failed(mock_receiver, mock_event, 'It failed!')
 
         self.assertEquals(call('devabc123', 'yadtshell', 'failed', 'It failed!'), mock_broadcaster.publish_cmd_for_target.call_args)
 
@@ -293,30 +322,40 @@ class YadtReceiverTests (unittest.TestCase):
         mock_broadcaster = Mock()
         mock_receiver.broadcaster = mock_broadcaster
 
+        mock_event = Mock(Event)
+        mock_event.target = 'devabc123'
+        mock_event.command = 'yadtshell'
+        mock_event.arguments = ['update']
 
-        Receiver.publish_start(mock_receiver, 'devabc123', 'yadtshell', ['update'])
+        Receiver.publish_start(mock_receiver, mock_event)
 
         self.assertEquals(call('devabc123', 'yadtshell', 'started', '(hostname) target[devabc123] request: command="yadtshell", arguments=[\'update\']'), mock_broadcaster.publish_cmd_for_target.call_args)
 
 
-    def test_should_handle_request (self):
+    @patch('yadtreceiver.Event')
+    def test_should_handle_request (self, mock_event_class):
         mock_receiver = Mock(Receiver)
-        mock_event = {'id': 'request', 'cmd': 'command', 'args': 'args'}
+        mock_event = Mock(Event)
+        mock_event_class.return_value = mock_event
 
-        Receiver.onEvent(mock_receiver, 'target', mock_event)
+        Receiver.onEvent(mock_receiver, 'target', {'id': 'request', 'cmd': 'command', 'args': 'args'})
 
-        self.assertEquals(call('target', 'command', 'args'), mock_receiver.handle_request.call_args)
+        self.assertEqual(call('target', {'id': 'request', 'cmd': 'command', 'args': 'args'}), mock_event_class.call_args)
+        self.assertEqual(call(mock_event), mock_receiver.handle_request.call_args)
 
 
+    @patch('yadtreceiver.Event')
     @patch('yadtreceiver.log')
-    def test_should_publish_event_about_failed_request_when_handle_request_fails (self, mock_log):
+    def test_should_publish_event_about_failed_request_when_handle_request_fails (self, mock_log, mock_event_class):
         mock_receiver = Mock(Receiver)
         mock_receiver.handle_request.side_effect = ReceiverException('It failed!')
-        mock_event = {'id': 'request', 'cmd': 'command', 'args': 'args'}
+        mock_event = Mock(Event)
+        mock_event_class.return_value = mock_event
 
-        Receiver.onEvent(mock_receiver, 'target', mock_event)
+        Receiver.onEvent(mock_receiver, 'target', {'id': 'request', 'cmd': 'command', 'args': 'args'})
 
-        self.assertEquals(call('target', 'command', 'It failed!'), mock_receiver.publish_failed.call_args)
+        self.assertEqual(call('target', {'id': 'request', 'cmd': 'command', 'args': 'args'}), mock_event_class.call_args)
+        self.assertEqual(call(mock_event, 'It failed!'), mock_receiver.publish_failed.call_args)
 
 
     @patch('yadtreceiver.reactor')

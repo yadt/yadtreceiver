@@ -71,28 +71,28 @@ class Receiver(service.Service):
         return target_directory
 
 
-    def handle_request(self, target, command, arguments):
+    def handle_request(self, event):
         """
             Handles a request for the given target by executing the given
             command (using the python_command and script_to_execute from
             the configuration).
         """
-        self.publish_start(target, command, arguments)
+        self.publish_start(event)
 
-        if self.configuration['graphite_active'] and len(arguments) > 0:
-            action = arguments[0]
-            self.notify_graphite(target, action)
+        if self.configuration['graphite_active'] and len(event.arguments) > 0:
+            action = event.arguments[0]
+            self.notify_graphite(event.target, action)
 
         hostname          = self.configuration['hostname']
         python_command    = self.configuration['python_command']
         script_to_execute = self.configuration['script_to_execute']
 
-        command_and_arguments_list = [python_command, script_to_execute] + arguments
+        command_and_arguments_list = [python_command, script_to_execute] + event.arguments
         command_with_arguments = ' '.join(command_and_arguments_list)
 
-        process_protocol = ProcessProtocol(hostname, self.broadcaster, target, command_with_arguments)
+        process_protocol = ProcessProtocol(hostname, self.broadcaster, event.target, command_with_arguments)
 
-        target_dir = self.get_target_directory(target)
+        target_dir = self.get_target_directory(event.target)
         reactor.spawnProcess(process_protocol, python_command, command_and_arguments_list, env={}, path=target_dir)
 
 
@@ -107,22 +107,22 @@ class Receiver(service.Service):
             send_update_notification_to_graphite(target, host, port)
 
 
-    def publish_failed(self, target, command, message):
+    def publish_failed(self, event, message):
         """
             Publishes a event to signal that the command on the target failed.
         """
         log.err(_stuff=Exception(message), _why=message)
-        self.broadcaster.publish_cmd_for_target(target, command, Event.FAILED, message)
+        self.broadcaster.publish_cmd_for_target(event.target, event.command, events.FAILED, message)
 
 
-    def publish_start(self, target, command, arguments):
+    def publish_start(self, event):
         """
             Publishes a event to signal that the command on the target started.
         """
         hostname = self.configuration['hostname']
-        message  = '(%s) target[%s] request: command="%s", arguments=%s' % (hostname, target, command, arguments)
+        message  = '(%s) target[%s] request: command="%s", arguments=%s' % (hostname, event.target, event.command, event.arguments)
         log.msg(message)
-        self.broadcaster.publish_cmd_for_target(target, command, Event.STARTED, message)
+        self.broadcaster.publish_cmd_for_target(event.target, event.command, events.STARTED, message)
 
 
     def onConnect(self):
@@ -189,27 +189,27 @@ class Receiver(service.Service):
             return self._connect_broadcaster()
 
 
-    def onEvent(self, target, event):
+    def onEvent(self, target, event_data):
         """
             Will be called when receiving an event from the broadcaster.
             See onConnect which subscribes to the targets.
         """
-        log.msg(event)
-        if event.get('id') == 'request':
-            command   = event['cmd']
-            arguments = event['args']
+        event = Event(target, event_data)
 
+        if event.is_a_request:
             try:
-                self.handle_request(target, command, arguments)
+                self.handle_request(event)
             except Exception as e:
                 log.err(e.message)
-                log.err('-' * 40)
+
                 for line in traceback.format_exc().splitlines():
                     log.err(line)
-                log.err('-' * 40)
-                self.publish_failed(target, command, e.message)
 
-        log.msg('onEvent finished')
+                self.publish_failed(event, e.message)
+
+        else:
+            log.msg(str(event))
+
 
     def set_configuration(self, configuration):
         """
