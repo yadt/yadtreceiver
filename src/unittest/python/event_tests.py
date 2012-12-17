@@ -23,10 +23,13 @@ from yadtreceiver.events import Event, EventValidationException
 
 class EventTests(TestCase):
     def test_should_raise_exception_when_command_attribute_is_missing_in_request(self):
-        with self.assertRaises(EventValidationException) as context:
-            Event('target-name', {'id': 'request','args': 'arg1 arg2 arg3'})
-
-            self.assertEqual('Request is missing attribute "command".', context.exception.message)
+        self.assertRaises(EventValidationException, Event, 'target-name', {'id': 'request','args': 'arg1 arg2 arg3'})
+        
+# python 2.7
+#        with self.assertRaises(EventValidationException) as context:
+#            Event('target-name', {'id': 'request','args': 'arg1 arg2 arg3'})
+#
+#            self.assertEqual('Request is missing attribute "command".', context.exception.message)
 
     def test_should_return_description_of_request(self):
         event = Event('target-name', {'id': 'request',
