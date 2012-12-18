@@ -69,6 +69,6 @@ class EventTests(TestCase):
         event = Event('target-name', {'id': 'cmd',
                                       'cmd': 'command',
                                       'state': 'state',
-                                      'message': 'None'})
+                                      'message': None})
 
         self.assertEqual('(broadcaster) target[target-name] command "command" state.', str(event))

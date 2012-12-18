@@ -208,7 +208,6 @@ class Receiver(service.Service):
                 self.publish_failed(event, e.message)
 
         else:
-            log.msg(event_data)
             log.msg(str(event))
 
 
