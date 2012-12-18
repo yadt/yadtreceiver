@@ -103,4 +103,4 @@ class Event (object):
             else:
                 return '(broadcaster) target[{0}] command "{1}" {2}.'.format(self.target, self.command, self.state)
 
-        raise NotImplementedError('Unkown event type {0}'.format(self._event_type))
+        raise NotImplementedError('Unknown event type {0}'.format(self._event_type))
