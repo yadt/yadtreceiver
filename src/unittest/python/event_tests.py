@@ -64,3 +64,11 @@ class EventTests(TestCase):
                                       'state': 'state'})
 
         self.assertEqual('(broadcaster) target[target-name] command "command" state.', str(event))
+
+    def test_should_return_description_of_command_when_message_is_none(self):
+        event = Event('target-name', {'id': 'cmd',
+                                      'cmd': 'command',
+                                      'state': 'state',
+                                      'message': None})
+
+        self.assertEqual('(broadcaster) target[target-name] command "command" state.', str(event))
