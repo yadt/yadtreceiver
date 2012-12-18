@@ -98,7 +98,7 @@ class Event (object):
             return 'target[{0}] change: {1} is {2}'.format(self.target, self.service, self.state)
 
         if self.is_a_command:
-            if hasattr(self, 'message') and self.message is not None:
+            if hasattr(self, 'message') and self.message is not 'None':
                 return '(broadcaster) target[{0}] command "{1}" {2}: {3}'.format(self.target, self.command, self.state, self.message)
             else:
                 return '(broadcaster) target[{0}] command "{1}" {2}.'.format(self.target, self.command, self.state)
