@@ -26,13 +26,13 @@ __author__ = 'Arne Hilmann, Michael Gruber'
 from twisted.application import service
 from twisted.internet.defer import setDebugging
 
-from yadtreceiver import VERSION, Receiver
+from yadtreceiver import __version__, Receiver
 from yadtreceiver.configuration import load
 
 setDebugging(True)
 
 configuration = load('/etc/yadtshell/receiver.cfg')
-application = service.Application('yadtreceiver version %s' % VERSION)
+application = service.Application('yadtreceiver version %s' % __version__)
 
 receiver = Receiver()
 receiver.set_configuration(configuration)
