@@ -46,8 +46,10 @@ class IncompleteEventDataException(Exception):
     """
 
     def __init__(self, event, attribute_name):
-        error_message = 'target[{0}] event {1} is missing attribute "{2}", got {3}.'\
-                                                    .format(event.target, event.event_type, attribute_name, event.data)
+        error_message = 'target[{0}] event {1} is missing attribute "{2}", got {3}.'.format(event.target,
+                                                                                            event.event_type,
+                                                                                            attribute_name,
+                                                                                            event.data)
         super(IncompleteEventDataException, self).__init__(error_message)
 
 class Event (object):
