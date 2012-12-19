@@ -69,18 +69,15 @@ class Event (object):
     def _ensure_attribute_in_data(self, attribute_name):
         if not attribute_name in self.data:
             raise IncompleteEventDataException(self, attribute_name)
+        return self.data[attribute_name]
 
     def _initialize_request(self, data):
-        self._ensure_attribute_in_data(ATTRIBUTE_COMMAND)
-        self._ensure_attribute_in_data(ATTRIBUTE_ARGUMENTS)
-
-        self.command = data[ATTRIBUTE_COMMAND]
-        self.arguments = data[ATTRIBUTE_ARGUMENTS]
+        self.command = self._ensure_attribute_in_data(ATTRIBUTE_COMMAND)
+        self.arguments = self._ensure_attribute_in_data(ATTRIBUTE_ARGUMENTS)
 
     def _initialize_service_change(self, data):
-        self._ensure_attribute_in_data(ATTRIBUTE_PAYLOAD)
+        payload = self._ensure_attribute_in_data(ATTRIBUTE_PAYLOAD)
 
-        payload = data[ATTRIBUTE_PAYLOAD]
         self.service_states = self._extract_service_states_from_payload(payload)
 
     def _extract_service_states_from_payload(self, payload):
@@ -92,8 +89,8 @@ class Event (object):
         return service_states
 
     def _initialize_command(self, data):
-        self.state = data[ATTRIBUTE_STATE]
-        self.command = data[ATTRIBUTE_COMMAND]
+        self.command = self._ensure_attribute_in_data(ATTRIBUTE_COMMAND)
+        self.state = self._ensure_attribute_in_data(ATTRIBUTE_STATE)
 
         if ATTRIBUTE_MESSAGE in data:
             self.message = data[ATTRIBUTE_MESSAGE]

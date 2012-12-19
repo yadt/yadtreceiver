@@ -32,6 +32,12 @@ class EventTests(TestCase):
     def test_should_raise_exception_when_payload_attribute_is_missing_in_service_change(self):
         self.assertRaises(IncompleteEventDataException, Event, 'target-name', {'id': 'service-change'})
 
+    def test_should_raise_exception_when_command_attribute_is_missing_in_command(self):
+        self.assertRaises(IncompleteEventDataException, Event, 'target-name', {'id': 'cmd', 'state' : 'state'})
+
+    def test_should_raise_exception_when_state_attribute_is_missing_in_command(self):
+        self.assertRaises(IncompleteEventDataException, Event, 'target-name', {'id': 'cmd', 'cmd' : 'command'})
+
     def test_should_return_description_of_multiple_service_changes(self):
         event = Event('target-name', {'id'      : 'service-change',
                                       'payload' : [{'uri' : 'spam',
