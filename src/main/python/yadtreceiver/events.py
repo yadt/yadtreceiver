@@ -40,52 +40,79 @@ TYPE_REQUEST = 'request'
 TYPE_SERVICE_CHANGE = 'service-change'
 
 
-class EventValidationException(Exception):
+class IncompleteEventDataException(Exception):
     """
         to be raised when an error during validation of an event occurs.
     """
+
+    def __init__(self, event, attribute_name):
+        error_message = 'target[{0}] event {1} is missing attribute "{2}", got {3}.'\
+                                                    .format(event.target, event.event_type, attribute_name, event.data)
+        super(IncompleteEventDataException, self).__init__(error_message)
 
 class Event (object):
 
     def __init__(self, target, data):
         self.target = target
-        self._event_type = data[ATTRIBUTE_TYPE]
+        self.data = data
+        self.event_type = data[ATTRIBUTE_TYPE]
 
         if self.is_a_request:
-            if not ATTRIBUTE_COMMAND in data:
-                raise EventValidationException('Request is missing attribute "{0}", got {1}.'.format(ATTRIBUTE_COMMAND, data))
-
-            self.command = data[ATTRIBUTE_COMMAND]
-            self.arguments = data[ATTRIBUTE_ARGUMENTS]
+            self._initialize_request(data)
 
         if self.is_a_service_change:
-            payload = data[ATTRIBUTE_PAYLOAD][0]
-
-            self.service = payload[PAYLOAD_ATTRIBUTE_URI]
-            self.state = payload[PAYLOAD_ATTRIBUTE_STATE]
+            self._initialize_service_change(data)
 
         if self.is_a_command:
-            self.state = data[ATTRIBUTE_STATE]
-            self.command = data[ATTRIBUTE_COMMAND]
+            self._initialize_command(data)
 
-            if ATTRIBUTE_MESSAGE in data:
-                self.message = data[ATTRIBUTE_MESSAGE]
+    def _ensure_attribute_in_data(self, attribute_name):
+        if not attribute_name in self.data:
+            raise IncompleteEventDataException(self, attribute_name)
+
+    def _initialize_request(self, data):
+        self._ensure_attribute_in_data(ATTRIBUTE_COMMAND)
+        self._ensure_attribute_in_data(ATTRIBUTE_ARGUMENTS)
+
+        self.command = data[ATTRIBUTE_COMMAND]
+        self.arguments = data[ATTRIBUTE_ARGUMENTS]
+
+    def _initialize_service_change(self, data):
+        self._ensure_attribute_in_data(ATTRIBUTE_PAYLOAD)
+
+        payload = data[ATTRIBUTE_PAYLOAD]
+        self.service_states = self._extract_service_states_from_payload(payload)
+
+    def _extract_service_states_from_payload(self, payload):
+        service_states = []
+        for service_state_dictionary in payload:
+            state = service_state_dictionary[PAYLOAD_ATTRIBUTE_STATE]
+            uri = service_state_dictionary[PAYLOAD_ATTRIBUTE_URI]
+            service_states.append(self.ServiceState(uri, state))
+        return service_states
+
+    def _initialize_command(self, data):
+        self.state = data[ATTRIBUTE_STATE]
+        self.command = data[ATTRIBUTE_COMMAND]
+
+        if ATTRIBUTE_MESSAGE in data:
+            self.message = data[ATTRIBUTE_MESSAGE]
 
     @property
     def is_a_request(self):
-        return self._event_type == TYPE_REQUEST
+        return self.event_type == TYPE_REQUEST
 
     @property
     def is_a_full_update(self):
-        return self._event_type == TYPE_FULL_UPDATE
+        return self.event_type == TYPE_FULL_UPDATE
 
     @property
     def is_a_service_change(self):
-        return self._event_type == TYPE_SERVICE_CHANGE
+        return self.event_type == TYPE_SERVICE_CHANGE
 
     @property
     def is_a_command(self):
-        return self._event_type == TYPE_COMMAND
+        return self.event_type == TYPE_COMMAND
 
     def __str__(self):
         if self.is_a_request:
@@ -95,7 +122,11 @@ class Event (object):
             return 'target[{0}] full update of status information.'.format(self.target)
 
         if self.is_a_service_change:
-            return 'target[{0}] change: {1} is {2}'.format(self.target, self.service, self.state)
+            if len(self.service_states) == 1:
+                return 'target[{0}] service change: {1} is {2}'.format(self.target, self.service_states[0].uri, self.service_states[0].state)
+            else :
+                state_changes = ', '.join(map(str, self.service_states))
+                return 'target[{0}] service changes: {1}'.format(self.target, state_changes)
 
         if self.is_a_command:
             if hasattr(self, 'message') and self.message is not None:
@@ -103,4 +134,13 @@ class Event (object):
             else:
                 return '(broadcaster) target[{0}] command "{1}" {2}.'.format(self.target, self.command, self.state)
 
-        raise NotImplementedError('Unknown event type {0}'.format(self._event_type))
+        raise NotImplementedError('Unknown event type {0}'.format(self.event_type))
+
+    class ServiceState (object):
+        def __init__(self, uri, state):
+            self.uri = uri
+            self.state = state
+
+        def __str__(self):
+            return '{0} is {1}'.format(self.uri, self.state)
+

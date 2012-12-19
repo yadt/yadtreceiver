@@ -15,21 +15,31 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-__author__ = 'Michael Gruber'
+__author__ = 'Michael Gruber, Maximilien Riehl'
 
 from unittest import TestCase
 
-from yadtreceiver.events import Event, EventValidationException
+from yadtreceiver.events import Event, IncompleteEventDataException
 
 class EventTests(TestCase):
     def test_should_raise_exception_when_command_attribute_is_missing_in_request(self):
-        self.assertRaises(EventValidationException, Event, 'target-name', {'id': 'request','args': 'arg1 arg2 arg3'})
-        
-# python 2.7
-#        with self.assertRaises(EventValidationException) as context:
-#            Event('target-name', {'id': 'request','args': 'arg1 arg2 arg3'})
-#
-#            self.assertEqual('Request is missing attribute "command".', context.exception.message)
+        self.assertRaises(IncompleteEventDataException, Event, 'target-name', {'id': 'request','args': 'arg1 arg2 arg3'})
+
+
+    def test_should_raise_exception_when_arguments_attribute_is_missing_in_request(self):
+        self.assertRaises(IncompleteEventDataException, Event, 'target-name', {'id': 'request','cmd' : 'command'})
+
+    def test_should_raise_exception_when_payload_attribute_is_missing_in_service_change(self):
+        self.assertRaises(IncompleteEventDataException, Event, 'target-name', {'id': 'service-change'})
+
+    def test_should_return_description_of_multiple_service_changes(self):
+        event = Event('target-name', {'id'      : 'service-change',
+                                      'payload' : [{'uri' : 'spam',
+                                                    'state' : 'up'},
+                                                   {'uri' : 'eggs',
+                                                    'state' : 'down'}]
+                                     })
+        self.assertEqual(str(event), 'target[target-name] service changes: spam is up, eggs is down')
 
     def test_should_return_description_of_request(self):
         event = Event('target-name', {'id': 'request',
@@ -48,7 +58,7 @@ class EventTests(TestCase):
                                       'payload': [{'uri': 'service://host/test-service',
                                                    'state': 'up'}]})
 
-        self.assertEqual('target[target-name] change: service://host/test-service is up', str(event))
+        self.assertEqual('target[target-name] service change: service://host/test-service is up', str(event))
 
     def test_should_return_description_of_command_with_message(self):
         event = Event('target-name', {'id': 'cmd',
