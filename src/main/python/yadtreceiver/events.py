@@ -68,14 +68,16 @@ class Event (object):
         if self.is_a_command:
             self._initialize_command(data)
 
-    def _ensure_attribute_in_data(self, attribute_name):
-        if not attribute_name in self.data:
-            raise IncompleteEventDataException(self, attribute_name)
-        return self.data[attribute_name]
-
     def _initialize_request(self, data):
         self.command = self._ensure_attribute_in_data(ATTRIBUTE_COMMAND)
         self.arguments = self._ensure_attribute_in_data(ATTRIBUTE_ARGUMENTS)
+
+    def _initialize_command(self, data):
+        self.command = self._ensure_attribute_in_data(ATTRIBUTE_COMMAND)
+        self.state = self._ensure_attribute_in_data(ATTRIBUTE_STATE)
+
+        if ATTRIBUTE_MESSAGE in data:
+            self.message = data[ATTRIBUTE_MESSAGE]
 
     def _initialize_service_change(self, data):
         payload = self._ensure_attribute_in_data(ATTRIBUTE_PAYLOAD)
@@ -90,12 +92,10 @@ class Event (object):
             service_states.append(self.ServiceState(uri, state))
         return service_states
 
-    def _initialize_command(self, data):
-        self.command = self._ensure_attribute_in_data(ATTRIBUTE_COMMAND)
-        self.state = self._ensure_attribute_in_data(ATTRIBUTE_STATE)
-
-        if ATTRIBUTE_MESSAGE in data:
-            self.message = data[ATTRIBUTE_MESSAGE]
+    def _ensure_attribute_in_data(self, attribute_name):
+        if not attribute_name in self.data:
+            raise IncompleteEventDataException(self, attribute_name)
+        return self.data[attribute_name]
 
     @property
     def is_a_request(self):
@@ -121,11 +121,8 @@ class Event (object):
             return 'target[{0}] full update of status information.'.format(self.target)
 
         if self.is_a_service_change:
-            if len(self.service_states) == 1:
-                return 'target[{0}] service change: {1} is {2}'.format(self.target, self.service_states[0].uri, self.service_states[0].state)
-            else :
-                state_changes = ', '.join(map(str, self.service_states))
-                return 'target[{0}] service changes: {1}'.format(self.target, state_changes)
+            state_changes = ', '.join(map(str, self.service_states))
+            return 'target[{0}] services changed: {1}'.format(self.target, state_changes)
 
         if self.is_a_command:
             if hasattr(self, 'message') and self.message is not None:

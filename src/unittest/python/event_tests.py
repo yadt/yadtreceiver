@@ -45,7 +45,7 @@ class EventTests(TestCase):
                                                    {'uri' : 'eggs',
                                                     'state' : 'down'}]
                                      })
-        self.assertEqual(str(event), 'target[target-name] service changes: spam is up, eggs is down')
+        self.assertEqual(str(event), 'target[target-name] services changed: spam is up, eggs is down')
 
     def test_should_return_description_of_request(self):
         event = Event('target-name', {'id': 'request',
@@ -64,7 +64,7 @@ class EventTests(TestCase):
                                       'payload': [{'uri': 'service://host/test-service',
                                                    'state': 'up'}]})
 
-        self.assertEqual('target[target-name] service change: service://host/test-service is up', str(event))
+        self.assertEqual('target[target-name] services changed: service://host/test-service is up', str(event))
 
     def test_should_return_description_of_command_with_message(self):
         event = Event('target-name', {'id': 'cmd',
