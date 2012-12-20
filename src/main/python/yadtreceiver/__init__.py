@@ -83,9 +83,9 @@ class Receiver(service.Service):
             action = event.arguments[0]
             self.notify_graphite(event.target, action)
 
-        hostname          = self.configuration['hostname']
-        python_command    = self.configuration['python_command']
-        script_to_execute = self.configuration['script_to_execute']
+        hostname          = str(self.configuration['hostname'])
+        python_command    = str(self.configuration['python_command'])
+        script_to_execute = str(self.configuration['script_to_execute'])
 
         command_and_arguments_list = [python_command, script_to_execute] + event.arguments
         command_with_arguments = ' '.join(command_and_arguments_list)
