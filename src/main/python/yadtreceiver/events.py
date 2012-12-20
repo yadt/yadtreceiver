@@ -92,17 +92,6 @@ class Event (object):
         if self.is_a_command:
             self._initialize_command(data)
 
-
-    def _ensure_is_valid_event_type(self, data):
-        if ATTRIBUTE_TYPE not in data:
-            raise InvalidEventTypeException(self, None)
-
-        event_type = data[ATTRIBUTE_TYPE]
-        if not event_type in KNOWN_EVENT_TYPES:
-            raise InvalidEventTypeException(self, event_type)
-        return event_type
-
-
     def _initialize_request(self, data):
         self.command = self._ensure_attribute_in_data(ATTRIBUTE_COMMAND)
         self.arguments = self._ensure_attribute_in_data(ATTRIBUTE_ARGUMENTS)
@@ -133,6 +122,14 @@ class Event (object):
             raise PayloadIntegrityException(self, attribute_name)
         return payload_entry[attribute_name]
 
+    def _ensure_is_valid_event_type(self, data):
+        if ATTRIBUTE_TYPE not in data:
+            raise InvalidEventTypeException(self, None)
+
+        event_type = data[ATTRIBUTE_TYPE]
+        if not event_type in KNOWN_EVENT_TYPES:
+            raise InvalidEventTypeException(self, event_type)
+        return event_type
 
     def _ensure_attribute_in_data(self, attribute_name):
         if not attribute_name in self.data:
