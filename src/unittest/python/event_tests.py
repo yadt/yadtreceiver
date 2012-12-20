@@ -19,17 +19,15 @@ __author__ = 'Michael Gruber, Maximilien Riehl'
 
 from unittest import TestCase
 
-from yadtreceiver.events import Event, IncompleteEventDataException, PayloadIntegrityException
+from yadtreceiver.events import (Event,
+                                 IncompleteEventDataException, PayloadIntegrityException, InvalidEventTypeException)
 
 class EventTests(TestCase):
     def test_should_raise_exception_when_command_attribute_is_missing_in_request(self):
         self.assertRaises(IncompleteEventDataException, Event, 'target-name', {'id': 'request','args': 'arg1 arg2 arg3'})
 
-
     def test_should_raise_exception_when_arguments_attribute_is_missing_in_request(self):
         self.assertRaises(IncompleteEventDataException, Event, 'target-name', {'id': 'request','cmd' : 'command'})
-
-
 
     def test_should_raise_exception_when_command_attribute_is_missing_in_command(self):
         self.assertRaises(IncompleteEventDataException, Event, 'target-name', {'id': 'cmd', 'state' : 'state'})
@@ -49,6 +47,10 @@ class EventTests(TestCase):
         payload_with_no_state_in_service_change = {'id': 'service-change',
                                                      'payload': [{'uri': 'spam'}]}
         self.assertRaises(PayloadIntegrityException, Event, 'target-name', payload_with_no_state_in_service_change)
+
+    def test_should_raise_exception_when_event_type_unknown(self):
+        invalid_event_data = {'id': 'spameggs'}
+        self.assertRaises(InvalidEventTypeException, Event, 'target-name', invalid_event_data)
 
     def test_should_return_description_of_multiple_service_changes(self):
         event = Event('target-name', {'id'      : 'service-change',

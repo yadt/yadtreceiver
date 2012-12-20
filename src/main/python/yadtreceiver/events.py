@@ -38,6 +38,7 @@ TYPE_COMMAND = 'cmd'
 TYPE_FULL_UPDATE = 'full-update'
 TYPE_REQUEST = 'request'
 TYPE_SERVICE_CHANGE = 'service-change'
+KNOWN_EVENT_TYPES = [TYPE_COMMAND, TYPE_FULL_UPDATE, TYPE_REQUEST, TYPE_SERVICE_CHANGE]
 
 
 class IncompleteEventDataException(Exception):
@@ -52,13 +53,26 @@ class IncompleteEventDataException(Exception):
                                                                                             event.data)
         super(IncompleteEventDataException, self).__init__(error_message)
 
+class InvalidEventTypeException(Exception):
+    """
+        to be raised when an invalid event is instantiated
+    """
+    def __init__(self, event):
+        error_message = 'target[{0}] invalid event of type {1} : {2}'.format(event.target,
+                                                                             event.event_type,
+                                                                             event.data)
+        super(InvalidEventTypeException, self).__init__(error_message)
+
 class PayloadIntegrityException(Exception):
     """
         to be raised when a payload cannot be validated
     """
 
     def __init__(self, event, payload_attribute_name):
-        super(PayloadIntegrityException, self).__init__('target[{0}] payload from {1} is missing attribute {2}'.format(event.target, event.data, payload_attribute_name))
+        error_message = 'target[{0}] payload from {1} is missing attribute {2}'.format(event.target,
+                                                                                       event.data,
+                                                                                       payload_attribute_name)
+        super(PayloadIntegrityException, self).__init__(error_message)
 
 class Event (object):
 
@@ -75,6 +89,9 @@ class Event (object):
 
         if self.is_a_command:
             self._initialize_command(data)
+
+        if not self.event_type in KNOWN_EVENT_TYPES:
+            raise InvalidEventTypeException(self)
 
     def _initialize_request(self, data):
         self.command = self._ensure_attribute_in_data(ATTRIBUTE_COMMAND)
