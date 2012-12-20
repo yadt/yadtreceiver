@@ -26,6 +26,9 @@ class EventTests(TestCase):
     def test_should_raise_exception_when_command_attribute_is_missing_in_request(self):
         self.assertRaises(IncompleteEventDataException, Event, 'target-name', {'id': 'request','args': 'arg1 arg2 arg3'})
 
+    def test_should_raise_exception_when_type_attribute_is_missing_in_request(self):
+        self.assertRaises(InvalidEventTypeException, Event, 'target-name', {})
+
     def test_should_raise_exception_when_arguments_attribute_is_missing_in_request(self):
         self.assertRaises(IncompleteEventDataException, Event, 'target-name', {'id': 'request','cmd' : 'command'})
 

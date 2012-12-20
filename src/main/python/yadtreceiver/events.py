@@ -47,7 +47,7 @@ class IncompleteEventDataException(Exception):
     """
 
     def __init__(self, event, attribute_name):
-        error_message = 'target[{0}] event {1} is missing attribute "{2}", got {3}.'.format(event.target,
+        error_message = 'Event "{1}" on target {0} is missing attribute "{2}", event dump : {3}'.format(event.target,
                                                                                             event.event_type,
                                                                                             attribute_name,
                                                                                             event.data)
@@ -57,9 +57,9 @@ class InvalidEventTypeException(Exception):
     """
         to be raised when an invalid event is instantiated
     """
-    def __init__(self, event):
-        error_message = 'target[{0}] invalid event of type {1} : {2}'.format(event.target,
-                                                                             event.event_type,
+    def __init__(self, event, event_type):
+        error_message = 'Event "{1}" on target {0} has invalid type, event dump : {2}'.format(event.target,
+                                                                             event_type,
                                                                              event.data)
         super(InvalidEventTypeException, self).__init__(error_message)
 
@@ -69,9 +69,11 @@ class PayloadIntegrityException(Exception):
     """
 
     def __init__(self, event, payload_attribute_name):
-        error_message = 'target[{0}] payload from {1} is missing attribute {2}'.format(event.target,
-                                                                                       event.data,
-                                                                                       payload_attribute_name)
+        error_message = 'Event "{1}" on target {0} is missing attribute {2} in payload, event dump : {3}'.format(
+                                                                                               event.target,
+                                                                                               event.event_type,
+                                                                                               payload_attribute_name,
+                                                                                               event.data)
         super(PayloadIntegrityException, self).__init__(error_message)
 
 class Event (object):
@@ -79,7 +81,7 @@ class Event (object):
     def __init__(self, target, data):
         self.target = target
         self.data = data
-        self.event_type = data[ATTRIBUTE_TYPE]
+        self.event_type = self._ensure_is_valid_event_type(data)
 
         if self.is_a_request:
             self._initialize_request(data)
@@ -90,8 +92,16 @@ class Event (object):
         if self.is_a_command:
             self._initialize_command(data)
 
-        if not self.event_type in KNOWN_EVENT_TYPES:
-            raise InvalidEventTypeException(self)
+
+    def _ensure_is_valid_event_type(self, data):
+        if ATTRIBUTE_TYPE not in data:
+            raise InvalidEventTypeException(self, None)
+
+        event_type = data[ATTRIBUTE_TYPE]
+        if not event_type in KNOWN_EVENT_TYPES:
+            raise InvalidEventTypeException(self, event_type)
+        return event_type
+
 
     def _initialize_request(self, data):
         self.command = self._ensure_attribute_in_data(ATTRIBUTE_COMMAND)
