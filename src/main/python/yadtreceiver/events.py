@@ -18,7 +18,7 @@
     A broadcaster event.
 """
 
-__author__ = 'Arne Hilmann, Michael Gruber'
+__author__ = 'Arne Hilmann, Michael Gruber, Maximilien Riehl'
 
 FAILED = 'failed'
 FINISHED = 'finished'
@@ -51,6 +51,14 @@ class IncompleteEventDataException(Exception):
                                                                                             attribute_name,
                                                                                             event.data)
         super(IncompleteEventDataException, self).__init__(error_message)
+
+class PayloadIntegrityException(Exception):
+    """
+        to be raised when a payload cannot be validated
+    """
+
+    def __init__(self, event, payload_attribute_name):
+        super(PayloadIntegrityException, self).__init__('target[{0}] payload from {1} is missing attribute {2}'.format(event.target, event.data, payload_attribute_name))
 
 class Event (object):
 
@@ -86,11 +94,18 @@ class Event (object):
 
     def _extract_service_states_from_payload(self, payload):
         service_states = []
-        for service_state_dictionary in payload:
-            state = service_state_dictionary[PAYLOAD_ATTRIBUTE_STATE]
-            uri = service_state_dictionary[PAYLOAD_ATTRIBUTE_URI]
+
+        for payload_entry in payload:
+            uri = self._ensure_payload_entry_contains_attribute(payload_entry, PAYLOAD_ATTRIBUTE_URI)
+            state = self._ensure_payload_entry_contains_attribute(payload_entry, PAYLOAD_ATTRIBUTE_STATE)
             service_states.append(self.ServiceState(uri, state))
         return service_states
+
+    def _ensure_payload_entry_contains_attribute(self, payload_entry, attribute_name):
+        if not attribute_name in payload_entry:
+            raise PayloadIntegrityException(self, attribute_name)
+        return payload_entry[attribute_name]
+
 
     def _ensure_attribute_in_data(self, attribute_name):
         if not attribute_name in self.data:
@@ -139,4 +154,3 @@ class Event (object):
 
         def __str__(self):
             return '{0} is {1}'.format(self.uri, self.state)
-
