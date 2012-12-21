@@ -81,29 +81,29 @@ class Event (object):
     def __init__(self, target, data):
         self.target = target
         self.data = data
-        self.event_type = self._ensure_is_valid_event_type(data)
+        self.event_type = self._ensure_is_valid_event_type()
 
         if self.is_a_request:
-            self._initialize_request(data)
+            self._initialize_request()
 
         if self.is_a_service_change:
-            self._initialize_service_change(data)
+            self._initialize_service_change()
 
         if self.is_a_command:
-            self._initialize_command(data)
+            self._initialize_command()
 
-    def _initialize_request(self, data):
+    def _initialize_request(self):
         self.command = self._ensure_attribute_in_data(ATTRIBUTE_COMMAND)
         self.arguments = self._ensure_attribute_in_data(ATTRIBUTE_ARGUMENTS)
 
-    def _initialize_command(self, data):
+    def _initialize_command(self):
         self.command = self._ensure_attribute_in_data(ATTRIBUTE_COMMAND)
         self.state = self._ensure_attribute_in_data(ATTRIBUTE_STATE)
 
-        if ATTRIBUTE_MESSAGE in data:
-            self.message = data[ATTRIBUTE_MESSAGE]
+        if ATTRIBUTE_MESSAGE in self.data:
+            self.message = self.data[ATTRIBUTE_MESSAGE]
 
-    def _initialize_service_change(self, data):
+    def _initialize_service_change(self):
         payload = self._ensure_attribute_in_data(ATTRIBUTE_PAYLOAD)
 
         self.service_states = self._extract_service_states_from_payload(payload)
@@ -122,11 +122,11 @@ class Event (object):
             raise PayloadIntegrityException(self, attribute_name)
         return payload_entry[attribute_name]
 
-    def _ensure_is_valid_event_type(self, data):
-        if ATTRIBUTE_TYPE not in data:
+    def _ensure_is_valid_event_type(self):
+        if ATTRIBUTE_TYPE not in self.data:
             raise InvalidEventTypeException(self, None)
 
-        event_type = data[ATTRIBUTE_TYPE]
+        event_type = self.data[ATTRIBUTE_TYPE]
         if not event_type in KNOWN_EVENT_TYPES:
             raise InvalidEventTypeException(self, event_type)
         return event_type
