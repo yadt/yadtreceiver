@@ -41,7 +41,7 @@ default_task = ['analyze', 'publish']
 def set_properties (project):
     project.depends_on('PyYAML')
     project.depends_on('Twisted')
-    project.depends_on('yadtbroadcaster-client', url='https://github.com/downloads/yadt/yadtbroadcast-client/yadtbroadcast-client-1.1.1.tar.gz')
+    project.depends_on('yadtbroadcast-client')
     
     project.build_depends_on('mock')
     project.build_depends_on('coverage')
