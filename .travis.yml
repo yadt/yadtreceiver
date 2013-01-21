@@ -6,7 +6,7 @@ before_script: sudo apt-get install pychecker pylint pep8 rpm python-rpm
 install:
   - pip install -r requirements.txt --use-mirrors
   - pyb --debug install_dependencies
-script: "pyb --debug analyze publish"
+script: "pyb --debug"
 notifications:
   email:
     - arne.hilmann@immobilienscout24.de
