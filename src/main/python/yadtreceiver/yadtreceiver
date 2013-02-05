@@ -1,5 +1,6 @@
 #!/bin/bash
 #
+# chkconfig: 2345 56 26
 # Description: init script for the yadtreceiver.
 #
 # Author:      Arne Hilmann <arne.hilmann@gmail.com>
