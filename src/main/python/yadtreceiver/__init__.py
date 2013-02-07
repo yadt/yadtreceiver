@@ -32,6 +32,7 @@ import traceback
 from twisted.application import service
 from twisted.internet import reactor
 from twisted.python import log
+from twisted.python.logfile import LogFile
 
 from yadtbroadcastclient import WampBroadcaster
 
@@ -164,7 +165,7 @@ class Receiver(service.Service):
 
     def onConnectionLost(self, reason):
         """
-            Allows for clean reconnect behaviour, because it 'none'ifies 
+            Allows for clean reconnect behaviour, because it 'none'ifies
             the client explicitly
         """
         log.err('connection lost: %s' % reason)
@@ -175,8 +176,8 @@ class Receiver(service.Service):
     def _client_watchdog(self, delay=1):
         """
             Checks periodically if broadcaster.client is set
-            (see also onConnectionLost), tries to reconnect after a 
-            delay (delay after failed connect: 1, 2, 4, 8, 16, 32, 60, 60, ... 
+            (see also onConnectionLost), tries to reconnect after a
+            delay (delay after failed connect: 1, 2, 4, 8, 16, 32, 60, 60, ...
             seconds)
         """
         if hasattr(self, 'broadcaster') and self.broadcaster.client:
@@ -222,6 +223,7 @@ class Receiver(service.Service):
         """
             Initializes logging and establishes connection to broadcaster.
         """
+        log.startLogging(LogFile.fromFullPath(self.configuration['log_filename']))
         log.msg('yadtreceiver version %s' % __version__)
         self._client_watchdog()
         self._refresh_connection(first_call=True)

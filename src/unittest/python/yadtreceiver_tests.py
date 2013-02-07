@@ -20,6 +20,8 @@ __author__ = 'Michael Gruber'
 import unittest
 
 from mock import Mock, call, patch
+from twisted.mail.scripts.mailmail import Configuration
+from twisted.python.logfile import LogFile
 
 from yadtreceiver import __version__, Receiver, ReceiverException
 from yadtreceiver.events import Event
@@ -39,7 +41,7 @@ class YadtReceiverTests (unittest.TestCase):
         self.assertEquals(configuration, receiver.configuration)
 
     @patch('yadtreceiver.WampBroadcaster')
-    def test_should_initialize_broadcaster_when_starting_service (self, mock_wamb):
+    def test_should_initialize_broadcaster_when_connecting_broadcaster (self, mock_wamb):
         configuration = Mock(Configuration)
         configuration.broadcaster_host = 'broadcaster-host'
         configuration.broadcaster_port = 1234
@@ -52,7 +54,7 @@ class YadtReceiverTests (unittest.TestCase):
 
 
     @patch('yadtreceiver.WampBroadcaster')
-    def test_should_add_session_handler_to_broadcaster_when_starting_service (self, mock_wamb):
+    def test_should_add_session_handler_to_broadcaster_when_connecting_broadcaster (self, mock_wamb):
         receiver      = Receiver()
         configuration = {'broadcaster_host' : 'broadcasterhost',
                          'broadcaster_port' : 1234}
@@ -66,7 +68,7 @@ class YadtReceiverTests (unittest.TestCase):
 
 
     @patch('yadtreceiver.WampBroadcaster')
-    def test_should_connect_broadcaster_when_starting_service (self, mock_wamb):
+    def test_should_connect_broadcaster_when_connecting_broadcaster (self, mock_wamb):
         receiver = Receiver()
         configuration = {'broadcaster_host' : 'broadcaster-host',
                          'broadcaster_port' : 1234}
@@ -80,7 +82,7 @@ class YadtReceiverTests (unittest.TestCase):
 
 
     @patch('yadtreceiver.WampBroadcaster')
-    def test_should_initialize_broadcaster_when_starting_service (self, mock_wamb):
+    def test_should_initialize_broadcaster_when_connecting_broadcaster (self, mock_wamb):
         configuration = {'broadcaster_host' : 'broadcaster-host',
                          'broadcaster_port' : 1234}
         receiver = Receiver()
@@ -105,13 +107,33 @@ class YadtReceiverTests (unittest.TestCase):
         self.assertEquals(call(1), mock_exit.call_args)
 
 
-    def test_should_initialize_watchdog_and_start_connection_when_service_starts (self):
+    @patch('yadtreceiver.LogFile')
+    @patch('yadtreceiver.log')
+    def test_should_initialize_watchdog_and_start_connection_when_service_starts (self, mock_log, mock_log_file):
         mock_receiver = Mock(Receiver)
+        mock_receiver.configuration = {'log_filename' : 'log/file.log'}
+
 
         Receiver.startService(mock_receiver)
 
         self.assertEquals(call(), mock_receiver._client_watchdog.call_args)
         self.assertEquals(call(first_call=True), mock_receiver._refresh_connection.call_args)
+
+
+    @patch('yadtreceiver.LogFile')
+    @patch('yadtreceiver.log')
+    def test_should_initialize_logging_when_service_starts (self, mock_log, mock_log_file_class):
+        receiver = Receiver()
+        receiver.set_configuration({'log_filename' : 'log/file.log',
+                                    'targets' : set(['devabc123']),
+                                    'broadcaster_host': 'broadcaster_host',
+                                    'broadcaster_port': 1234})
+        mock_log_file = Mock(LogFile)
+        mock_log_file_class.fromFullPath.return_value = mock_log_file
+
+        receiver.startService()
+
+        self.assertEquals(call(mock_log_file), mock_log.startLogging.call_args)
 
 
     def test_should_subscribe_to_target_from_configuration_when_connected (self):
@@ -146,7 +168,7 @@ class YadtReceiverTests (unittest.TestCase):
         mock_exists.return_value = False
         receiver = Receiver()
         configuration = {'hostname'          : 'hostname',
-                         'targets_directory' : '/etc/yadtshell/targets/'} 
+                         'targets_directory' : '/etc/yadtshell/targets/'}
         receiver.set_configuration(configuration)
 
         self.assertRaises(ReceiverException, receiver.get_target_directory, 'spargel')
@@ -157,7 +179,7 @@ class YadtReceiverTests (unittest.TestCase):
         mock_exists.return_value = True
         receiver = Receiver()
         configuration = {'hostname'          : 'hostname',
-                         'targets_directory' : '/etc/yadtshell/targets/'} 
+                         'targets_directory' : '/etc/yadtshell/targets/'}
         receiver.set_configuration(configuration)
 
         actual_target_directory = receiver.get_target_directory('spargel')
@@ -170,7 +192,7 @@ class YadtReceiverTests (unittest.TestCase):
         mock_exists.return_value = True
         receiver = Receiver()
         configuration = {'hostname'          : 'hostname',
-                         'targets_directory' : '/etc/yadtshell/targets/'} 
+                         'targets_directory' : '/etc/yadtshell/targets/'}
         receiver.set_configuration(configuration)
 
         actual_target_directory = receiver.get_target_directory('spargel')
@@ -361,9 +383,9 @@ class YadtReceiverTests (unittest.TestCase):
     @patch('yadtreceiver.reactor')
     def test_should_queue_call_to_refresh_connection (self, mock_reactor):
         mock_receiver = Mock(Receiver)
-        
+
         Receiver._refresh_connection(mock_receiver, 123)
-    
+
         self.assertEquals(call(123, mock_receiver._refresh_connection), mock_reactor.callLater.call_args)
 
 
@@ -374,7 +396,7 @@ class YadtReceiverTests (unittest.TestCase):
         mock_receiver.broadcaster = mock_broadcaster
 
         Receiver._refresh_connection(mock_receiver, 123)
-        
+
         self.assertEquals(call(), mock_broadcaster.client.sendClose.call_args)
 
 
@@ -385,7 +407,7 @@ class YadtReceiverTests (unittest.TestCase):
         mock_receiver.broadcaster = mock_broadcaster
 
         Receiver._refresh_connection(mock_receiver, 123, first_call=True)
-        
+
         self.assertEquals(None, mock_broadcaster.client.sendClose.call_args)
 
 
@@ -395,12 +417,12 @@ class YadtReceiverTests (unittest.TestCase):
         mock_broadcaster = Mock()
         mock_broadcaster.client = 'Test client'
         mock_receiver.broadcaster = mock_broadcaster
-        
+
         Receiver.onConnectionLost(mock_receiver, 'Spam eggs.')
-        
+
         self.assertEquals(None, mock_broadcaster.client)
-        
-        
+
+
     @patch('yadtreceiver.log')
     @patch('yadtreceiver.reactor')
     def test_should_queue_call_to_client_watchdog_when_client_available (self, mock_reactor, mock_log):
@@ -408,9 +430,9 @@ class YadtReceiverTests (unittest.TestCase):
         mock_broadcaster = Mock()
         mock_broadcaster.client = 'Test client'
         mock_receiver.broadcaster = mock_broadcaster
-        
+
         Receiver._client_watchdog(mock_receiver)
-        
+
         self.assertEquals(call(1, mock_receiver._client_watchdog), mock_reactor.callLater.call_args)
 
 
@@ -418,9 +440,9 @@ class YadtReceiverTests (unittest.TestCase):
     @patch('yadtreceiver.reactor')
     def test_should_queue_call_to_client_watchdog_no_client_available (self, mock_reactor, mock_log):
         mock_receiver = Mock(Receiver)
-        
+
         Receiver._client_watchdog(mock_receiver)
-        
+
         self.assertEquals(call(1, mock_receiver._client_watchdog, 2), mock_reactor.callLater.call_args)
 
 
@@ -428,9 +450,9 @@ class YadtReceiverTests (unittest.TestCase):
     @patch('yadtreceiver.reactor')
     def test_should_queue_call_to_client_watchdog_no_client_available_and_double_delay_when_delay_of_two_is_given (self, mock_reactor, mock_log):
         mock_receiver = Mock(Receiver)
-        
+
         Receiver._client_watchdog(mock_receiver, delay=2)
-        
+
         self.assertEquals(call(2, mock_receiver._client_watchdog, 4), mock_reactor.callLater.call_args)
 
 
@@ -438,9 +460,9 @@ class YadtReceiverTests (unittest.TestCase):
     @patch('yadtreceiver.reactor')
     def test_should_queue_call_to_client_watchdog_no_client_available_and_double_delay_when_delay_of_four_is_given (self, mock_reactor, mock_log):
         mock_receiver = Mock(Receiver)
-        
+
         Receiver._client_watchdog(mock_receiver, delay=4)
-        
+
         self.assertEquals(call(4, mock_receiver._client_watchdog, 8), mock_reactor.callLater.call_args)
 
 
@@ -448,9 +470,9 @@ class YadtReceiverTests (unittest.TestCase):
     @patch('yadtreceiver.reactor')
     def test_should_queue_call_to_client_watchdog_no_client_available_and_return_sixty_as_maximum_delay_when_delay_of_one_sixty_is_given (self, mock_reactor, mock_log):
         mock_receiver = Mock(Receiver)
-        
+
         Receiver._client_watchdog(mock_receiver, delay=60)
-        
+
         self.assertEquals(call(60, mock_receiver._client_watchdog, 60), mock_reactor.callLater.call_args)
 
 
@@ -459,18 +481,17 @@ class YadtReceiverTests (unittest.TestCase):
     def test_should_return_result_of_connect_broadcaster (self, mock_reactor, mock_log):
         mock_receiver = Mock(Receiver)
         mock_receiver._connect_broadcaster.return_value = 'spam eggs'
-        
+
         actual_result = Receiver._client_watchdog(mock_receiver)
-        
+
         self.assertEquals('spam eggs', actual_result)
-        
-    
+
+
     @patch('yadtreceiver.log')
     def test_should_log_shutting_down_of_service (self, mock_log):
         mock_receiver = Mock(Receiver)
-    
+
         Receiver.stopService(mock_receiver)
-        
+
         # Since all the method does is logging we are asserting it here.
         self.assertEquals(call('shutting down service'), mock_log.msg.call_args)
-    
