@@ -30,25 +30,26 @@ authors = [Author('Arne Hilmann', 'arne.hilmann@gmail.com'),
            Author('Maximilien Riehl', 'maximilien.riehl@gmail.com'),
            Author('Michael Gruber', 'aelgru@gmail.com')]
 license = 'GNU GPL v3'
-name    = 'yadtreceiver'
+name = 'yadtreceiver'
 summary = 'Executes yadtshell commands triggered by a yadtbroadcaster.'
-url     = 'https://github.com/yadt/yadtreceiver'
+url = 'https://github.com/yadt/yadtreceiver'
 version = '0.1.10'
 
 default_task = ['analyze', 'publish']
 
+
 @init
-def set_properties (project):
+def set_properties(project):
     project.depends_on('PyYAML')
     project.depends_on('Twisted')
     project.depends_on('yadtbroadcast-client')
-    
+
     project.build_depends_on('mock')
     project.build_depends_on('coverage')
 
     project.set_property('coverage_break_build', True)
     project.set_property('coverage_threshold_warn', 95)
-    
+
     project.get_property('distutils_commands').append('bdist_rpm')
     project.set_property('copy_resources_target', '$dir_dist')
     project.get_property('filter_resources_glob').append('**/yadtreceiver/__init__.py')
@@ -57,14 +58,12 @@ def set_properties (project):
     project.get_property('copy_resources_glob').append('post-uninstall.sh')
     project.set_property('dir_dist_scripts', 'scripts')
 
-
     project.install_file('/etc/twisted-taps/', 'yadtreceiver/yadtreceiver.tac')
     project.install_file('/etc/init.d/', 'yadtreceiver/yadtreceiver')
 
 
 @init(environments="teamcity")
-def set_properties_for_teamcity (project):
+def set_properties_for_teamcity(project):
     import os
     project.version = '%s-%s' % (project.version, os.environ.get('BUILD_NUMBER', 0))
     project.default_task = ['install_build_dependencies', 'analyze', 'package']
-
