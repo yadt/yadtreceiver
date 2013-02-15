@@ -36,7 +36,7 @@ class YadtReceiverTests (unittest.TestCase):
     def test_should_call_start_logging_when_initializing_twisted_logging(self, mock_log, mock_log_file_class):
         receiver = Receiver()
         receiver.set_configuration({'log_filename': 'log/file.log',
-                                    'targets': {'devabc123'},
+                                    'targets': set(['devabc123']),
                                     'broadcaster_host': 'broadcaster_host',
                                     'broadcaster_port': 1234})
         mock_log_file = Mock(LogFile)
