@@ -219,11 +219,14 @@ class Receiver(service.Service):
         self.configuration = configuration
 
 
+    def initialize_twisted_logging(self):
+        log.startLogging(LogFile.fromFullPath(self.configuration['log_filename']))
+
     def startService(self):
         """
             Initializes logging and establishes connection to broadcaster.
         """
-        log.startLogging(LogFile.fromFullPath(self.configuration['log_filename']))
+        self.initialize_twisted_logging()
         log.msg('yadtreceiver version %s' % __version__)
         self._client_watchdog()
         self._refresh_connection(first_call=True)
