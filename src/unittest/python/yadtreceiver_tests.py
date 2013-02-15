@@ -28,15 +28,15 @@ from yadtreceiver.events import Event
 
 
 class YadtReceiverTests (unittest.TestCase):
-    def test_if_this_test_fails_maybe_you_have_yadtreceiver_installed_locally (self):
+    def test_if_this_test_fails_maybe_you_have_yadtreceiver_installed_locally(self):
         self.assertEqual('${version}', __version__)
 
     @patch('yadtreceiver.LogFile')
     @patch('yadtreceiver.log')
     def test_should_call_start_logging_when_initializing_twisted_logging(self, mock_log, mock_log_file_class):
         receiver = Receiver()
-        receiver.set_configuration({'log_filename' : 'log/file.log',
-                                    'targets' : set(['devabc123']),
+        receiver.set_configuration({'log_filename': 'log/file.log',
+                                    'targets': {'devabc123'},
                                     'broadcaster_host': 'broadcaster_host',
                                     'broadcaster_port': 1234})
         mock_log_file = Mock(LogFile)
@@ -46,7 +46,7 @@ class YadtReceiverTests (unittest.TestCase):
 
         self.assertEquals(call(mock_log_file), mock_log.startLogging.call_args)
 
-    def test_should_set_configuration (self):
+    def test_should_set_configuration(self):
         configuration = 'configuration'
         receiver = Receiver()
 
@@ -55,7 +55,7 @@ class YadtReceiverTests (unittest.TestCase):
         self.assertEquals(configuration, receiver.configuration)
 
     @patch('yadtreceiver.WampBroadcaster')
-    def test_should_initialize_broadcaster_when_connecting_broadcaster (self, mock_wamb):
+    def test_should_initialize_broadcaster_when_connecting_broadcaster(self, mock_wamb):
         configuration = Mock(Configuration)
         configuration.broadcaster_host = 'broadcaster-host'
         configuration.broadcaster_port = 1234
@@ -66,12 +66,11 @@ class YadtReceiverTests (unittest.TestCase):
 
         self.assertEquals(call('broadcaster-host', 1234, 'yadtreceiver'), mock_wamb.call_args)
 
-
     @patch('yadtreceiver.WampBroadcaster')
-    def test_should_add_session_handler_to_broadcaster_when_connecting_broadcaster (self, mock_wamb):
-        receiver      = Receiver()
-        configuration = {'broadcaster_host' : 'broadcasterhost',
-                         'broadcaster_port' : 1234}
+    def test_should_add_session_handler_to_broadcaster_when_connecting_broadcaster(self, mock_wamb):
+        receiver = Receiver()
+        configuration = {'broadcaster_host': 'broadcasterhost',
+                         'broadcaster_port': 1234}
         receiver.set_configuration(configuration)
         mock_broadcaster_client = Mock()
         mock_wamb.return_value = mock_broadcaster_client
@@ -80,12 +79,11 @@ class YadtReceiverTests (unittest.TestCase):
 
         self.assertEquals(call(receiver.onConnect), mock_broadcaster_client.addOnSessionOpenHandler.call_args)
 
-
     @patch('yadtreceiver.WampBroadcaster')
-    def test_should_connect_broadcaster_when_connecting_broadcaster (self, mock_wamb):
+    def test_should_connect_broadcaster_when_connecting_broadcaster(self, mock_wamb):
         receiver = Receiver()
-        configuration = {'broadcaster_host' : 'broadcaster-host',
-                         'broadcaster_port' : 1234}
+        configuration = {'broadcaster_host': 'broadcaster-host',
+                         'broadcaster_port': 1234}
         receiver.set_configuration(configuration)
         mock_broadcaster_client = Mock()
         mock_wamb.return_value = mock_broadcaster_client
@@ -94,11 +92,10 @@ class YadtReceiverTests (unittest.TestCase):
 
         self.assertEquals(call(), mock_broadcaster_client.connect.call_args)
 
-
     @patch('yadtreceiver.WampBroadcaster')
-    def test_should_initialize_broadcaster_when_connecting_broadcaster (self, mock_wamb):
-        configuration = {'broadcaster_host' : 'broadcaster-host',
-                         'broadcaster_port' : 1234}
+    def test_should_initialize_broadcaster_when_connecting_broadcaster(self, mock_wamb):
+        configuration = {'broadcaster_host': 'broadcaster-host',
+                         'broadcaster_port': 1234}
         receiver = Receiver()
         receiver.set_configuration(configuration)
 
@@ -108,9 +105,9 @@ class YadtReceiverTests (unittest.TestCase):
 
     @patch('yadtreceiver.log')
     @patch('__builtin__.exit')
-    def test_should_exit_when_no_target_configured (self, mock_exit, mock_log):
+    def test_should_exit_when_no_target_configured(self, mock_exit, mock_log):
         receiver = Receiver()
-        receiver.set_configuration({'targets' : set(),
+        receiver.set_configuration({'targets': set(),
                                     'broadcaster_host': 'broadcaster_host',
                                     'broadcaster_port': 1234})
         mock_broadcaster_client = Mock()
@@ -120,41 +117,36 @@ class YadtReceiverTests (unittest.TestCase):
 
         self.assertEquals(call(1), mock_exit.call_args)
 
-
     @patch('yadtreceiver.LogFile')
     @patch('yadtreceiver.log')
-    def test_should_initialize_watchdog_and_start_connection_when_service_starts (self, mock_log, mock_log_file):
+    def test_should_initialize_watchdog_and_start_connection_when_service_starts(self, mock_log, mock_log_file):
         mock_receiver = Mock(Receiver)
-        mock_receiver.configuration = {'log_filename' : 'log/file.log'}
-
+        mock_receiver.configuration = {'log_filename': 'log/file.log'}
 
         Receiver.startService(mock_receiver)
 
         self.assertEquals(call(), mock_receiver._client_watchdog.call_args)
         self.assertEquals(call(first_call=True), mock_receiver._refresh_connection.call_args)
 
-
-    def test_should_initialize_logging_when_service_starts (self):
+    def test_should_initialize_logging_when_service_starts(self):
         mock_receiver = Mock(Receiver)
 
         Receiver.startService(mock_receiver)
 
         self.assertEquals(call(), mock_receiver.initialize_twisted_logging.call_args)
 
-
-    def test_should_subscribe_to_target_from_configuration_when_connected (self):
+    def test_should_subscribe_to_target_from_configuration_when_connected(self):
         receiver = Receiver()
         mock_broadcaster_client = Mock()
         receiver.broadcaster = mock_broadcaster_client
-        receiver.set_configuration({'targets' : set(['devabc123']),
+        receiver.set_configuration({'targets': set(['devabc123']),
                                     'broadcaster_host': 'broadcaster_host',
                                     'broadcaster_port': 1234})
         receiver.onConnect()
 
         self.assertEquals(call('devabc123', receiver.onEvent), mock_broadcaster_client.client.subscribe.call_args)
 
-
-    def test_should_subscribe_to_targets_from_configuration_in_alphabetical_order_when_connected (self):
+    def test_should_subscribe_to_targets_from_configuration_in_alphabetical_order_when_connected(self):
         receiver = Receiver()
         mock_broadcaster_client = Mock()
         receiver.broadcaster = mock_broadcaster_client
@@ -168,53 +160,49 @@ class YadtReceiverTests (unittest.TestCase):
                            call('dev02', receiver.onEvent),
                            call('dev03', receiver.onEvent)], mock_broadcaster_client.client.subscribe.call_args_list)
 
-
     @patch('os.path.exists')
-    def test_should_raise_exception_when_target_directory_does_not_exist (self, mock_exists):
+    def test_should_raise_exception_when_target_directory_does_not_exist(self, mock_exists):
         mock_exists.return_value = False
         receiver = Receiver()
-        configuration = {'hostname'          : 'hostname',
-                         'targets_directory' : '/etc/yadtshell/targets/'}
+        configuration = {'hostname': 'hostname',
+                         'targets_directory': '/etc/yadtshell/targets/'}
         receiver.set_configuration(configuration)
 
         self.assertRaises(ReceiverException, receiver.get_target_directory, 'spargel')
 
-
     @patch('os.path.exists')
-    def test_should_append_target_name_to_targets_directory (self, mock_exists):
+    def test_should_append_target_name_to_targets_directory(self, mock_exists):
         mock_exists.return_value = True
         receiver = Receiver()
-        configuration = {'hostname'          : 'hostname',
-                         'targets_directory' : '/etc/yadtshell/targets/'}
+        configuration = {'hostname': 'hostname',
+                         'targets_directory': '/etc/yadtshell/targets/'}
         receiver.set_configuration(configuration)
 
         actual_target_directory = receiver.get_target_directory('spargel')
 
         self.assertEquals('/etc/yadtshell/targets/spargel', actual_target_directory)
 
-
     @patch('os.path.exists')
-    def test_should_join_target_name_with_targets_directory (self, mock_exists):
+    def test_should_join_target_name_with_targets_directory(self, mock_exists):
         mock_exists.return_value = True
         receiver = Receiver()
-        configuration = {'hostname'          : 'hostname',
-                         'targets_directory' : '/etc/yadtshell/targets/'}
+        configuration = {'hostname': 'hostname',
+                         'targets_directory': '/etc/yadtshell/targets/'}
         receiver.set_configuration(configuration)
 
         actual_target_directory = receiver.get_target_directory('spargel')
 
         self.assertEquals('/etc/yadtshell/targets/spargel', actual_target_directory)
-
 
     @patch('yadtreceiver.reactor')
     @patch('yadtreceiver.send_update_notification_to_graphite')
-    def test_should_publish_start_event (self, mock_reactor, mock_send):
+    def test_should_publish_start_event(self, mock_reactor, mock_send):
         mock_receiver = Mock(Receiver)
         mock_receiver.broadcaster = Mock()
-        mock_receiver.configuration = {'hostname' : 'hostname',
-                                       'python_command' : '/usr/bin/python',
+        mock_receiver.configuration = {'hostname': 'hostname',
+                                       'python_command': '/usr/bin/python',
                                        'graphite_active': True,
-                                       'script_to_execute' : '/usr/bin/yadtshell'}
+                                       'script_to_execute': '/usr/bin/yadtshell'}
 
         mock_event = Mock(Event)
         mock_event.target = 'devabc123'
@@ -225,15 +213,14 @@ class YadtReceiverTests (unittest.TestCase):
 
         self.assertEquals(call(mock_event), mock_receiver.publish_start.call_args)
 
-
     @patch('yadtreceiver.reactor')
-    def test_should_notify_graphite (self, mock_reactor):
+    def test_should_notify_graphite(self, mock_reactor):
         mock_receiver = Mock(Receiver)
         mock_receiver.broadcaster = Mock()
-        mock_receiver.configuration = {'hostname'          : 'hostname',
-                                       'graphite_active'   : True,
-                                       'python_command'    : '/usr/bin/python',
-                                       'script_to_execute' : '/usr/bin/yadtshell'}
+        mock_receiver.configuration = {'hostname': 'hostname',
+                                       'graphite_active': True,
+                                       'python_command': '/usr/bin/python',
+                                       'script_to_execute': '/usr/bin/yadtshell'}
 
         mock_event = Mock(Event)
         mock_event.target = 'devabc123'
@@ -248,10 +235,10 @@ class YadtReceiverTests (unittest.TestCase):
     def test_should_not_notify_graphite_if_deactivated (self, mock_reactor):
         mock_receiver = Mock(Receiver)
         mock_receiver.broadcaster = Mock()
-        mock_receiver.configuration = {'hostname'          : 'hostname',
-                                       'graphite_active'   : False,
-                                       'python_command'    : '/usr/bin/python',
-                                       'script_to_execute' : '/usr/bin/yadtshell'}
+        mock_receiver.configuration = {'hostname': 'hostname',
+                                       'graphite_active': False,
+                                       'python_command': '/usr/bin/python',
+                                       'script_to_execute': '/usr/bin/yadtshell'}
         mock_event = Mock(Event)
         mock_event.target = 'devabc123'
         mock_event.command = 'yadtshell'
@@ -261,15 +248,14 @@ class YadtReceiverTests (unittest.TestCase):
 
         self.assertEquals(None, mock_receiver.notify_graphite.call_args)
 
-
     @patch('yadtreceiver.reactor')
     def test_should_not_notify_graphite_when_no_action_given (self, mock_reactor):
         mock_receiver = Mock(Receiver)
         mock_receiver.broadcaster = Mock()
-        mock_receiver.configuration = {'hostname'          : 'hostname',
-                                       'graphite_active'   : True,
-                                       'python_command'    : '/usr/bin/python',
-                                       'script_to_execute' : '/usr/bin/yadtshell'}
+        mock_receiver.configuration = {'hostname': 'hostname',
+                                       'graphite_active': True,
+                                       'python_command': '/usr/bin/python',
+                                       'script_to_execute': '/usr/bin/yadtshell'}
 
         mock_event = Mock(Event)
         mock_event.target = 'devabc123'
@@ -280,21 +266,20 @@ class YadtReceiverTests (unittest.TestCase):
 
         self.assertEquals(None, mock_receiver.notify_graphite.call_args)
 
-
     @patch('yadtreceiver.send_update_notification_to_graphite')
     @patch('yadtreceiver.reactor')
     @patch('yadtreceiver.ProcessProtocol')
-    def test_should_spawn_new_process_on_reactor (self, mock_protocol, mock_reactor, mock_send):
+    def test_should_spawn_new_process_on_reactor(self, mock_protocol, mock_reactor, mock_send):
         mock_protocol.return_value = 'mock-protocol'
         mock_receiver = Mock(Receiver)
         mock_broadcaster = Mock()
         mock_receiver.broadcaster = mock_broadcaster
         mock_receiver.get_target_directory.return_value = '/etc/yadtshell/targets/devabc123'
 
-        mock_receiver.configuration = {'hostname'          : 'hostname',
-                                       'graphite_active'   : True,
-                                       'python_command'    : '/usr/bin/python',
-                                       'script_to_execute' : '/usr/bin/yadtshell'}
+        mock_receiver.configuration = {'hostname': 'hostname',
+                                       'graphite_active': True,
+                                       'python_command': '/usr/bin/python',
+                                       'script_to_execute': '/usr/bin/yadtshell'}
 
         mock_event = Mock(Event)
         mock_event.target = 'devabc123'
@@ -306,15 +291,13 @@ class YadtReceiverTests (unittest.TestCase):
         self.assertEquals(call('hostname', mock_broadcaster, 'devabc123', '/usr/bin/python /usr/bin/yadtshell update'), mock_protocol.call_args)
         self.assertEquals(call('mock-protocol', '/usr/bin/python', ['/usr/bin/python', '/usr/bin/yadtshell', 'update'], path='/etc/yadtshell/targets/devabc123', env={}), mock_reactor.spawnProcess.call_args)
 
-
     @patch('yadtreceiver.send_update_notification_to_graphite')
-    def test_should_not_notify_graphite_on_update_if_command_is_status (self, mock_send):
+    def test_should_not_notify_graphite_on_update_if_command_is_status(self, mock_send):
         mock_receiver = Mock(Receiver)
 
         Receiver.notify_graphite(mock_receiver, 'devabc123', 'status')
 
         self.assertEquals(None, mock_send.call_args)
-
 
     @patch('yadtreceiver.send_update_notification_to_graphite')
     def test_should_notify_graphite_on_update (self, mock_send):
