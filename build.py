@@ -33,7 +33,7 @@ license = 'GNU GPL v3'
 name = 'yadtreceiver'
 summary = 'Executes yadtshell commands triggered by a yadtbroadcaster.'
 url = 'https://github.com/yadt/yadtreceiver'
-version = '0.1.10'
+version = '0.1.11'
 
 default_task = ['analyze', 'publish']
 
@@ -51,7 +51,6 @@ def set_properties(project):
     project.set_property('coverage_break_build', True)
     project.set_property('coverage_threshold_warn', 95)
 
-    project.get_property('distutils_commands').append('bdist_rpm')
     project.set_property('copy_resources_target', '$dir_dist')
     project.get_property('filter_resources_glob').append('**/yadtreceiver/__init__.py')
     project.get_property('copy_resources_glob').append('setup.cfg')
@@ -68,3 +67,4 @@ def set_properties_for_teamcity(project):
     import os
     project.version = '%s-%s' % (project.version, os.environ.get('BUILD_NUMBER', 0))
     project.default_task = ['install_build_dependencies', 'analyze', 'package']
+    project.get_property('distutils_commands').append('bdist_rpm')
