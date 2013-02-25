@@ -37,12 +37,8 @@
 
 __author__ = 'Michael Gruber'
 
-import os
 import socket
-import sys
 from yadtcommons.configuration import YadtConfigParser
-
-from ConfigParser import SafeConfigParser
 
 
 DEFAULT_BROADCASTER_HOST = 'localhost'
@@ -65,7 +61,7 @@ SECTION_GRAPHITE    = 'graphite'
 
 class ReceiverConfigLoader (object):
     """
-        uses a SafeConfigParser to offer some convenience methods.
+        uses a YadtConfigParser which offers convenience methods.
     """
 
     def __init__(self):
