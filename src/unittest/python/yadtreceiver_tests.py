@@ -13,6 +13,7 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import yadtreceiver
 
 
 __author__ = 'Michael Gruber'
@@ -288,8 +289,59 @@ class YadtReceiverTests (unittest.TestCase):
 
         Receiver.handle_request(mock_receiver, mock_event)
 
-        self.assertEquals(call('hostname', mock_broadcaster, 'devabc123', '/usr/bin/python /usr/bin/yadtshell update'), mock_protocol.call_args)
+        self.assertEquals(call('hostname', mock_broadcaster, 'devabc123', '/usr/bin/python /usr/bin/yadtshell update', tracking_id=None), mock_protocol.call_args)
         self.assertEquals(call('mock-protocol', '/usr/bin/python', ['/usr/bin/python', '/usr/bin/yadtshell', 'update'], path='/etc/yadtshell/targets/devabc123', env={}), mock_reactor.spawnProcess.call_args)
+
+    @patch('yadtreceiver.reactor')
+    @patch('yadtreceiver.ProcessProtocol')
+    def test_should_create_process_protocol_with_tracking_id_if_given(self, mock_protocol, mock_reactor):
+        mock_protocol.return_value = 'mock-protocol'
+        mock_receiver = Mock(Receiver)
+        mock_broadcaster = Mock()
+        mock_receiver.broadcaster = mock_broadcaster
+        mock_receiver.get_target_directory.return_value = '/etc/yadtshell/targets/devabc123'
+
+        mock_receiver.configuration = {'hostname': 'hostname',
+                                       'graphite_active': False,
+                                       'python_command': '/usr/bin/python',
+                                       'script_to_execute': '/usr/bin/yadtshell'}
+
+        mock_event = Mock(Event)
+        mock_event.target = 'devabc123'
+        mock_event.command = 'yadtshell'
+        mock_event.arguments = ['update', '--tracking-id=foo']
+
+        Receiver.handle_request(mock_receiver, mock_event)
+
+        expected_command_with_arguments = '/usr/bin/python /usr/bin/yadtshell update --tracking-id=foo'
+
+        self.assertEqual(call('hostname', mock_broadcaster, 'devabc123', expected_command_with_arguments,
+                                                            tracking_id='foo'), mock_protocol.call_args)
+
+    @patch('yadtreceiver.reactor')
+    @patch('yadtreceiver.ProcessProtocol')
+    def test_should_create_process_protocol_with_no_tracking_id_if_not_given(self, mock_protocol, mock_reactor):
+        mock_protocol.return_value = 'mock-protocol'
+        mock_receiver = Mock(Receiver)
+        mock_broadcaster = Mock()
+        mock_receiver.broadcaster = mock_broadcaster
+        mock_receiver.get_target_directory.return_value = '/etc/yadtshell/targets/devabc123'
+
+        mock_receiver.configuration = {'hostname': 'hostname',
+                                       'graphite_active': False,
+                                       'python_command': '/usr/bin/python',
+                                       'script_to_execute': '/usr/bin/yadtshell'}
+
+        mock_event = Mock(Event)
+        mock_event.target = 'devabc123'
+        mock_event.command = 'yadtshell'
+        mock_event.arguments = ['update']
+
+        Receiver.handle_request(mock_receiver, mock_event)
+
+        expected_command_with_arguments = '/usr/bin/python /usr/bin/yadtshell update'
+
+        self.assertEqual(call('hostname', mock_broadcaster, 'devabc123', expected_command_with_arguments, tracking_id=None), mock_protocol.call_args)
 
     @patch('yadtreceiver.send_update_notification_to_graphite')
     def test_should_not_notify_graphite_on_update_if_command_is_status(self, mock_send):
@@ -484,3 +536,11 @@ class YadtReceiverTests (unittest.TestCase):
 
         # Since all the method does is logging we are asserting it here.
         self.assertEquals(call('shutting down service'), mock_log.msg.call_args)
+
+    def test_determine_tracking_id_should_return_tracking_id_if_present(self):
+        list_with_tracking_id = ['foo', 'bar', 'baz=fubar', '--tracking-id=test', 'foofoo']
+        self.assertEqual(yadtreceiver._determine_tracking_id(list_with_tracking_id), 'test')
+
+    def test_determine_tracking_id_should_return_none_if_no_tracking_id_present(self):
+        list_with_tracking_id = ['foo', 'bar', 'baz=fubar', '--no-tracking-id=test', 'foofoo']
+        self.assertEqual(yadtreceiver._determine_tracking_id(list_with_tracking_id), None)

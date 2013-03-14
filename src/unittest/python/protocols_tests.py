@@ -26,12 +26,13 @@ from yadtreceiver.protocols import ProcessProtocol
 class ProcessProtocolTests (unittest.TestCase):
     def test_should_initialize_with_given_properties (self):
         mock_broadcaster = Mock()
-        protocol = ProcessProtocol('hostname', mock_broadcaster, 'devabc123', '/usr/bin/python abc 123')
+        protocol = ProcessProtocol('hostname', mock_broadcaster, 'devabc123', '/usr/bin/python abc 123', tracking_id='tracking-id')
 
         self.assertEquals('hostname', protocol.hostname)
         self.assertEquals(mock_broadcaster, protocol.broadcaster)
         self.assertEquals('devabc123', protocol.target)
         self.assertEquals('/usr/bin/python abc 123', protocol.readable_command)
+        self.assertEqual('tracking-id', protocol.tracking_id)
 
 
     def test_should_publish_as_failed_event_when_return_code_not_zero (self):
@@ -61,10 +62,11 @@ class ProcessProtocolTests (unittest.TestCase):
         mock_protocol.hostname = 'hostname'
         mock_protocol.target = 'dev123'
         mock_protocol.readable_command = '/usr/bin/python abc'
+        mock_protocol.tracking_id = 'tracking-id'
 
         ProcessProtocol.publish_finished(mock_protocol)
 
-        self.assertEquals(call('dev123', '/usr/bin/python abc', 'finished', '(hostname) target[dev123] request finished: "/usr/bin/python abc" succeeded.'), mock_broadcaster.publish_cmd_for_target.call_args)
+        self.assertEquals(call('dev123', '/usr/bin/python abc', 'finished', '(hostname) target[dev123] request finished: "/usr/bin/python abc" succeeded.', tracking_id='tracking-id'), mock_broadcaster.publish_cmd_for_target.call_args)
 
     @patch('yadtreceiver.protocols.log')
     def test_should_publish_failed_event (self, mock_log):
@@ -74,8 +76,9 @@ class ProcessProtocolTests (unittest.TestCase):
         mock_protocol.hostname = 'hostname'
         mock_protocol.target = 'dev123'
         mock_protocol.readable_command = '/usr/bin/python abc'
+        mock_protocol.tracking_id = 'tracking_id'
 
         ProcessProtocol.publish_failed(mock_protocol, 123)
 
-        self.assertEquals(call('dev123', '/usr/bin/python abc', 'failed', '(hostname) target[dev123] request "/usr/bin/python abc" failed: return code was 123.'), mock_broadcaster.publish_cmd_for_target.call_args)
+        self.assertEquals(call('dev123', '/usr/bin/python abc', 'failed', '(hostname) target[dev123] request "/usr/bin/python abc" failed: return code was 123.', tracking_id='tracking_id'), mock_broadcaster.publish_cmd_for_target.call_args)
 

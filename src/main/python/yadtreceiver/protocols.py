@@ -27,7 +27,7 @@ from yadtreceiver import events
 
 
 class ProcessProtocol(protocol.ProcessProtocol):
-    def __init__(self, hostname, broadcaster, target, readable_command):
+    def __init__(self, hostname, broadcaster, target, readable_command, tracking_id=None):
         """
             Initializes the process protocol with the given properties.
         """
@@ -35,6 +35,7 @@ class ProcessProtocol(protocol.ProcessProtocol):
         self.hostname = hostname
         self.readable_command = readable_command
         self.target = target
+        self.tracking_id = tracking_id
 
         log.msg('(%s) target[%s] executing "%s"' % (self.hostname, target, readable_command))
 
@@ -60,7 +61,8 @@ class ProcessProtocol(protocol.ProcessProtocol):
         message = '(%s) target[%s] request finished: "%s" succeeded.' \
                   % (self.hostname, self.target, self.readable_command)
         log.msg(message)
-        self.broadcaster.publish_cmd_for_target(self.target, self.readable_command, events.FINISHED, message)
+        self.broadcaster.publish_cmd_for_target(self.target, self.readable_command, events.FINISHED,
+                                                message, tracking_id=self.tracking_id)
 
 
     def publish_failed(self, return_code):
@@ -71,4 +73,5 @@ class ProcessProtocol(protocol.ProcessProtocol):
         error_message = '(%s) target[%s] request "%s" failed: return code was %s.' \
                         % (self.hostname, self.target, self.readable_command, return_code)
         log.err(error_message)
-        self.broadcaster.publish_cmd_for_target(self.target, self.readable_command, events.FAILED, error_message)
+        self.broadcaster.publish_cmd_for_target(self.target, self.readable_command, events.FAILED,
+                                                error_message, tracking_id=self.tracking_id)

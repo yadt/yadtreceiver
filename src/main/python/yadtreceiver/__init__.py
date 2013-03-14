@@ -41,7 +41,6 @@ from yadtreceiver.protocols import ProcessProtocol
 from yadtreceiver.events import Event
 
 
-
 class ReceiverException(Exception):
     """
         To be raised when an exception occurs within the receiver.
@@ -91,7 +90,9 @@ class Receiver(service.Service):
         command_and_arguments_list = [python_command, script_to_execute] + event.arguments
         command_with_arguments = ' '.join(command_and_arguments_list)
 
-        process_protocol = ProcessProtocol(hostname, self.broadcaster, event.target, command_with_arguments)
+        tracking_id = _determine_tracking_id(command_and_arguments_list)
+
+        process_protocol = ProcessProtocol(hostname, self.broadcaster, event.target, command_with_arguments, tracking_id=tracking_id)
 
         target_dir = self.get_target_directory(event.target)
         reactor.spawnProcess(process_protocol, python_command, command_and_arguments_list, env={}, path=target_dir)
@@ -252,3 +253,10 @@ class Receiver(service.Service):
         self.broadcaster = WampBroadcaster(host, port, 'yadtreceiver')
         self.broadcaster.addOnSessionOpenHandler(self.onConnect)
         self.broadcaster.connect()
+
+def _determine_tracking_id(command_and_arguments_list):
+    tracking_id = None
+    for command_or_argument in command_and_arguments_list:
+        if command_or_argument.startswith('--tracking-id='):
+            tracking_id = command_or_argument.split('=')[1]
+    return tracking_id
