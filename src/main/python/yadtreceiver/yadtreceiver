@@ -22,7 +22,7 @@ PID=$(get_pid)
 case "${1:-}" in
     start)
         if [[ -z $PID ]]; then
-            $TWISTD --pidfile=$PIDFILE --python=$TACFILE ${uid:+--uid=$uid} ${gid:+--gid=$gid}
+            $TWISTD --pidfile=$PIDFILE --python=$TACFILE ${uid:+--uid=$uid} ${gid:+--gid=$gid} --umask=022
             echo "$0 started, returning 0" && exit 0
         else
             echo "$0 already running (pid $PID), returning 0" && exit 0
