@@ -92,10 +92,23 @@ class ProcessProtocolTests (unittest.TestCase):
         protocol.errReceived('foo\nbar')
         protocol.errReceived('baz')
 
-        protocol._report_error_summary()
+        self.assertEqual('foo\nbarbaz', protocol.error_buffer)
 
-        self.assertEqual([call('Errors in executing /usr/bin/python abc 123 on devabc123:'),
-                          call('foo'),
-                          call('barbaz')],
-                         mock_log.err.call_args_list)
+    @patch('yadtreceiver.protocols.log')
+    def test_should_send_error_reports_upon_failure(self, mock_log):
+        mock_protocol = Mock(ProcessProtocol)
+        mock_broadcaster = Mock()
+        mock_protocol.broadcaster = mock_broadcaster
+        mock_protocol.hostname = 'hostname'
+        mock_protocol.target = 'dev123'
+        mock_protocol.readable_command = '/usr/bin/python abc'
+        mock_protocol.tracking_id = 'tracking_id'
+        mock_protocol.error_buffer= 'foo\nbar\nbaz'
+
+        ProcessProtocol._report_error_summary(mock_protocol)
+
+        self.assertEqual([call('error-report', data='foo', tracking_id='tracking_id'),
+                          call('error-report', data='bar', tracking_id='tracking_id'),
+                          call('error-report', data='baz', tracking_id='tracking_id')],
+                         mock_broadcaster._sendEvent.call_args_list)
 

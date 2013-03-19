@@ -82,6 +82,6 @@ class ProcessProtocol(protocol.ProcessProtocol):
         self.error_buffer += str(data)
 
     def _report_error_summary(self):
-        log.err('Errors in executing {0} on {1}:'.format(self.readable_command, self.target))
+        log.msg('Reporting errors of execution of {0} on {1}.'.format(self.readable_command, self.target))
         for error_line in self.error_buffer.split('\n'):
-            log.err(error_line)
+            self.broadcaster._sendEvent(events.TYPE_ERROR_REPORT, data=error_line, tracking_id=self.tracking_id)

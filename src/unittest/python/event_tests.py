@@ -82,11 +82,18 @@ class EventTests(TestCase):
     def test_should_return_description_of_heartbeat(self):
         event = Event('target-name', {'id': 'heartbeat',
                                       'type': 'event',
-                                      'target': 'dev12',
+                                      'target': 'target-name',
                                       'tracking_id': None,
                                       'payload': None})
+        self.assertEqual('Heartbeat on target-name', str(event))
 
-        self.assertEqual('heartbeat', str(event))
+    def test_should_return_description_of_error_report(self):
+        event = Event('target-name', {'id': 'error-report',
+                                      'type': 'event',
+                                      'target': 'target-name',
+                                      'tracking_id': None,
+                                      'payload': None})
+        self.assertEqual('Error report on target-name', str(event))
 
     def test_should_return_description_of_full_update(self):
         event = Event('target-name', {'id': 'full-update'})
