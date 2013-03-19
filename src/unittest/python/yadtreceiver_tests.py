@@ -22,7 +22,6 @@ import unittest
 
 from mock import Mock, call, patch
 from twisted.mail.scripts.mailmail import Configuration
-from twisted.python.logfile import LogFile
 
 from yadtreceiver import __version__, Receiver, ReceiverException
 from yadtreceiver.events import Event
@@ -31,21 +30,6 @@ from yadtreceiver.events import Event
 class YadtReceiverTests (unittest.TestCase):
     def test_if_this_test_fails_maybe_you_have_yadtreceiver_installed_locally(self):
         self.assertEqual('${version}', __version__)
-
-    @patch('yadtreceiver.LogFile')
-    @patch('yadtreceiver.log')
-    def test_should_call_start_logging_when_initializing_twisted_logging(self, mock_log, mock_log_file_class):
-        receiver = Receiver()
-        receiver.set_configuration({'log_filename': 'log/file.log',
-                                    'targets': set(['devabc123']),
-                                    'broadcaster_host': 'broadcaster_host',
-                                    'broadcaster_port': 1234})
-        mock_log_file = Mock(LogFile)
-        mock_log_file_class.fromFullPath.return_value = mock_log_file
-
-        receiver.initialize_twisted_logging()
-
-        self.assertEquals(call(mock_log_file), mock_log.startLogging.call_args)
 
     def test_should_set_configuration(self):
         configuration = 'configuration'
@@ -128,13 +112,6 @@ class YadtReceiverTests (unittest.TestCase):
 
         self.assertEquals(call(), mock_receiver._client_watchdog.call_args)
         self.assertEquals(call(first_call=True), mock_receiver._refresh_connection.call_args)
-
-    def test_should_initialize_logging_when_service_starts(self):
-        mock_receiver = Mock(Receiver)
-
-        Receiver.startService(mock_receiver)
-
-        self.assertEquals(call(), mock_receiver.initialize_twisted_logging.call_args)
 
     def test_should_subscribe_to_target_from_configuration_when_connected(self):
         receiver = Receiver()
