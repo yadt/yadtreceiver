@@ -79,6 +79,15 @@ class EventTests(TestCase):
 
         self.assertEqual('target[target-name] requested command "command" using arguments "arg1 arg2 arg3"', str(event))
 
+    def test_should_return_description_of_heartbeat(self):
+        event = Event('target-name', {'id': 'heartbeat',
+                                      'type': 'event',
+                                      'target': 'dev12',
+                                      'tracking_id': None,
+                                      'payload': None})
+
+        self.assertEqual('heartbeat', str(event))
+
     def test_should_return_description_of_full_update(self):
         event = Event('target-name', {'id': 'full-update'})
 

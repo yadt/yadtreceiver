@@ -153,6 +153,10 @@ class Event (object):
     def is_a_command(self):
         return self.event_type == TYPE_COMMAND
 
+    @property
+    def is_a_heartbeat(self):
+        return self.event_type == TYPE_HEARTBEAT
+
     def __str__(self):
         if self.is_a_request:
             return 'target[{0}] requested command "{1}" using arguments "{2}"'.format(self.target, self.command, self.arguments)
@@ -169,6 +173,9 @@ class Event (object):
                 return '(broadcaster) target[{0}] command "{1}" {2}: {3}'.format(self.target, self.command, self.state, self.message)
             else:
                 return '(broadcaster) target[{0}] command "{1}" {2}.'.format(self.target, self.command, self.state)
+
+        if self.is_a_heartbeat:
+            return 'heartbeat'
 
         raise NotImplementedError('Unknown event type {0}'.format(self.event_type))
 
