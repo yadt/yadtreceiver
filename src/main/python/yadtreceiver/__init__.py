@@ -32,7 +32,7 @@ import traceback
 from twisted.application import service
 from twisted.internet import reactor
 from twisted.python import log
-from twisted.python.logfile import LogFile
+from twisted.python.logfile import DailyLogFile
 
 from yadtbroadcastclient import WampBroadcaster
 
@@ -221,7 +221,8 @@ class Receiver(service.Service):
 
 
     def initialize_twisted_logging(self):
-        log.startLogging(LogFile.fromFullPath(self.configuration['log_filename']))
+        log_file = DailyLogFile.fromFullPath(self.configuration['log_filename'], maxRotatedFiles=30)
+        log.startLogging(log_file)
 
     def startService(self):
         """
