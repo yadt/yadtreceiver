@@ -33,7 +33,7 @@ license = 'GNU GPL v3'
 name = 'yadtreceiver'
 summary = 'Executes yadtshell commands triggered by a yadtbroadcaster.'
 url = 'https://github.com/yadt/yadtreceiver'
-version = '0.1.11'
+version = '0.2.0'
 
 default_task = ['analyze', 'publish']
 
