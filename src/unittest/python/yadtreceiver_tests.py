@@ -45,7 +45,7 @@ class YadtReceiverTests (unittest.TestCase):
 
         receiver.initialize_twisted_logging()
 
-        self.assertEqual(call('log/file.log', maxRotatedFiles=30), mock_log_file_class.fromFullPath.call_args)
+        self.assertEqual(call('log/file.log'), mock_log_file_class.fromFullPath.call_args)
         self.assertEquals(call(mock_log_file), mock_log.startLogging.call_args)
 
     def test_should_set_configuration(self):

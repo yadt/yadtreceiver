@@ -221,7 +221,7 @@ class Receiver(service.Service):
 
 
     def initialize_twisted_logging(self):
-        log_file = DailyLogFile.fromFullPath(self.configuration['log_filename'], maxRotatedFiles=30)
+        log_file = DailyLogFile.fromFullPath(self.configuration['log_filename'])
         log.startLogging(log_file)
 
     def startService(self):
