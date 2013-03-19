@@ -74,14 +74,9 @@ class ProcessProtocol(protocol.ProcessProtocol):
         error_message = '(%s) target[%s] request "%s" failed: return code was %s.' \
                         % (self.hostname, self.target, self.readable_command, return_code)
         log.err(error_message)
-        self._report_error_summary()
         self.broadcaster.publish_cmd_for_target(self.target, self.readable_command, events.FAILED,
-                                                error_message, tracking_id=self.tracking_id)
+                                                message=self.error_buffer, tracking_id=self.tracking_id)
 
     def errReceived(self, data):
         self.error_buffer += str(data)
 
-    def _report_error_summary(self):
-        log.msg('Reporting errors of execution of {0} on {1}.'.format(self.readable_command, self.target))
-        for error_line in self.error_buffer.split('\n'):
-            self.broadcaster._sendEvent(events.TYPE_ERROR_REPORT, data=error_line, tracking_id=self.tracking_id)

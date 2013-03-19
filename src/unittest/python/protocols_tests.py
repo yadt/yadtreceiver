@@ -69,7 +69,7 @@ class ProcessProtocolTests (unittest.TestCase):
         self.assertEquals(call('dev123', '/usr/bin/python abc', 'finished', '(hostname) target[dev123] request finished: "/usr/bin/python abc" succeeded.', tracking_id='tracking-id'), mock_broadcaster.publish_cmd_for_target.call_args)
 
     @patch('yadtreceiver.protocols.log')
-    def test_should_publish_failed_event (self, mock_log):
+    def test_should_publish_failed_event_with_stderr_from_process (self, mock_log):
         mock_protocol = Mock(ProcessProtocol)
         mock_broadcaster = Mock()
         mock_protocol.broadcaster = mock_broadcaster
@@ -77,10 +77,16 @@ class ProcessProtocolTests (unittest.TestCase):
         mock_protocol.target = 'dev123'
         mock_protocol.readable_command = '/usr/bin/python abc'
         mock_protocol.tracking_id = 'tracking_id'
+        mock_protocol.error_buffer = 'Someone has shut down the internet.'
 
         ProcessProtocol.publish_failed(mock_protocol, 123)
 
-        self.assertEquals(call('dev123', '/usr/bin/python abc', 'failed', '(hostname) target[dev123] request "/usr/bin/python abc" failed: return code was 123.', tracking_id='tracking_id'), mock_broadcaster.publish_cmd_for_target.call_args)
+        self.assertEquals(call('dev123',
+                               '/usr/bin/python abc',
+                               'failed',
+                               message='Someone has shut down the internet.',
+                               tracking_id='tracking_id'),
+                          mock_broadcaster.publish_cmd_for_target.call_args)
 
     @patch('yadtreceiver.protocols.log')
     def test_should_accumulate_error_output(self, mock_log):
@@ -93,22 +99,3 @@ class ProcessProtocolTests (unittest.TestCase):
         protocol.errReceived('baz')
 
         self.assertEqual('foo\nbarbaz', protocol.error_buffer)
-
-    @patch('yadtreceiver.protocols.log')
-    def test_should_send_error_reports_upon_failure(self, mock_log):
-        mock_protocol = Mock(ProcessProtocol)
-        mock_broadcaster = Mock()
-        mock_protocol.broadcaster = mock_broadcaster
-        mock_protocol.hostname = 'hostname'
-        mock_protocol.target = 'dev123'
-        mock_protocol.readable_command = '/usr/bin/python abc'
-        mock_protocol.tracking_id = 'tracking_id'
-        mock_protocol.error_buffer= 'foo\nbar\nbaz'
-
-        ProcessProtocol._report_error_summary(mock_protocol)
-
-        self.assertEqual([call('error-report', data='foo', tracking_id='tracking_id'),
-                          call('error-report', data='bar', tracking_id='tracking_id'),
-                          call('error-report', data='baz', tracking_id='tracking_id')],
-                         mock_broadcaster._sendEvent.call_args_list)
-

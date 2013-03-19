@@ -39,14 +39,12 @@ TYPE_FULL_UPDATE = 'full-update'
 TYPE_REQUEST = 'request'
 TYPE_SERVICE_CHANGE = 'service-change'
 TYPE_HEARTBEAT = 'heartbeat'
-TYPE_ERROR_REPORT = 'error-report'
 
 KNOWN_EVENT_TYPES = [TYPE_COMMAND,
                      TYPE_FULL_UPDATE,
                      TYPE_REQUEST,
                      TYPE_SERVICE_CHANGE,
-                     TYPE_HEARTBEAT,
-                     TYPE_ERROR_REPORT]
+                     TYPE_HEARTBEAT]
 
 
 class IncompleteEventDataException(Exception):
@@ -164,10 +162,6 @@ class Event (object):
     def is_a_heartbeat(self):
         return self.event_type == TYPE_HEARTBEAT
 
-    @property
-    def is_an_error_report(self):
-        return self.event_type == TYPE_ERROR_REPORT
-
     def __str__(self):
         if self.is_a_request:
             return 'target[{0}] requested command "{1}" using arguments "{2}"'.format(self.target, self.command, self.arguments)
@@ -187,9 +181,6 @@ class Event (object):
 
         if self.is_a_heartbeat:
             return 'Heartbeat on {0}'.format(self.target)
-
-        if self.is_an_error_report:
-            return 'Error report on {0}'.format(self.target)
 
         raise NotImplementedError('Unknown event type {0}'.format(self.event_type))
 
