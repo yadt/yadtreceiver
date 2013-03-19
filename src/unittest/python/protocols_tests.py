@@ -82,13 +82,20 @@ class ProcessProtocolTests (unittest.TestCase):
 
         self.assertEquals(call('dev123', '/usr/bin/python abc', 'failed', '(hostname) target[dev123] request "/usr/bin/python abc" failed: return code was 123.', tracking_id='tracking_id'), mock_broadcaster.publish_cmd_for_target.call_args)
 
-    def test_should_accumulate_error_output(self):
+    @patch('yadtreceiver.protocols.log')
+    def test_should_accumulate_error_output(self, mock_log):
         mock_broadcaster = Mock()
         protocol = ProcessProtocol('hostname', mock_broadcaster, 'devabc123', '/usr/bin/python abc 123', tracking_id='tracking-id')
 
         self.assertEqual(protocol.error_buffer, '')
 
-        protocol.errReceived('foo')
-        protocol.errReceived('bar')
+        protocol.errReceived('foo\nbar')
+        protocol.errReceived('baz')
 
-        self.assertEqual(protocol._get_error_summary(), 'foobar')
+        protocol._report_error_summary()
+
+        self.assertEqual([call('Errors in executing /usr/bin/python abc 123 on devabc123:'),
+                          call('foo'),
+                          call('barbaz')],
+                         mock_log.err.call_args_list)
+

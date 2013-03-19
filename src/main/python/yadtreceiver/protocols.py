@@ -76,10 +76,12 @@ class ProcessProtocol(protocol.ProcessProtocol):
         log.err(error_message)
         self.broadcaster.publish_cmd_for_target(self.target, self.readable_command, events.FAILED,
                                                 error_message, tracking_id=self.tracking_id)
-        log.err('Errors from execution : {0}'.format(self._get_error_summary()))
+        self._report_error_summary()
 
     def errReceived(self, data):
-        self.error_buffer += data
+        self.error_buffer += str(data)
 
-    def _get_error_summary(self):
-        return self.error_buffer
+    def _report_error_summary(self):
+        log.err('Errors in executing {0} on {1}:'.format(self.readable_command, self.target))
+        for error_line in self.error_buffer.split('\n'):
+            log.err(error_line)
