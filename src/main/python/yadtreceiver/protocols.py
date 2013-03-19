@@ -18,7 +18,7 @@
     Provides the ProcessProtocol.
 """
 
-__author__ = 'Michael Gruber'
+__author__ = 'Michael Gruber, Maximilien Riehl'
 
 from twisted.internet import protocol
 from twisted.python import log
@@ -36,6 +36,7 @@ class ProcessProtocol(protocol.ProcessProtocol):
         self.readable_command = readable_command
         self.target = target
         self.tracking_id = tracking_id
+        self.error_buffer = ''
 
         log.msg('(%s) target[%s] executing "%s"' % (self.hostname, target, readable_command))
 
@@ -75,3 +76,10 @@ class ProcessProtocol(protocol.ProcessProtocol):
         log.err(error_message)
         self.broadcaster.publish_cmd_for_target(self.target, self.readable_command, events.FAILED,
                                                 error_message, tracking_id=self.tracking_id)
+        log.err('Errors from execution : {0}'.format(self._get_error_summary()))
+
+    def errReceived(self, data):
+        self.error_buffer += data
+
+    def _get_error_summary(self):
+        return self.error_buffer

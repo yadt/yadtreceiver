@@ -82,3 +82,13 @@ class ProcessProtocolTests (unittest.TestCase):
 
         self.assertEquals(call('dev123', '/usr/bin/python abc', 'failed', '(hostname) target[dev123] request "/usr/bin/python abc" failed: return code was 123.', tracking_id='tracking_id'), mock_broadcaster.publish_cmd_for_target.call_args)
 
+    def test_should_accumulate_error_output(self):
+        mock_broadcaster = Mock()
+        protocol = ProcessProtocol('hostname', mock_broadcaster, 'devabc123', '/usr/bin/python abc 123', tracking_id='tracking-id')
+
+        self.assertEqual(protocol.error_buffer, '')
+
+        protocol.errReceived('foo')
+        protocol.errReceived('bar')
+
+        self.assertEqual(protocol._get_error_summary(), 'foobar')
