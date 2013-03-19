@@ -22,7 +22,7 @@ import unittest
 
 from mock import Mock, call, patch
 from twisted.mail.scripts.mailmail import Configuration
-from twisted.python.logfile import DailyLogFile
+from twisted.python.logfile import LogFile
 
 from yadtreceiver import __version__, Receiver, ReceiverException
 from yadtreceiver.events import Event
@@ -32,7 +32,7 @@ class YadtReceiverTests (unittest.TestCase):
     def test_if_this_test_fails_maybe_you_have_yadtreceiver_installed_locally(self):
         self.assertEqual('${version}', __version__)
 
-    @patch('yadtreceiver.DailyLogFile')
+    @patch('yadtreceiver.LogFile')
     @patch('yadtreceiver.log')
     def test_should_call_start_logging_when_initializing_twisted_logging(self, mock_log, mock_log_file_class):
         receiver = Receiver()
@@ -40,12 +40,13 @@ class YadtReceiverTests (unittest.TestCase):
                                     'targets': set(['devabc123']),
                                     'broadcaster_host': 'broadcaster_host',
                                     'broadcaster_port': 1234})
-        mock_log_file = Mock(DailyLogFile)
+        mock_log_file = Mock(LogFile)
         mock_log_file_class.fromFullPath.return_value = mock_log_file
 
         receiver.initialize_twisted_logging()
 
-        self.assertEqual(call('log/file.log'), mock_log_file_class.fromFullPath.call_args)
+        self.assertEqual(call('log/file.log', rotateLength=20000000, maxRotatedFiles=10),
+                         mock_log_file_class.fromFullPath.call_args)
         self.assertEquals(call(mock_log_file), mock_log.startLogging.call_args)
 
     def test_should_set_configuration(self):
@@ -119,7 +120,7 @@ class YadtReceiverTests (unittest.TestCase):
 
         self.assertEquals(call(1), mock_exit.call_args)
 
-    @patch('yadtreceiver.DailyLogFile')
+    @patch('yadtreceiver.LogFile')
     @patch('yadtreceiver.log')
     def test_should_initialize_watchdog_and_start_connection_when_service_starts(self, mock_log, mock_log_file):
         mock_receiver = Mock(Receiver)
