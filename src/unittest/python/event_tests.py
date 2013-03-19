@@ -64,6 +64,14 @@ class EventTests(TestCase):
                                      })
         self.assertEqual(str(event), 'target[target-name] services changed: spam is up, eggs is down')
 
+    def test_should_not_complain_upon_receiving_heartbeat_events(self):
+        event = Event('target-name', {'id': 'heartbeat',
+                                      'type': 'event',
+                                      'target': 'dev12',
+                                      'tracking_id': None,
+                                      'payload': None})
+
+
     def test_should_return_description_of_request(self):
         event = Event('target-name', {'id': 'request',
                                       'cmd': 'command',
