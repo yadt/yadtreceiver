@@ -25,6 +25,12 @@ from twisted.python import log
 
 from yadtreceiver import events
 
+try: # pragma: no cover
+    import cStringIO
+    StringIO = cStringIO
+except: # pragma: no cover
+    import StringIO
+
 
 class ProcessProtocol(protocol.ProcessProtocol):
     def __init__(self, hostname, broadcaster, target, readable_command, tracking_id=None):
@@ -36,7 +42,7 @@ class ProcessProtocol(protocol.ProcessProtocol):
         self.readable_command = readable_command
         self.target = target
         self.tracking_id = tracking_id
-        self.error_buffer = ''
+        self.error_buffer = StringIO.StringIO()
 
         log.msg('(%s) target[%s] executing "%s"' % (self.hostname, target, readable_command))
 
@@ -62,6 +68,7 @@ class ProcessProtocol(protocol.ProcessProtocol):
         message = '(%s) target[%s] request finished: "%s" succeeded.' \
                   % (self.hostname, self.target, self.readable_command)
         log.msg(message)
+        self.error_buffer.close()
         self.broadcaster.publish_cmd_for_target(self.target, self.readable_command, events.FINISHED,
                                                 message, tracking_id=self.tracking_id)
 
@@ -71,12 +78,14 @@ class ProcessProtocol(protocol.ProcessProtocol):
             Uses the broadcaster-client to publish a failed-event.
             The given return code will be included into the message of the event.
         """
+        error_output = self.error_buffer.getvalue()
+        self.error_buffer.close()
         error_message = '(%s) target[%s] request "%s" failed: return code was %s.' \
                         % (self.hostname, self.target, self.readable_command, return_code)
         log.err(error_message)
         self.broadcaster.publish_cmd_for_target(self.target, self.readable_command, events.FAILED,
-                                                message=self.error_buffer, tracking_id=self.tracking_id)
+                                                message=error_output, tracking_id=self.tracking_id)
 
     def errReceived(self, data):
-        self.error_buffer += str(data)
+        self.error_buffer.write(str(data))
 

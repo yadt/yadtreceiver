@@ -19,6 +19,8 @@ __author__ = 'Michael Gruber'
 
 import unittest
 
+from StringIO import StringIO
+
 from mock import Mock, call, patch
 
 from yadtreceiver.protocols import ProcessProtocol
@@ -63,6 +65,7 @@ class ProcessProtocolTests (unittest.TestCase):
         mock_protocol.target = 'dev123'
         mock_protocol.readable_command = '/usr/bin/python abc'
         mock_protocol.tracking_id = 'tracking-id'
+        mock_protocol.error_buffer = Mock()
 
         ProcessProtocol.publish_finished(mock_protocol)
 
@@ -77,7 +80,7 @@ class ProcessProtocolTests (unittest.TestCase):
         mock_protocol.target = 'dev123'
         mock_protocol.readable_command = '/usr/bin/python abc'
         mock_protocol.tracking_id = 'tracking_id'
-        mock_protocol.error_buffer = 'Someone has shut down the internet.'
+        mock_protocol.error_buffer = StringIO('Someone has shut down the internet.')
 
         ProcessProtocol.publish_failed(mock_protocol, 123)
 
@@ -93,9 +96,9 @@ class ProcessProtocolTests (unittest.TestCase):
         mock_broadcaster = Mock()
         protocol = ProcessProtocol('hostname', mock_broadcaster, 'devabc123', '/usr/bin/python abc 123', tracking_id='tracking-id')
 
-        self.assertEqual(protocol.error_buffer, '')
+        self.assertEqual(protocol.error_buffer.getvalue(), '')
 
         protocol.errReceived('foo\nbar')
         protocol.errReceived('baz')
 
-        self.assertEqual('foo\nbarbaz', protocol.error_buffer)
+        self.assertEqual('foo\nbarbaz', protocol.error_buffer.getvalue())
