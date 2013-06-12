@@ -97,7 +97,6 @@ class Receiver(service.Service):
         target_dir = self.get_target_directory(event.target)
         reactor.spawnProcess(process_protocol, python_command, command_and_arguments_list, env={}, path=target_dir)
 
-
     def notify_graphite(self, target, action):
         """
             Notifies the configured graphite server about events (update events).

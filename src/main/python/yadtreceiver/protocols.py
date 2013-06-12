@@ -15,7 +15,8 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-    Provides the ProcessProtocol.
+    Provides the ProcessProtocol, which dictates
+    how the receiver interacts with spawned processes.
 """
 
 __author__ = 'Michael Gruber, Maximilien Riehl'

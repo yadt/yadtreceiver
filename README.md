@@ -2,10 +2,13 @@
 
 Executes yadtshell commands triggered by a yadtbroadcaster.
 
+## Big picture
+<TODO>
+
 ## Installation
 
 Since yadtreceiver is a python application you can install it using `pip`
- 
+
 ```bash
 sudo pip install yadtreceiver
 ```
@@ -13,7 +16,7 @@ sudo pip install yadtreceiver
 Unfortunately tar will not set the permissions as required:
 
 ```bash
-sudo chmod 755 /etc/init.d/yadtreceiver 
+sudo chmod 755 /etc/init.d/yadtreceiver
 ```
 ## Configuration
 
@@ -41,7 +44,7 @@ port = 2003
 After installation you will find a minimal service script in `/etc/init.d`.
 Maybe you want/need to modify the script to make it fit to your *nix
 distribution.
- 
+
 ```bash
 sudo service yadtreceiver start
 ```
