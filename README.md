@@ -3,7 +3,7 @@
 Executes yadtshell commands triggered by a yadtbroadcaster.
 
 ## Big picture
-<TODO>
+![big picture : yadtreceiver with broadcaster and yadtshell](https://raw.github.com/yadt/yadtreceiver/master/bigpicture.png)
 
 ## Installation
 
