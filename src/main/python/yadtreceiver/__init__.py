@@ -42,12 +42,14 @@ from yadtreceiver.events import Event
 
 
 class ReceiverException(Exception):
+
     """
         To be raised when an exception occurs within the receiver.
     """
 
 
 class Receiver(service.Service):
+
     """
         The receiver connects to the broadcaster and receives events
         for the targets that it subscribed to.
@@ -59,17 +61,16 @@ class Receiver(service.Service):
 
             @raise ReceiverException: if the target directory does not exist.
         """
-        hostname          = self.configuration['hostname']
+        hostname = self.configuration['hostname']
         targets_directory = self.configuration['targets_directory']
 
-        target_directory  = os.path.join(targets_directory, target)
+        target_directory = os.path.join(targets_directory, target)
 
         if not os.path.exists(target_directory):
             raise ReceiverException('(%s) target[%s] request failed: target directory "%s" does not exist.'
                                     % (hostname, target, target_directory))
 
         return target_directory
-
 
     def handle_request(self, event):
         """
@@ -83,19 +84,22 @@ class Receiver(service.Service):
             action = event.arguments[0]
             self.notify_graphite(event.target, action)
 
-        hostname          = str(self.configuration['hostname'])
-        python_command    = str(self.configuration['python_command'])
+        hostname = str(self.configuration['hostname'])
+        python_command = str(self.configuration['python_command'])
         script_to_execute = str(self.configuration['script_to_execute'])
 
-        command_and_arguments_list = [python_command, script_to_execute] + event.arguments
+        command_and_arguments_list = [
+            python_command, script_to_execute] + event.arguments
         command_with_arguments = ' '.join(command_and_arguments_list)
 
         tracking_id = _determine_tracking_id(command_and_arguments_list)
 
-        process_protocol = ProcessProtocol(hostname, self.broadcaster, event.target, command_with_arguments, tracking_id=tracking_id)
+        process_protocol = ProcessProtocol(
+            hostname, self.broadcaster, event.target, command_with_arguments, tracking_id=tracking_id)
 
         target_dir = self.get_target_directory(event.target)
-        reactor.spawnProcess(process_protocol, python_command, command_and_arguments_list, env={}, path=target_dir)
+        reactor.spawnProcess(process_protocol, python_command,
+                             command_and_arguments_list, env={}, path=target_dir)
 
     def notify_graphite(self, target, action):
         """
@@ -107,24 +111,24 @@ class Receiver(service.Service):
 
             send_update_notification_to_graphite(target, host, port)
 
-
     def publish_failed(self, event, message):
         """
             Publishes a event to signal that the command on the target failed.
         """
         log.err(_stuff=Exception(message), _why=message)
-        self.broadcaster.publish_cmd_for_target(event.target, event.command, events.FAILED, message)
-
+        self.broadcaster.publish_cmd_for_target(
+            event.target, event.command, events.FAILED, message)
 
     def publish_start(self, event):
         """
             Publishes a event to signal that the command on the target started.
         """
         hostname = self.configuration['hostname']
-        message  = '(%s) target[%s] request: command="%s", arguments=%s' % (hostname, event.target, event.command, event.arguments)
+        message = '(%s) target[%s] request: command="%s", arguments=%s' % (
+            hostname, event.target, event.command, event.arguments)
         log.msg(message)
-        self.broadcaster.publish_cmd_for_target(event.target, event.command, events.STARTED, message)
-
+        self.broadcaster.publish_cmd_for_target(
+            event.target, event.command, events.STARTED, message)
 
     def onConnect(self):
         """
@@ -137,7 +141,8 @@ class Receiver(service.Service):
         host = self.configuration['broadcaster_host']
         port = self.configuration['broadcaster_port']
 
-        log.msg('Successfully connected to broadcaster on %s:%s' % (host, port))
+        log.msg('Successfully connected to broadcaster on %s:%s' %
+                (host, port))
 
         targets = sorted(self.configuration['targets'])
 
@@ -149,8 +154,6 @@ class Receiver(service.Service):
             log.msg('subscribing to target "%s".' % target)
             self.broadcaster.client.subscribe(target, self.onEvent)
 
-
-
     def _refresh_connection(self, delay=60 * 60, first_call=False):
         """
             When connected, closes connection to force a clean reconnect,
@@ -159,9 +162,9 @@ class Receiver(service.Service):
         reactor.callLater(delay, self._refresh_connection)
         if hasattr(self, 'broadcaster') and self.broadcaster.client:
             if not first_call:
-                log.msg('Closing connection to broadcaster. This should force a connection-refresh.')
+                log.msg(
+                    'Closing connection to broadcaster. This should force a connection-refresh.')
                 self.broadcaster.client.sendClose()
-
 
     def onConnectionLost(self, reason):
         """
@@ -171,7 +174,6 @@ class Receiver(service.Service):
         log.err('connection lost: %s' % reason)
         self.broadcaster.client = None
         # TODO: superclass method should be called here?
-
 
     def _client_watchdog(self, delay=1):
         """
@@ -188,7 +190,6 @@ class Receiver(service.Service):
             if delay > 1:
                 log.msg('(scheduling next try in %s seconds)' % delay)
             return self._connect_broadcaster()
-
 
     def onEvent(self, target, event_data):
         """
@@ -211,13 +212,11 @@ class Receiver(service.Service):
         else:
             log.msg(str(event))
 
-
     def set_configuration(self, configuration):
         """
             Assigns a configuration to this receiver instance.
         """
         self.configuration = configuration
-
 
     def initialize_twisted_logging(self):
         twenty_megabytes = 20000000
@@ -235,13 +234,11 @@ class Receiver(service.Service):
         self._client_watchdog()
         self._refresh_connection(first_call=True)
 
-
     def stopService(self):
         """
             Writes 'shutting down service' to the log.
         """
         log.msg('shutting down service')
-
 
     def _connect_broadcaster(self):
         """
@@ -256,6 +253,7 @@ class Receiver(service.Service):
         self.broadcaster = WampBroadcaster(host, port, 'yadtreceiver')
         self.broadcaster.addOnSessionOpenHandler(self.onConnect)
         self.broadcaster.connect()
+
 
 def _determine_tracking_id(command_and_arguments_list):
     tracking_id = None

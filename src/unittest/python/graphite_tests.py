@@ -23,10 +23,12 @@ from mock import Mock, call, patch
 
 from yadtreceiver.graphite import send_update_notification_to_graphite
 
+
 class GraphiteTests(unittest.TestCase):
+
     @patch('yadtreceiver.graphite.time')
     @patch('yadtreceiver.graphite.socket')
-    def test_should_send_update_message_to_graphite (self, mock_socket, mock_time):
+    def test_should_send_update_message_to_graphite(self, mock_socket, mock_time):
         mock_time.return_value = 1
         mock_graphite_socket = Mock()
         mock_socket.return_value = mock_graphite_socket
@@ -34,15 +36,16 @@ class GraphiteTests(unittest.TestCase):
         send_update_notification_to_graphite('target', 'host', 123)
 
         self.assertEquals(call(), mock_socket.call_args)
-        self.assertEquals(call(('host', 123)), mock_graphite_socket.connect.call_args)
-        self.assertEquals(call('yadt.target.update 1 1\n'), mock_graphite_socket.send.call_args)
+        self.assertEquals(
+            call(('host', 123)), mock_graphite_socket.connect.call_args)
+        self.assertEquals(
+            call('yadt.target.update 1 1\n'), mock_graphite_socket.send.call_args)
         self.assertEquals(call(), mock_graphite_socket.close.call_args)
-
 
     @patch('yadtreceiver.graphite.log')
     @patch('yadtreceiver.graphite.time')
     @patch('yadtreceiver.graphite.socket')
-    def test_should_close_socket_even_when_error_occurs (self, mock_socket, mock_time, mock_log):
+    def test_should_close_socket_even_when_error_occurs(self, mock_socket, mock_time, mock_log):
         mock_time.return_value = 1
         mock_graphite_socket = Mock()
         mock_graphite_socket.connect.side_effect = Exception('Oh no.')
@@ -51,6 +54,6 @@ class GraphiteTests(unittest.TestCase):
         send_update_notification_to_graphite('target', 'host', 123)
 
         self.assertEquals(call(), mock_socket.call_args)
-        self.assertEquals(call(('host', 123)), mock_graphite_socket.connect.call_args)
+        self.assertEquals(
+            call(('host', 123)), mock_graphite_socket.connect.call_args)
         self.assertEquals(call(), mock_graphite_socket.close.call_args)
-

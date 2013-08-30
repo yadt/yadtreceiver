@@ -48,39 +48,46 @@ KNOWN_EVENT_TYPES = [TYPE_COMMAND,
 
 
 class IncompleteEventDataException(Exception):
+
     """
         to be raised when an error during validation of an event occurs.
     """
 
     def __init__(self, event, attribute_name):
         error_message = 'Event "{1}" on target {0} is missing attribute "{2}", event dump : {3}'.format(event.target,
-                                                                                            event.event_type,
-                                                                                            attribute_name,
-                                                                                            event.data)
+                                                                                                        event.event_type,
+                                                                                                        attribute_name,
+                                                                                                        event.data)
         super(IncompleteEventDataException, self).__init__(error_message)
 
+
 class InvalidEventTypeException(Exception):
+
     """
         to be raised when an invalid event is instantiated
     """
+
     def __init__(self, event, event_type):
         error_message = 'Event "{1}" on target {0} has invalid type, event dump : {2}'.format(event.target,
-                                                                             event_type,
-                                                                             event.data)
+                                                                                              event_type,
+                                                                                              event.data)
         super(InvalidEventTypeException, self).__init__(error_message)
 
+
 class PayloadIntegrityException(Exception):
+
     """
         to be raised when a payload cannot be validated
     """
 
     def __init__(self, event, payload_attribute_name):
         error_message = 'Event "{1}" on target {0} is missing attribute {2} in payload, event dump : {3}'.format(
-                                                                                               event.target,
-                                                                                               event.event_type,
-                                                                                               payload_attribute_name,
-                                                                                               event.data)
+            event.target,
+            event.event_type,
+            payload_attribute_name,
+            event.data)
         super(PayloadIntegrityException, self).__init__(error_message)
+
 
 class Event (object):
 
@@ -112,14 +119,17 @@ class Event (object):
     def _initialize_service_change(self):
         payload = self._ensure_attribute_in_data(ATTRIBUTE_PAYLOAD)
 
-        self.service_states = self._extract_service_states_from_payload(payload)
+        self.service_states = self._extract_service_states_from_payload(
+            payload)
 
     def _extract_service_states_from_payload(self, payload):
         service_states = []
 
         for payload_entry in payload:
-            uri = self._ensure_payload_entry_contains_attribute(payload_entry, PAYLOAD_ATTRIBUTE_URI)
-            state = self._ensure_payload_entry_contains_attribute(payload_entry, PAYLOAD_ATTRIBUTE_STATE)
+            uri = self._ensure_payload_entry_contains_attribute(
+                payload_entry, PAYLOAD_ATTRIBUTE_URI)
+            state = self._ensure_payload_entry_contains_attribute(
+                payload_entry, PAYLOAD_ATTRIBUTE_STATE)
             service_states.append(self.ServiceState(uri, state))
         return service_states
 
@@ -182,9 +192,11 @@ class Event (object):
         if self.is_a_heartbeat:
             return 'Heartbeat on {0}'.format(self.target)
 
-        raise NotImplementedError('Unknown event type {0}'.format(self.event_type))
+        raise NotImplementedError(
+            'Unknown event type {0}'.format(self.event_type))
 
     class ServiceState (object):
+
         def __init__(self, uri, state):
             self.uri = uri
             self.state = state

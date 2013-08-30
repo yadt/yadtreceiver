@@ -26,14 +26,15 @@ from twisted.python import log
 
 from yadtreceiver import events
 
-try: # pragma: no cover
+try:  # pragma: no cover
     import cStringIO
     StringIO = cStringIO
-except: # pragma: no cover
+except:  # pragma: no cover
     import StringIO
 
 
 class ProcessProtocol(protocol.ProcessProtocol):
+
     def __init__(self, hostname, broadcaster, target, readable_command, tracking_id=None):
         """
             Initializes the process protocol with the given properties.
@@ -45,8 +46,8 @@ class ProcessProtocol(protocol.ProcessProtocol):
         self.tracking_id = tracking_id
         self.error_buffer = StringIO.StringIO()
 
-        log.msg('(%s) target[%s] executing "%s"' % (self.hostname, target, readable_command))
-
+        log.msg('(%s) target[%s] executing "%s"' %
+                (self.hostname, target, readable_command))
 
     def processExited(self, reason):
         """
@@ -61,7 +62,6 @@ class ProcessProtocol(protocol.ProcessProtocol):
 
         self.publish_finished()
 
-
     def publish_finished(self):
         """
             Uses the broadcaster-client to publish a finished-event.
@@ -70,9 +70,9 @@ class ProcessProtocol(protocol.ProcessProtocol):
                   % (self.hostname, self.target, self.readable_command)
         log.msg(message)
         self.error_buffer.close()
-        self.broadcaster.publish_cmd_for_target(self.target, self.readable_command, events.FINISHED,
-                                                message, tracking_id=self.tracking_id)
-
+        self.broadcaster.publish_cmd_for_target(
+            self.target, self.readable_command, events.FINISHED,
+            message, tracking_id=self.tracking_id)
 
     def publish_failed(self, return_code):
         """
@@ -84,9 +84,9 @@ class ProcessProtocol(protocol.ProcessProtocol):
         error_message = '(%s) target[%s] request "%s" failed: return code was %s.' \
                         % (self.hostname, self.target, self.readable_command, return_code)
         log.err(error_message)
-        self.broadcaster.publish_cmd_for_target(self.target, self.readable_command, events.FAILED,
-                                                message=error_output, tracking_id=self.tracking_id)
+        self.broadcaster.publish_cmd_for_target(
+            self.target, self.readable_command, events.FAILED,
+            message=error_output, tracking_id=self.tracking_id)
 
     def errReceived(self, data):
         self.error_buffer.write(str(data))
-

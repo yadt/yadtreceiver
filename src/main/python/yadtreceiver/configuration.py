@@ -163,7 +163,7 @@ class ReceiverConfigLoader (object):
     def read_configuration_file (self, filename):
         """
             Reads the given configuration file. Uses the YadtConfigParser.
-            
+
             @return: configuration dictionary
         """
         return self._parser.read_configuration_file(filename)

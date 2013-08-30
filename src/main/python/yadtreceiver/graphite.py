@@ -16,7 +16,7 @@
 
 """
     Provides a function to send graphite a update notification.
-    
+
     For more information about graphite please visit:
     http://graphite.wikidot.com/
 """
@@ -33,12 +33,14 @@ def send_update_notification_to_graphite(target, host, port):
         Sends a update notification to the graphite server at host:port.
     """
     try:
-        graphite_socket  = socket()
+        graphite_socket = socket()
         graphite_address = (host, port)
         graphite_socket.connect(graphite_address)
 
         timestamp = int(time())
-        log.msg('sending update of target %s notification to graphite on %s:%s' % (target, host, port))
+        log.msg(
+            'sending update of target %s notification to graphite on %s:%s' %
+            (target, host, port))
         graphite_socket.send('yadt.%s.update 1 %d\n' % (target, timestamp))
 
     except Exception as e:
