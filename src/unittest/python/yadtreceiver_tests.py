@@ -61,9 +61,8 @@ class YadtReceiverTests (unittest.TestCase):
 
     @patch('yadtreceiver.WampBroadcaster')
     def test_should_initialize_broadcaster_when_connecting_broadcaster(self, mock_wamb):
-        configuration = Mock(Configuration)
-        configuration.broadcaster_host = 'broadcaster-host'
-        configuration.broadcaster_port = 1234
+        configuration = {'broadcaster_host': 'broadcaster-host',
+                         'broadcaster_port': 1234}
         receiver = Receiver()
         receiver.set_configuration(configuration)
 
