@@ -23,16 +23,12 @@ from mock import Mock, call, patch
 
 from yadtreceiver.configuration import (DEFAULT_BROADCASTER_HOST,
                                         DEFAULT_BROADCASTER_PORT,
-                                        DEFAULT_GRAPHITE_ACTIVE,
-                                        DEFAULT_GRAPHITE_HOST,
-                                        DEFAULT_GRAPHITE_PORT,
                                         DEFAULT_LOG_FILENAME,
                                         DEFAULT_PYTHON_COMMAND,
                                         DEFAULT_SCRIPT_TO_EXECUTE,
                                         DEFAULT_TARGETS,
                                         DEFAULT_TARGETS_DIRECTORY,
                                         SECTION_BROADCASTER,
-                                        SECTION_GRAPHITE,
                                         SECTION_RECEIVER,
                                         ReceiverConfigLoader,
                                         load)
@@ -72,46 +68,6 @@ class ReceiverConfigLoaderTests (unittest.TestCase):
         self.assertEqual(8081, actual_broadcaster_port)
         self.assertEqual(
             call(SECTION_BROADCASTER, 'port', DEFAULT_BROADCASTER_PORT), mock_parser.get_option_as_int.call_args)
-
-    def test_should_return_graphite_active(self):
-        mock_loader = Mock(ReceiverConfigLoader)
-        mock_parser = Mock(YadtConfigParser)
-        mock_parser.get_option_as_yes_or_no_boolean.return_value = True
-        mock_loader._parser = mock_parser
-
-        actual_graphite_active = ReceiverConfigLoader.get_graphite_active(
-            mock_loader)
-
-        self.assertEqual(True, actual_graphite_active)
-        self.assertEqual(
-            call(SECTION_GRAPHITE, 'active', DEFAULT_GRAPHITE_ACTIVE),
-            mock_parser.get_option_as_yes_or_no_boolean.call_args)
-
-    def test_should_return_graphite_host(self):
-        mock_loader = Mock(ReceiverConfigLoader)
-        mock_parser = Mock(YadtConfigParser)
-        mock_parser.get_option.return_value = 'graphite.host'
-        mock_loader._parser = mock_parser
-
-        actual_graphite_host = ReceiverConfigLoader.get_graphite_host(
-            mock_loader)
-
-        self.assertEqual('graphite.host', actual_graphite_host)
-        self.assertEqual(
-            call(SECTION_GRAPHITE, 'host', DEFAULT_GRAPHITE_HOST), mock_parser.get_option.call_args)
-
-    def test_should_return_graphite_port(self):
-        mock_loader = Mock(ReceiverConfigLoader)
-        mock_parser = Mock(YadtConfigParser)
-        mock_parser.get_option_as_int.return_value = 2003
-        mock_loader._parser = mock_parser
-
-        actual_graphite_port = ReceiverConfigLoader.get_graphite_port(
-            mock_loader)
-
-        self.assertEqual(2003, actual_graphite_port)
-        self.assertEqual(
-            call(SECTION_GRAPHITE, 'port', DEFAULT_GRAPHITE_PORT), mock_parser.get_option_as_int.call_args)
 
     @patch('yadtreceiver.configuration.socket')
     def test_should_return_hostname_from_receiver_section(self, mock_socket):
@@ -234,26 +190,6 @@ class LoadTest (unittest.TestCase):
 
         self.assertEqual(call(), mock_loader.get_broadcaster_port.call_args)
         self.assertEqual(12345, actual_configuration['broadcaster_port'])
-
-    @patch('yadtreceiver.configuration.ReceiverConfigLoader')
-    def test_should_get_graphite_properties_from_parser(self, mock_loader_class):
-        mock_loader = Mock(ReceiverConfigLoader)
-        mock_loader.get_graphite_active.return_value = True
-        mock_loader.get_graphite_host.return_value = 'graphite host'
-        mock_loader.get_graphite_port.return_value = 54321
-        mock_loader_class.return_value = mock_loader
-
-        actual_configuration = load('abc')
-
-        self.assertEqual(call(), mock_loader.get_graphite_active.call_args)
-        self.assertEqual(True, actual_configuration['graphite_active'])
-
-        self.assertEqual(call(), mock_loader.get_graphite_host.call_args)
-        self.assertEqual(
-            'graphite host', actual_configuration['graphite_host'])
-
-        self.assertEqual(call(), mock_loader.get_graphite_port.call_args)
-        self.assertEqual(54321, actual_configuration['graphite_port'])
 
     @patch('yadtreceiver.configuration.ReceiverConfigLoader')
     def test_should_get_receiver_properties_from_parser(self, mock_loader_class):
