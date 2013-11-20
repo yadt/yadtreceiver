@@ -49,11 +49,6 @@ hostname = spameggs
 [broadcaster]
 host = broadcaster.domain.tld
 port = 8081
-
-[graphite]
-active = yes
-host = graphite.domain.tld
-port = 2003
 """)
 
         actual_configuration = load(configuration_filename)
@@ -73,11 +68,6 @@ port = 2003
         self.assertEqual('broadcaster.domain.tld',
                          actual_configuration['broadcaster_host'])
         self.assertEqual(8081, actual_configuration['broadcaster_port'])
-
-        self.assertEqual(
-            'graphite.domain.tld', actual_configuration['graphite_host'])
-        self.assertEqual(2003, actual_configuration['graphite_port'])
-        self.assertEqual(True, actual_configuration['graphite_active'])
 
 
 if __name__ == '__main__':
