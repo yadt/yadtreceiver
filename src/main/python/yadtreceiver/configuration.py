@@ -71,14 +71,12 @@ class ReceiverConfigLoader (object):
         """
         self._parser = YadtConfigParser()
 
-
     def get_broadcaster_host(self):
         """
             @return: the broadcaster host from the configuration file,
                      otherwise DEFAULT_BROADCASTER_HOST.
         """
         return self._parser.get_option(SECTION_BROADCASTER, 'host', DEFAULT_BROADCASTER_HOST)
-
 
     def get_broadcaster_port(self):
         """
@@ -95,14 +93,12 @@ class ReceiverConfigLoader (object):
         """
         return self._parser.get_option(SECTION_RECEIVER, 'hostname', socket.gethostname())
 
-
     def get_log_filename(self):
         """
             @return: the log filename from the configuration file if given,
                      otherwise DEFAULT_LOG_FILENAME
         """
         return self._parser.get_option(SECTION_RECEIVER, 'log_filename', DEFAULT_LOG_FILENAME)
-
 
     def get_python_command(self):
         """
@@ -111,14 +107,12 @@ class ReceiverConfigLoader (object):
         """
         return self._parser.get_option(SECTION_RECEIVER, 'python_command', DEFAULT_PYTHON_COMMAND)
 
-
     def get_script_to_execute(self):
         """
             @return: if the configuration file provides a script to execute,
                      otherwise DEFAULT_SCRIPT_TO_EXECUTE.
         """
         return self._parser.get_option(SECTION_RECEIVER, 'script_to_execute', DEFAULT_SCRIPT_TO_EXECUTE)
-
 
     def get_targets(self):
         """
@@ -127,7 +121,6 @@ class ReceiverConfigLoader (object):
         """
         return self._parser.get_option_as_set(SECTION_RECEIVER, 'targets', DEFAULT_TARGETS)
 
-
     def get_targets_directory(self):
         """
             @return: the targets directory from the configuration file,
@@ -135,7 +128,7 @@ class ReceiverConfigLoader (object):
         """
         return self._parser.get_option(SECTION_RECEIVER, 'targets_directory', DEFAULT_TARGETS_DIRECTORY)
 
-    def read_configuration_file (self, filename):
+    def read_configuration_file(self, filename):
         """
             Reads the given configuration file. Uses the YadtConfigParser.
 
