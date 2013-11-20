@@ -44,22 +44,22 @@ from yadtcommons.configuration import YadtConfigParser
 DEFAULT_BROADCASTER_HOST = 'localhost'
 DEFAULT_BROADCASTER_PORT = 8081
 
-DEFAULT_GRAPHITE_HOST   = 'localhost'
-DEFAULT_GRAPHITE_PORT   = 2003
+DEFAULT_GRAPHITE_HOST = 'localhost'
+DEFAULT_GRAPHITE_PORT = 2003
 DEFAULT_GRAPHITE_ACTIVE = False
 
-DEFAULT_LOG_FILENAME      = '/var/log/yadtreceiver.log'
-DEFAULT_PYTHON_COMMAND    = '/usr/bin/python'
+DEFAULT_LOG_FILENAME = '/var/log/yadtreceiver.log'
+DEFAULT_PYTHON_COMMAND = '/usr/bin/python'
 DEFAULT_SCRIPT_TO_EXECUTE = '/usr/bin/yadtshell'
-DEFAULT_TARGETS           = set()
+DEFAULT_TARGETS = set()
 DEFAULT_TARGETS_DIRECTORY = '/etc/yadtshell/targets/'
 
 SECTION_BROADCASTER = 'broadcaster'
-SECTION_RECEIVER    = 'receiver'
-SECTION_GRAPHITE    = 'graphite'
+SECTION_RECEIVER = 'receiver'
 
 
 class ReceiverConfigLoader (object):
+
     """
         uses a YadtConfigParser which offers convenience methods.
     """
@@ -86,31 +86,6 @@ class ReceiverConfigLoader (object):
                      otherwise DEFAULT_BROADCASTER_PORT.
         """
         return self._parser.get_option_as_int(SECTION_BROADCASTER, 'port', DEFAULT_BROADCASTER_PORT)
-
-
-    def get_graphite_active(self):
-        """
-            @return: the graphite active porperty from the configuration file
-                     as bool, otherwise DEFAULT_GRAPHITE_ACTIVE.
-        """
-        return self._parser.get_option_as_yes_or_no_boolean(SECTION_GRAPHITE, 'active', DEFAULT_GRAPHITE_ACTIVE)
-
-
-    def get_graphite_host(self):
-        """
-            @return: the graphite host from the configuration file,
-                     otherwise DEFAULT_GRAPHITE_HOST.
-        """
-        return self._parser.get_option(SECTION_GRAPHITE, 'host', DEFAULT_GRAPHITE_HOST)
-
-
-    def get_graphite_port(self):
-        """
-            @return: the graphite port from the configuration file as int,
-                     otherwise DEFAULT_GRAPHITE_PORT.
-        """
-        return self._parser.get_option_as_int(SECTION_GRAPHITE, 'port', DEFAULT_GRAPHITE_PORT)
-
 
     def get_hostname(self):
         """
@@ -178,16 +153,13 @@ def load(filename):
     parser = ReceiverConfigLoader()
     parser.read_configuration_file(filename)
 
-    configuration = {'broadcaster_host' : parser.get_broadcaster_host(),
-                     'broadcaster_port' : parser.get_broadcaster_port(),
-                     'graphite_active'  : parser.get_graphite_active(),
-                     'graphite_host'    : parser.get_graphite_host(),
-                     'graphite_port'    : parser.get_graphite_port(),
-                     'hostname'         : parser.get_hostname(),
-                     'log_filename'     : parser.get_log_filename(),
-                     'python_command'   : parser.get_python_command(),
+    configuration = {'broadcaster_host': parser.get_broadcaster_host(),
+                     'broadcaster_port': parser.get_broadcaster_port(),
+                     'hostname': parser.get_hostname(),
+                     'log_filename': parser.get_log_filename(),
+                     'python_command': parser.get_python_command(),
                      'script_to_execute': parser.get_script_to_execute(),
-                     'targets'          : parser.get_targets(),
+                     'targets': parser.get_targets(),
                      'targets_directory': parser.get_targets_directory()}
 
     return configuration
