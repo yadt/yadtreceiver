@@ -29,10 +29,6 @@
         host = broadcaster.domain.tld
         port = 8081
 
-        [graphite]
-        active = yes
-        host = graphite.domain.tld
-        port = 2003
 """
 
 __author__ = 'Michael Gruber'
