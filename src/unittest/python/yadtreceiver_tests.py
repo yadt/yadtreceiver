@@ -197,83 +197,8 @@ class YadtReceiverTests (unittest.TestCase):
             '/etc/yadtshell/targets/spargel', actual_target_directory)
 
     @patch('yadtreceiver.reactor')
-    @patch('yadtreceiver.send_update_notification_to_graphite')
-    def test_should_publish_start_event(self, mock_reactor, mock_send):
-        mock_receiver = Mock(Receiver)
-        mock_receiver.broadcaster = Mock()
-        mock_receiver.configuration = {'hostname': 'hostname',
-                                       'python_command': '/usr/bin/python',
-                                       'graphite_active': True,
-                                       'script_to_execute': '/usr/bin/yadtshell'}
-
-        mock_event = Mock(Event)
-        mock_event.target = 'devabc123'
-        mock_event.command = 'yadtshell'
-        mock_event.arguments = ['update']
-
-        Receiver.handle_request(mock_receiver, mock_event)
-
-        self.assertEquals(
-            call(mock_event), mock_receiver.publish_start.call_args)
-
-    @patch('yadtreceiver.reactor')
-    def test_should_notify_graphite(self, mock_reactor):
-        mock_receiver = Mock(Receiver)
-        mock_receiver.broadcaster = Mock()
-        mock_receiver.configuration = {'hostname': 'hostname',
-                                       'graphite_active': True,
-                                       'python_command': '/usr/bin/python',
-                                       'script_to_execute': '/usr/bin/yadtshell'}
-
-        mock_event = Mock(Event)
-        mock_event.target = 'devabc123'
-        mock_event.command = 'yadtshell'
-        mock_event.arguments = ['update']
-
-        Receiver.handle_request(mock_receiver, mock_event)
-
-        self.assertEquals(
-            call('devabc123', 'update'), mock_receiver.notify_graphite.call_args)
-
-    @patch('yadtreceiver.reactor')
-    def test_should_not_notify_graphite_if_deactivated(self, mock_reactor):
-        mock_receiver = Mock(Receiver)
-        mock_receiver.broadcaster = Mock()
-        mock_receiver.configuration = {'hostname': 'hostname',
-                                       'graphite_active': False,
-                                       'python_command': '/usr/bin/python',
-                                       'script_to_execute': '/usr/bin/yadtshell'}
-        mock_event = Mock(Event)
-        mock_event.target = 'devabc123'
-        mock_event.command = 'yadtshell'
-        mock_event.arguments = ['update']
-
-        Receiver.handle_request(mock_receiver, mock_event)
-
-        self.assertEquals(None, mock_receiver.notify_graphite.call_args)
-
-    @patch('yadtreceiver.reactor')
-    def test_should_not_notify_graphite_when_no_action_given(self, mock_reactor):
-        mock_receiver = Mock(Receiver)
-        mock_receiver.broadcaster = Mock()
-        mock_receiver.configuration = {'hostname': 'hostname',
-                                       'graphite_active': True,
-                                       'python_command': '/usr/bin/python',
-                                       'script_to_execute': '/usr/bin/yadtshell'}
-
-        mock_event = Mock(Event)
-        mock_event.target = 'devabc123'
-        mock_event.command = 'yadtshell'
-        mock_event.arguments = []
-
-        Receiver.handle_request(mock_receiver, mock_event)
-
-        self.assertEquals(None, mock_receiver.notify_graphite.call_args)
-
-    @patch('yadtreceiver.send_update_notification_to_graphite')
-    @patch('yadtreceiver.reactor')
     @patch('yadtreceiver.ProcessProtocol')
-    def test_should_spawn_new_process_on_reactor(self, mock_protocol, mock_reactor, mock_send):
+    def test_should_spawn_new_process_on_reactor(self, mock_protocol, mock_reactor):
         mock_protocol.return_value = 'mock-protocol'
         mock_receiver = Mock(Receiver)
         mock_broadcaster = Mock()
@@ -281,7 +206,6 @@ class YadtReceiverTests (unittest.TestCase):
         mock_receiver.get_target_directory.return_value = '/etc/yadtshell/targets/devabc123'
 
         mock_receiver.configuration = {'hostname': 'hostname',
-                                       'graphite_active': True,
                                        'python_command': '/usr/bin/python',
                                        'script_to_execute': '/usr/bin/yadtshell'}
 
@@ -307,7 +231,6 @@ class YadtReceiverTests (unittest.TestCase):
         mock_receiver.get_target_directory.return_value = '/etc/yadtshell/targets/devabc123'
 
         mock_receiver.configuration = {'hostname': 'hostname',
-                                       'graphite_active': False,
                                        'python_command': '/usr/bin/python',
                                        'script_to_execute': '/usr/bin/yadtshell'}
 
@@ -335,7 +258,6 @@ class YadtReceiverTests (unittest.TestCase):
         mock_receiver.get_target_directory.return_value = '/etc/yadtshell/targets/devabc123'
 
         mock_receiver.configuration = {'hostname': 'hostname',
-                                       'graphite_active': False,
                                        'python_command': '/usr/bin/python',
                                        'script_to_execute': '/usr/bin/yadtshell'}
 
@@ -350,25 +272,6 @@ class YadtReceiverTests (unittest.TestCase):
 
         self.assertEqual(call('hostname', mock_broadcaster, 'devabc123',
                          expected_command_with_arguments, tracking_id=None), mock_protocol.call_args)
-
-    @patch('yadtreceiver.send_update_notification_to_graphite')
-    def test_should_not_notify_graphite_on_update_if_command_is_status(self, mock_send):
-        mock_receiver = Mock(Receiver)
-
-        Receiver.notify_graphite(mock_receiver, 'devabc123', 'status')
-
-        self.assertEquals(None, mock_send.call_args)
-
-    @patch('yadtreceiver.send_update_notification_to_graphite')
-    def test_should_notify_graphite_on_update(self, mock_send):
-        mock_receiver = Mock(Receiver)
-        mock_receiver.configuration = {'graphite_host': 'host',
-                                       'graphite_port': 'port'}
-
-        Receiver.notify_graphite(mock_receiver, 'devabc123', 'update')
-
-        self.assertEquals(
-            call('devabc123', 'host', 'port'), mock_send.call_args)
 
     @patch('yadtreceiver.log')
     def test_should_publish_event_about_failed_command_on_target(self, mock_log):

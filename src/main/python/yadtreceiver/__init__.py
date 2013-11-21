@@ -19,8 +19,7 @@
     application. The receiver allows to start processes triggered by
     broadcast events. It is configured using a dictionary. You can load
     configuration files using the load method from the configuration
-    module. When activated in the configuration the receiver will send
-    update notifications to a graphite server.
+    module. 
 """
 
 __author__ = 'Arne Hilmann, Maximilien Riehl, Michael Gruber'
@@ -36,7 +35,6 @@ from twisted.python.logfile import LogFile
 
 from yadtbroadcastclient import WampBroadcaster
 
-from yadtreceiver.graphite import send_update_notification_to_graphite
 from yadtreceiver.protocols import ProcessProtocol
 from yadtreceiver.events import Event
 
@@ -80,10 +78,6 @@ class Receiver(service.Service):
         """
         self.publish_start(event)
 
-        if self.configuration['graphite_active'] and len(event.arguments) > 0:
-            action = event.arguments[0]
-            self.notify_graphite(event.target, action)
-
         hostname = str(self.configuration['hostname'])
         python_command = str(self.configuration['python_command'])
         script_to_execute = str(self.configuration['script_to_execute'])
@@ -100,16 +94,6 @@ class Receiver(service.Service):
         target_dir = self.get_target_directory(event.target)
         reactor.spawnProcess(process_protocol, python_command,
                              command_and_arguments_list, env={}, path=target_dir)
-
-    def notify_graphite(self, target, action):
-        """
-            Notifies the configured graphite server about events (update events).
-        """
-        if action == 'update':
-            host = self.configuration['graphite_host']
-            port = self.configuration['graphite_port']
-
-            send_update_notification_to_graphite(target, host, port)
 
     def publish_failed(self, event, message):
         """
