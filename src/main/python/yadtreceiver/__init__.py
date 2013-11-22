@@ -22,7 +22,7 @@
     module. 
 """
 
-__author__ = 'Arne Hilmann, Maximilien Riehl, Michael Gruber'
+__author__ = 'Arne Hilmann, Maximilien Riehl, Michael Gruber, Marcel Wolf, Daniel Clerc'
 __version__ = '${version}'
 
 import os
@@ -38,6 +38,9 @@ from yadtbroadcastclient import WampBroadcaster
 from yadtreceiver.protocols import ProcessProtocol
 from yadtreceiver.events import Event
 
+from twisted.internet import inotify
+from twisted.python import filepath
+
 
 class ReceiverException(Exception):
 
@@ -52,6 +55,12 @@ class Receiver(service.Service):
         The receiver connects to the broadcaster and receives events
         for the targets that it subscribed to.
     """
+
+    def subscribeTarget(self, targetname):
+        print "Subscribe: ", targetname
+
+    def unsubscribeTarget(self, targetname):
+        print "Unsubscribe: ", targetname
 
     def get_target_directory(self, target):
         """
@@ -245,3 +254,27 @@ def _determine_tracking_id(command_and_arguments_list):
         if command_or_argument.startswith('--tracking-id='):
             tracking_id = command_or_argument.split('=')[1]
     return tracking_id
+
+
+class FileSystemWatcher(service.Service):
+
+    def __init__(self, path_to_watch):
+        self.SUBFOLDER_CREATE = 0x40000100
+        self.SUBFOLDER_DELETE = 0x40000200
+
+        self.path = path_to_watch
+
+    def startService(self):
+        in_watch_mask = (self.SUBFOLDER_CREATE | self.SUBFOLDER_DELETE)
+        notifier = inotify.INotify()
+        notifier.startReading()
+        notifier.watch(filepath.FilePath(self.path), mask=in_watch_mask,
+                       callbacks=[self.OnChange])
+
+    def OnChange(self, watch, path, mask):
+        if mask in (self.SUBFOLDER_CREATE, self.SUBFOLDER_DELETE):
+            callback = self.onChangeCallbacks['create']
+            if mask == self.SUBFOLDER_DELETE:
+                callback = self.onChangeCallbacks['delete']
+            target = path.basename()
+            callback(target)

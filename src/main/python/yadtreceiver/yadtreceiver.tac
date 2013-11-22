@@ -20,13 +20,13 @@
     Start-up and configuration of the yadtreceiver application.
 """
 
-__author__ = 'Arne Hilmann, Michael Gruber'
+__author__ = 'Arne Hilmann, Michael Gruber, Marcel Wolf, Daniel Clerc'
 
 
 from twisted.application import service
 from twisted.internet.defer import setDebugging
 
-from yadtreceiver import __version__, Receiver
+from yadtreceiver import __version__, Receiver, FileSystemWatcher
 from yadtreceiver.configuration import load
 
 setDebugging(True)
@@ -37,3 +37,9 @@ application = service.Application('yadtreceiver version %s' % __version__)
 receiver = Receiver()
 receiver.set_configuration(configuration)
 receiver.setServiceParent(application)
+
+fs = FileSystemWatcher(
+    configuration.get('targets_directory', '/etc/yadtshell/targets/'))
+fs.setServiceParent(application)
+fs.onChangeCallbacks = dict(
+    create=receiver.subscribeTarget, delete=receiver.unsubscribeTarget)
