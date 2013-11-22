@@ -40,10 +40,6 @@ from yadtcommons.configuration import YadtConfigParser
 DEFAULT_BROADCASTER_HOST = 'localhost'
 DEFAULT_BROADCASTER_PORT = 8081
 
-DEFAULT_GRAPHITE_HOST = 'localhost'
-DEFAULT_GRAPHITE_PORT = 2003
-DEFAULT_GRAPHITE_ACTIVE = False
-
 DEFAULT_LOG_FILENAME = '/var/log/yadtreceiver.log'
 DEFAULT_PYTHON_COMMAND = '/usr/bin/python'
 DEFAULT_SCRIPT_TO_EXECUTE = '/usr/bin/yadtshell'
