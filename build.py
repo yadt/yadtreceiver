@@ -49,7 +49,7 @@ def set_properties(project):
     project.build_depends_on('coverage')
 
     project.set_property('coverage_break_build', True)
-    project.set_property('coverage_threshold_warn', 95)
+    project.set_property('coverage_threshold_warn', 85)
 
     project.set_property('copy_resources_target', '$dir_dist')
     project.get_property('filter_resources_glob').append('**/yadtreceiver/__init__.py')
