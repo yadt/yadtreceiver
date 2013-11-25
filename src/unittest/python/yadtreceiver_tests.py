@@ -24,8 +24,9 @@ from mock import Mock, call, patch
 from twisted.mail.scripts.mailmail import Configuration
 from twisted.python.logfile import LogFile
 
-from yadtreceiver import __version__, Receiver, ReceiverException
+from yadtreceiver import __version__, Receiver, ReceiverException, FileSystemWatcher
 from yadtreceiver.events import Event
+from twisted.python import filepath
 
 
 class YadtReceiverTests (unittest.TestCase):
@@ -462,3 +463,38 @@ class YadtReceiverTests (unittest.TestCase):
             'foo', 'bar', 'baz=fubar', '--no-tracking-id=test', 'foofoo']
         self.assertEqual(
             yadtreceiver._determine_tracking_id(list_with_tracking_id), None)
+
+
+class YadtReceiverFilesytemWatcherTests (unittest.TestCase):
+
+    def setUp(self):
+        self.CREATE = 0x40000100
+        self.DELETE = 0x40000200
+        self.PATH = filepath.FilePath('/foo/bar')
+
+    def test_for_missing_callbacks(self):
+        fs = FileSystemWatcher('/foo/bar')
+        self.assertRaises(
+            AttributeError, fs.OnChange, 'watch', self.PATH, self.CREATE)
+
+    def test_for_mock_callback_create(self):
+        mock_receiver = Mock(Receiver)
+        fs = FileSystemWatcher('/foo/bar')
+        fs.onChangeCallbacks = dict(create=mock_receiver.subscribeTarget,
+                                    delete=mock_receiver.unsubscribeTarget)
+        fs.OnChange('watch', self.PATH, self.CREATE)
+        self.assertTrue(mock_receiver.subscribeTarget.called)
+
+    def test_for_mock_callback_delete(self):
+        mock_receiver = Mock(Receiver)
+        fs = FileSystemWatcher('/foo/bar')
+        fs.onChangeCallbacks = dict(create=mock_receiver.subscribeTarget,
+                                    delete=mock_receiver.unsubscribeTarget)
+        fs.OnChange('watch', self.PATH, self.DELETE)
+        self.assertTrue(mock_receiver.unsubscribeTarget.called)
+
+    @patch('yadtreceiver.inotify')
+    def test_inotify_is_started(self, mock_inotify):
+        fs = FileSystemWatcher('/foo/bar')
+        fs.startService()
+        self.assertTrue(mock_inotify.INotify().startReading.called)
