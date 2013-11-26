@@ -33,6 +33,8 @@
 
 __author__ = 'Michael Gruber'
 
+from glob import glob
+import os
 import socket
 from yadtcommons.configuration import YadtConfigParser
 
@@ -129,22 +131,58 @@ class ReceiverConfigLoader (object):
         return self._parser.read_configuration_file(filename)
 
 
+class ReceiverConfig(object):
+
+    def __init__(self, config_filename):
+        self.config_filename = config_filename
+        self.load()
+
+    def load(self):
+        parser = ReceiverConfigLoader()
+        parser.read_configuration_file(self.config_filename)
+
+        self.configuration = {
+            'broadcaster_host': parser.get_broadcaster_host(),
+            'broadcaster_port': parser.get_broadcaster_port(),
+            'hostname': parser.get_hostname(),
+            'log_filename': parser.get_log_filename(),
+            'python_command': parser.get_python_command(),
+            'script_to_execute': parser.get_script_to_execute(),
+            'targets': parser.get_targets(),
+            'targets_directory': parser.get_targets_directory()
+        }
+        self.compute_allowed_targets()
+
+    def compute_allowed_targets(self):
+        allowed_targets = []
+        for target_glob in self['targets']:
+            new_allowed_targets = glob(
+                os.path.join(self['targets_directory'], target_glob))
+            allowed_targets.extend(new_allowed_targets)
+        self.configuration['allowed_targets'] = allowed_targets
+
+    def reload_targets(self):
+        parser = ReceiverConfigLoader()
+        parser.read_configuration_file(self.config_filename)
+        self.configuration['targets'] = parser.get_targets()
+        self.compute_allowed_targets()
+
+    def __getitem__(self, key):
+        return self.configuration[key]
+
+    def get(self, key, default=None):
+        result = self.configuration[key]
+        if result:
+            return result
+        else:
+            return default
+
+
 def load(filename):
     """
         loads configuration from a file.
 
         @return: Configuration object containing the data from the file.
     """
-    parser = ReceiverConfigLoader()
-    parser.read_configuration_file(filename)
 
-    configuration = {'broadcaster_host': parser.get_broadcaster_host(),
-                     'broadcaster_port': parser.get_broadcaster_port(),
-                     'hostname': parser.get_hostname(),
-                     'log_filename': parser.get_log_filename(),
-                     'python_command': parser.get_python_command(),
-                     'script_to_execute': parser.get_script_to_execute(),
-                     'targets': parser.get_targets(),
-                     'targets_directory': parser.get_targets_directory()}
-
-    return configuration
+    return ReceiverConfig(filename)
