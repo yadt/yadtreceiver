@@ -104,7 +104,7 @@ class YadtReceiverTests (unittest.TestCase):
     @patch('__builtin__.exit')
     def test_should_exit_when_no_target_configured(self, mock_exit, mock_log):
         receiver = Receiver()
-        receiver.set_configuration({'targets': set(),
+        receiver.set_configuration({'allowed_targets': set(),
                                     'broadcaster_host': 'broadcaster_host',
                                     'broadcaster_port': 1234})
         mock_broadcaster_client = Mock()
@@ -138,7 +138,7 @@ class YadtReceiverTests (unittest.TestCase):
         receiver = Receiver()
         mock_broadcaster_client = Mock()
         receiver.broadcaster = mock_broadcaster_client
-        receiver.set_configuration({'targets': set(['devabc123']),
+        receiver.set_configuration({'allowed_targets': set(['devabc123']),
                                     'broadcaster_host': 'broadcaster_host',
                                     'broadcaster_port': 1234})
         receiver.onConnect()
@@ -151,7 +151,7 @@ class YadtReceiverTests (unittest.TestCase):
         mock_broadcaster_client = Mock()
         receiver.broadcaster = mock_broadcaster_client
         receiver.set_configuration(
-            {'targets': set(['dev01', 'dev02', 'dev03']),
+            {'allowed_targets': set(['dev01', 'dev02', 'dev03']),
              'broadcaster_host': 'broadcaster_host',
              'broadcaster_port': 1234})
 

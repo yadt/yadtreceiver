@@ -145,15 +145,15 @@ class Receiver(service.Service):
         log.msg('Successfully connected to broadcaster on %s:%s' %
                 (host, port))
 
-        targets = sorted(self.configuration['targets'])
+        targets = sorted(self.configuration['allowed_targets'])
 
         if not targets:
-            log.err('No targets configured.')
+            log.err('No targets configured or no targets in allowed targets.')
             exit(1)
 
-        for target in targets:
-            log.msg('subscribing to target "%s".' % target)
-            self.broadcaster.client.subscribe(target, self.onEvent)
+        for targetname in targets:
+            log.msg('subscribing to target "%s".' % targetname)
+            self.broadcaster.client.subscribe(targetname, self.onEvent)
 
     def _refresh_connection(self, delay=60 * 60, first_call=False):
         """
