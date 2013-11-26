@@ -57,10 +57,18 @@ class Receiver(service.Service):
     """
 
     def subscribeTarget(self, targetname):
-        print "Subscribe: ", targetname
+        self.configuration.reload_targets()
+        if targetname in self.configuration['allowed_targets']:
+            log.msg('subscribing to target "%s".' % targetname)
+            self.broadcaster.client.subscribe(targetname, self.onEvent)
+        else:
+            log.msg(
+                "Can't subscribe to target %s. Target not in allowed targets." %
+                targetname)
 
     def unsubscribeTarget(self, targetname):
-        print "Unsubscribe: ", targetname
+        log.msg('unsubscribing from target "%s".' % targetname)
+        self.broadcaster.client.unsubscribe(targetname)
 
     def get_target_directory(self, target):
         """
