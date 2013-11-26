@@ -29,17 +29,14 @@ import os
 import traceback
 
 from twisted.application import service
-from twisted.internet import reactor
-from twisted.python import log
+from twisted.internet import inotify, reactor
+from twisted.python import filepath, log
 from twisted.python.logfile import LogFile
 
 from yadtbroadcastclient import WampBroadcaster
 
-from yadtreceiver.protocols import ProcessProtocol
-from yadtreceiver.events import Event
-
-from twisted.internet import inotify
-from twisted.python import filepath
+import events
+from protocols import ProcessProtocol
 
 
 class ReceiverException(Exception):
@@ -197,7 +194,7 @@ class Receiver(service.Service):
             Will be called when receiving an event from the broadcaster.
             See onConnect which subscribes to the targets.
         """
-        event = Event(target, event_data)
+        event = events.Event(target, event_data)
 
         if event.is_a_request:
             try:
