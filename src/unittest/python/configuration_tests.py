@@ -236,8 +236,8 @@ class ReceiverConfigTests(unittest.TestCase):
     @patch('yadtreceiver.configuration.ReceiverConfigLoader')
     @patch('yadtreceiver.configuration.glob')
     def test_should_compute_allowed_targets(self, mock_glob, mock_loader_class):
-        mock_glob.return_value = ['dev', 'dev01', 'dev02']
-        config = ReceiverConfig('/dev/foo')
+        mock_glob.return_value = ['/foo/dev', '/foo/dev01', '/foo/dev02']
+        config = ReceiverConfig('blah')
         config.configuration['targets'] = ['foo']
         config.compute_allowed_targets()
 
