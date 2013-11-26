@@ -25,6 +25,7 @@ from twisted.mail.scripts.mailmail import Configuration
 from twisted.python.logfile import LogFile
 
 from yadtreceiver import __version__, Receiver, ReceiverException, FileSystemWatcher
+from yadtreceiver.configuration import ReceiverConfig
 from yadtreceiver.events import Event
 from twisted.python import filepath
 
@@ -463,6 +464,22 @@ class YadtReceiverTests (unittest.TestCase):
             'foo', 'bar', 'baz=fubar', '--no-tracking-id=test', 'foofoo']
         self.assertEqual(
             yadtreceiver._determine_tracking_id(list_with_tracking_id), None)
+
+    def test_subscribe_target_is_allowed(self):
+        mock_receiver = Mock(Receiver)
+        mock_config = Mock(ReceiverConfig)
+        mock_config.configuration = {'allowed_targets': ['foo']}
+        mock_config.__getitem__ = lambda _self, key: mock_config.configuration[
+            key]
+        mock_receiver.broadcaster = Mock()
+        mock_receiver.broadcaster.client = Mock()
+        mock_receiver.configuration = mock_config
+
+        Receiver.subscribeTarget(mock_receiver, 'foo')
+
+        mock_receiver.configuration.reload_targets.assert_called_with()
+        mock_receiver.broadcaster.client.subscribe.assert_called_with(
+            'foo', mock_receiver.onEvent)
 
 
 class YadtReceiverFilesytemWatcherTests (unittest.TestCase):
