@@ -33,9 +33,12 @@
 
 __author__ = 'Michael Gruber'
 
-from glob import glob
 import os
 import socket
+
+from glob import glob
+from twisted.python import filepath
+
 from yadtcommons.configuration import YadtConfigParser
 
 
@@ -154,11 +157,14 @@ class ReceiverConfig(object):
         self.compute_allowed_targets()
 
     def compute_allowed_targets(self):
+        def _path_to_name(target):
+            return filepath.FilePath(target).basename()
         allowed_targets = []
         for target_glob in self['targets']:
             new_allowed_targets = glob(
                 os.path.join(self['targets_directory'], target_glob))
             allowed_targets.extend(new_allowed_targets)
+        allowed_targets = [ _path_to_name(target) for target in allowed_targets ]
         self.configuration['allowed_targets'] = allowed_targets
 
     def reload_targets(self):
