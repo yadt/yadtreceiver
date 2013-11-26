@@ -31,6 +31,7 @@ from yadtreceiver.configuration import (DEFAULT_BROADCASTER_HOST,
                                         SECTION_BROADCASTER,
                                         SECTION_RECEIVER,
                                         ReceiverConfigLoader,
+                                        ReceiverConfig,
                                         load)
 from yadtcommons.configuration import YadtConfigParser
 
@@ -165,8 +166,9 @@ class ReceiverConfigLoaderTests (unittest.TestCase):
 
 class LoadTest (unittest.TestCase):
 
+    @patch('yadtreceiver.configuration.ReceiverConfig.compute_allowed_targets')
     @patch('yadtreceiver.configuration.ReceiverConfigLoader')
-    def test_should_load_configuration_from_file(self, mock_loader_class):
+    def test_should_load_configuration_from_file(self, mock_loader_class, _):
         mock_loader = Mock(ReceiverConfigLoader)
         mock_loader_class.return_value = mock_loader
 
@@ -175,8 +177,9 @@ class LoadTest (unittest.TestCase):
         self.assertEqual(
             call('abc'), mock_loader.read_configuration_file.call_args)
 
+    @patch('yadtreceiver.configuration.ReceiverConfig.compute_allowed_targets')
     @patch('yadtreceiver.configuration.ReceiverConfigLoader')
-    def test_should_get_broadcaster_properties_from_parser(self, mock_loader_class):
+    def test_should_get_broadcaster_properties_from_parser(self, mock_loader_class, _):
         mock_loader = Mock(ReceiverConfigLoader)
         mock_loader.get_broadcaster_host.return_value = 'broadcaster host'
         mock_loader.get_broadcaster_port.return_value = 12345
@@ -226,3 +229,28 @@ class LoadTest (unittest.TestCase):
         self.assertEqual(call(), mock_loader.get_targets_directory.call_args)
         self.assertEqual('/etc/yadtshell/targets',
                          actual_configuration['targets_directory'])
+
+
+class ReceiverConfigTests(unittest.TestCase):
+
+    @patch('yadtreceiver.configuration.ReceiverConfigLoader')
+    @patch('yadtreceiver.configuration.glob')
+    def test_should_compute_allowed_targets(self, mock_glob, mock_loader_class):
+        mock_glob.return_value = ['dev', 'dev01', 'dev02']
+        config = ReceiverConfig('/dev/foo')
+        config.configuration['targets'] = ['foo']
+        config.compute_allowed_targets()
+
+        self.assertEqual(config['allowed_targets'], ['dev', 'dev01', 'dev02'])
+
+    @patch('yadtreceiver.configuration.ReceiverConfig.compute_allowed_targets')
+    @patch('yadtreceiver.configuration.ReceiverConfigLoader')
+    def test_should_reload_targets(self, mock_loader_class, _):
+        mock_loader = Mock(ReceiverConfigLoader)
+        mock_loader.get_targets.return_value = ['foo']
+        mock_loader_class.return_value = mock_loader
+        config = ReceiverConfig('/dev/foo')
+        config.configuration['targets'] = ['bar']
+        config.reload_targets()
+
+        self.assertEqual(config['targets'], ['foo'])
