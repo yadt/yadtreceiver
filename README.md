@@ -25,7 +25,7 @@ Put a file called receiver.cfg into the directory /etc/yadtshell/
 ```
 [receiver]
 log_filename = /var/log/yadtreceiver.log
-targets = devyadt
+targets = dev*
 targets_directory = /etc/yadtshell/targets
 script_to_execute = /usr/bin/yadtshell
 
@@ -33,6 +33,11 @@ script_to_execute = /usr/bin/yadtshell
 host = broadcaster.domain.tld
 port = 8081
 ```
+
+`targets` is a whitelist with glob-like expressions, like `foo*` will match 
+everything starting with `foo`, e.g. `foobar`, `foobaz`, etc. The receiver will 
+watch the  targets directory for target configurations which names are covered 
+by the whitelist and subscribe to them without the need to restart the receiver.
 
 ## Starting service
 
