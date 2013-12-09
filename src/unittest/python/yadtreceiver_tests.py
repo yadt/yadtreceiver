@@ -21,7 +21,6 @@ __author__ = 'Michael Gruber'
 import unittest
 
 from mock import Mock, call, patch
-from twisted.mail.scripts.mailmail import Configuration
 from twisted.python.logfile import LogFile
 
 from yadtreceiver import __version__, Receiver, ReceiverException, FileSystemWatcher
