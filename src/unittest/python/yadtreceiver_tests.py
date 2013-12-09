@@ -491,14 +491,14 @@ class YadtReceiverFilesytemWatcherTests (unittest.TestCase):
     def test_for_missing_callbacks(self):
         fs = FileSystemWatcher('/foo/bar')
         self.assertRaises(
-            AttributeError, fs.OnChange, 'watch', self.PATH, self.CREATE)
+            AttributeError, fs.onChange, 'watch', self.PATH, self.CREATE)
 
     def test_for_mock_callback_create(self):
         mock_receiver = Mock(Receiver)
         fs = FileSystemWatcher('/foo/bar')
         fs.onChangeCallbacks = dict(create=mock_receiver.subscribeTarget,
                                     delete=mock_receiver.unsubscribeTarget)
-        fs.OnChange('watch', self.PATH, self.CREATE)
+        fs.onChange('watch', self.PATH, self.CREATE)
         self.assertTrue(mock_receiver.subscribeTarget.called)
 
     def test_for_mock_callback_delete(self):
@@ -506,7 +506,7 @@ class YadtReceiverFilesytemWatcherTests (unittest.TestCase):
         fs = FileSystemWatcher('/foo/bar')
         fs.onChangeCallbacks = dict(create=mock_receiver.subscribeTarget,
                                     delete=mock_receiver.unsubscribeTarget)
-        fs.OnChange('watch', self.PATH, self.DELETE)
+        fs.onChange('watch', self.PATH, self.DELETE)
         self.assertTrue(mock_receiver.unsubscribeTarget.called)
 
     @patch('yadtreceiver.inotify')
