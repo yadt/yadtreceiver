@@ -19,7 +19,7 @@
     application. The receiver allows to start processes triggered by
     broadcast events. It is configured using a dictionary. You can load
     configuration files using the load method from the configuration
-    module. 
+    module.
 """
 
 __author__ = 'Arne Hilmann, Maximilien Riehl, Michael Gruber, Marcel Wolf, Daniel Clerc'
@@ -274,9 +274,9 @@ class FileSystemWatcher(service.Service):
         notifier = inotify.INotify()
         notifier.startReading()
         notifier.watch(filepath.FilePath(self.path), mask=in_watch_mask,
-                       callbacks=[self.OnChange])
+                       callbacks=[self.onChange])
 
-    def OnChange(self, watch, path, mask):
+    def onChange(self, watch, path, mask):
         if mask in (self.SUBFOLDER_CREATE, self.SUBFOLDER_DELETE):
             callback = self.onChangeCallbacks['create']
             if mask == self.SUBFOLDER_DELETE:
