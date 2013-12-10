@@ -44,6 +44,7 @@ def set_properties(project):
     project.depends_on('Twisted')
     project.depends_on('yadtbroadcast-client')
     project.depends_on('yadtcommons')
+    project.depends_on('fysom')
 
     project.build_depends_on('mock')
     project.build_depends_on('coverage')
