@@ -229,6 +229,7 @@ class Receiver(service.Service):
         event = events.Event(target, event_data)
 
         if event.is_a_vote:
+            log.msg("Go vote %r for tracking id %r" % (event.vote, event.tracking_id))
             own_vote = self.states[event.tracking_id].vote
             is_a_fold = (own_vote < event.vote)
 
