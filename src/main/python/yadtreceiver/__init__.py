@@ -27,6 +27,8 @@ __version__ = '${version}'
 
 import os
 import traceback
+import functools
+from uuid import uuid4 as random_uuid
 
 from twisted.application import service
 from twisted.internet import inotify, reactor
@@ -37,6 +39,7 @@ from yadtbroadcastclient import WampBroadcaster
 
 import events
 from protocols import ProcessProtocol
+from voting import create_voting_fsm
 
 
 class ReceiverException(Exception):
@@ -85,29 +88,57 @@ class Receiver(service.Service):
         return target_directory
 
     def handle_request(self, event):
+        tracking_id = _determine_tracking_id(event.arguments)
+        vote = str(random_uuid())
+
+        def broadcast_vote(_):
+            log.msg('Voting %r for request with tracking-id %r' % (vote, tracking_id))
+            self.broadcaster._sendEvent('vote',
+                                        data=vote,
+                                        tracking_id=tracking_id)
+
+        def cleanup_fsm(_):
+            log.msg('Cleaning up fsm which is in state %r' % self.states[tracking_id].current)
+            del self.states[tracking_id]
+
+        self.states[tracking_id] = create_voting_fsm(tracking_id,
+                                                     vote,
+                                                     broadcast_vote,
+                                                     functools.partial(
+                                                         self.perform_request, event),
+                                                     cleanup_fsm)
+
+        reactor.callLater(10, self.states[tracking_id].showdown)
+
+    def perform_request(self, event, _):
         """
             Handles a request for the given target by executing the given
             command (using the python_command and script_to_execute from
             the configuration).
         """
-        self.publish_start(event)
+        log.msg('Spawning process for %r' % event.target)
+        try:
+            self.publish_start(event)
 
-        hostname = str(self.configuration['hostname'])
-        python_command = str(self.configuration['python_command'])
-        script_to_execute = str(self.configuration['script_to_execute'])
+            hostname = str(self.configuration['hostname'])
+            python_command = str(self.configuration['python_command'])
+            script_to_execute = str(self.configuration['script_to_execute'])
 
-        command_and_arguments_list = [
-            python_command, script_to_execute] + event.arguments
-        command_with_arguments = ' '.join(command_and_arguments_list)
+            command_and_arguments_list = [
+                python_command, script_to_execute] + event.arguments
+            command_with_arguments = ' '.join(command_and_arguments_list)
 
-        tracking_id = _determine_tracking_id(command_and_arguments_list)
+            tracking_id = _determine_tracking_id(command_and_arguments_list)
+            self.states[tracking_id].spawned()
 
-        process_protocol = ProcessProtocol(
-            hostname, self.broadcaster, event.target, command_with_arguments, tracking_id=tracking_id)
+            process_protocol = ProcessProtocol(
+                hostname, self.broadcaster, event.target, command_with_arguments, tracking_id=tracking_id)
 
-        target_dir = self.get_target_directory(event.target)
-        reactor.spawnProcess(process_protocol, python_command,
-                             command_and_arguments_list, env={}, path=target_dir)
+            target_dir = self.get_target_directory(event.target)
+            reactor.spawnProcess(process_protocol, python_command,
+                                 command_and_arguments_list, env={}, path=target_dir)
+        except Exception as e:
+            self.publish_failed(event, e.message)
 
     def publish_failed(self, event, message):
         """
@@ -134,6 +165,8 @@ class Receiver(service.Service):
             is useless when no targets are configured, therefore it will exit
             with error code 1 when no targets are configured.
         """
+        self.states = {}
+
         self.broadcaster.client.connectionLost = self.onConnectionLost
 
         host = self.configuration['broadcaster_host']
@@ -171,7 +204,6 @@ class Receiver(service.Service):
         """
         log.err('connection lost: %s' % reason)
         self.broadcaster.client = None
-        # TODO: superclass method should be called here?
 
     def _client_watchdog(self, delay=1):
         """
@@ -196,7 +228,22 @@ class Receiver(service.Service):
         """
         event = events.Event(target, event_data)
 
-        if event.is_a_request:
+        if event.is_a_vote:
+            own_vote = self.states[event.tracking_id].vote
+            is_a_fold = (own_vote < event.vote)
+
+            if is_a_fold:
+                log.msg(
+                    'Folding due to vote %r being higher than own vote %r' %
+                    (event.vote, own_vote))
+                self.states[event.tracking_id].fold()
+            else:
+                log.msg(
+                    'Calling due to vote %r being lower than own vote %r' %
+                    (event.vote, own_vote))
+                self.states[event.tracking_id].call()
+
+        elif event.is_a_request:
             try:
                 self.handle_request(event)
             except Exception as e:

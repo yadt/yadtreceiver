@@ -21,24 +21,28 @@
 from fysom import Fysom
 
 
-def create_voting_fsm(on_ownvote,
-                      broadcast_vote_and_schedule_bets_closed,
+def create_voting_fsm(tracking_id,
+                      vote,
+                      broadcast_vote,
                       spawn_yadtshell,
                       cleanup_fsm):
     fsm = Fysom({
-        'initial': 'bidding',
+        'initial': 'negotiating',
         'events': [
-            {'name': 'vote', 'src': 'bidding', 'dst': 'destroy'},
-            {'name': 'ownvote', 'src': 'bidding', 'dst': 'negotiating'},
-            {'name': 'smallervote', 'src': 'negotiating', 'dst': 'negotiating'},
-            {'name': 'biggervote', 'src': 'negotiating', 'dst': 'destroy'},
-            {'name': 'betsclosed', 'src': 'negotiating', 'dst': 'spawning'},
+            {'name': 'call', 'src':
+                'negotiating', 'dst': 'negotiating'},
+            {'name': 'fold', 'src': 'negotiating', 'dst': 'finish'},
+            {'name': 'showdown', 'src':
+                'negotiating', 'dst': 'spawning'},
+            {'name': 'spawned', 'src': 'spawning', 'dst': 'finish'},
+            {'name': 'showdown', 'src': 'finish', 'dst': 'finish'}
         ],
         'callbacks': {
-            'onbidding': on_ownvote,
-            'onnegotiating': broadcast_vote_and_schedule_bets_closed,
+            'onnegotiating': broadcast_vote,
             'onspawning': spawn_yadtshell,
-            'ondestroy': cleanup_fsm
+            'onfinish': cleanup_fsm
         }
     })
+    fsm.tracking_id = tracking_id
+    fsm.vote = vote
     return fsm

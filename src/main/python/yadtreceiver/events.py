@@ -39,12 +39,14 @@ TYPE_FULL_UPDATE = 'full-update'
 TYPE_REQUEST = 'request'
 TYPE_SERVICE_CHANGE = 'service-change'
 TYPE_HEARTBEAT = 'heartbeat'
+TYPE_VOTE = 'vote'
 
 KNOWN_EVENT_TYPES = [TYPE_COMMAND,
                      TYPE_FULL_UPDATE,
                      TYPE_REQUEST,
                      TYPE_SERVICE_CHANGE,
-                     TYPE_HEARTBEAT]
+                     TYPE_HEARTBEAT,
+                     TYPE_VOTE]
 
 
 class IncompleteEventDataException(Exception):
@@ -94,7 +96,11 @@ class Event (object):
     def __init__(self, target, data):
         self.target = target
         self.data = data
+        self.tracking_id = data.get('tracking_id')
         self.event_type = self._ensure_is_valid_event_type()
+
+        if self.is_a_vote:
+            self._initialize_vote()
 
         if self.is_a_request:
             self._initialize_request()
@@ -104,6 +110,9 @@ class Event (object):
 
         if self.is_a_command:
             self._initialize_command()
+
+    def _initialize_vote(self):
+        self.vote = self._ensure_attribute_in_data(ATTRIBUTE_PAYLOAD)
 
     def _initialize_request(self):
         self.command = self._ensure_attribute_in_data(ATTRIBUTE_COMMAND)
@@ -169,6 +178,10 @@ class Event (object):
         return self.event_type == TYPE_COMMAND
 
     @property
+    def is_a_vote(self):
+        return self.event_type == TYPE_VOTE
+
+    @property
     def is_a_heartbeat(self):
         return self.event_type == TYPE_HEARTBEAT
 
@@ -191,6 +204,9 @@ class Event (object):
 
         if self.is_a_heartbeat:
             return 'Heartbeat on {0}'.format(self.target)
+
+        if self.is_a_vote:
+            return 'Vote with value {0}'.format(self.vote)
 
         raise NotImplementedError(
             'Unknown event type {0}'.format(self.event_type))

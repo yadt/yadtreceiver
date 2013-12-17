@@ -205,6 +205,7 @@ class YadtReceiverTests (unittest.TestCase):
         mock_broadcaster = Mock()
         mock_receiver.broadcaster = mock_broadcaster
         mock_receiver.get_target_directory.return_value = '/etc/yadtshell/targets/devabc123'
+        mock_receiver.states = {None: Mock()}
 
         mock_receiver.configuration = {'hostname': 'hostname',
                                        'python_command': '/usr/bin/python',
@@ -215,7 +216,7 @@ class YadtReceiverTests (unittest.TestCase):
         mock_event.command = 'yadtshell'
         mock_event.arguments = ['update']
 
-        Receiver.handle_request(mock_receiver, mock_event)
+        Receiver.perform_request(mock_receiver, mock_event, Mock())
 
         self.assertEquals(call('hostname', mock_broadcaster, 'devabc123',
                           '/usr/bin/python /usr/bin/yadtshell update', tracking_id=None), mock_protocol.call_args)
@@ -224,10 +225,34 @@ class YadtReceiverTests (unittest.TestCase):
 
     @patch('yadtreceiver.reactor')
     @patch('yadtreceiver.ProcessProtocol')
+    def test_should_broadcast_error_when_spawning_fails(self, mock_protocol, mock_reactor):
+        mock_protocol.side_effect = RuntimeError('Booom!')
+        mock_receiver = Mock(Receiver)
+        mock_broadcaster = Mock()
+        mock_receiver.broadcaster = mock_broadcaster
+        mock_receiver.get_target_directory.return_value = '/etc/yadtshell/targets/devabc123'
+        mock_receiver.states = {None: Mock()}
+
+        mock_receiver.configuration = {'hostname': 'hostname',
+                                       'python_command': '/usr/bin/python',
+                                       'script_to_execute': '/usr/bin/yadtshell'}
+
+        mock_event = Mock(Event)
+        mock_event.target = 'devabc123'
+        mock_event.command = 'yadtshell'
+        mock_event.arguments = ['update']
+
+        Receiver.perform_request(mock_receiver, mock_event, Mock())
+
+        mock_receiver.publish_failed.assert_called_with(mock_event, 'Booom!')
+
+    @patch('yadtreceiver.reactor')
+    @patch('yadtreceiver.ProcessProtocol')
     def test_should_create_process_protocol_with_tracking_id_if_given(self, mock_protocol, mock_reactor):
         mock_protocol.return_value = 'mock-protocol'
         mock_receiver = Mock(Receiver)
         mock_broadcaster = Mock()
+        mock_receiver.states = {'foo': Mock()}
         mock_receiver.broadcaster = mock_broadcaster
         mock_receiver.get_target_directory.return_value = '/etc/yadtshell/targets/devabc123'
 
@@ -240,7 +265,7 @@ class YadtReceiverTests (unittest.TestCase):
         mock_event.command = 'yadtshell'
         mock_event.arguments = ['update', '--tracking-id=foo']
 
-        Receiver.handle_request(mock_receiver, mock_event)
+        Receiver.perform_request(mock_receiver, mock_event, Mock())
 
         expected_command_with_arguments = '/usr/bin/python /usr/bin/yadtshell update --tracking-id=foo'
 
@@ -254,6 +279,7 @@ class YadtReceiverTests (unittest.TestCase):
     def test_should_create_process_protocol_with_no_tracking_id_if_not_given(self, mock_protocol, mock_reactor):
         mock_protocol.return_value = 'mock-protocol'
         mock_receiver = Mock(Receiver)
+        mock_receiver.states = {None: Mock()}
         mock_broadcaster = Mock()
         mock_receiver.broadcaster = mock_broadcaster
         mock_receiver.get_target_directory.return_value = '/etc/yadtshell/targets/devabc123'
@@ -267,7 +293,7 @@ class YadtReceiverTests (unittest.TestCase):
         mock_event.command = 'yadtshell'
         mock_event.arguments = ['update']
 
-        Receiver.handle_request(mock_receiver, mock_event)
+        Receiver.perform_request(mock_receiver, mock_event, Mock())
 
         expected_command_with_arguments = '/usr/bin/python /usr/bin/yadtshell update'
 
@@ -311,7 +337,9 @@ class YadtReceiverTests (unittest.TestCase):
     @patch('yadtreceiver.events.Event')
     def test_should_handle_request(self, mock_event_class):
         mock_receiver = Mock(Receiver)
+        mock_receiver.states = {None: Mock()}
         mock_event = Mock(Event)
+        mock_event.is_a_vote = False
         mock_event_class.return_value = mock_event
 
         Receiver.onEvent(mock_receiver, 'target', {
@@ -328,7 +356,10 @@ class YadtReceiverTests (unittest.TestCase):
         mock_receiver = Mock(Receiver)
         mock_receiver.handle_request.side_effect = ReceiverException(
             'It failed!')
+        mock_receiver.states = {'some-id': Mock()}
         mock_event = Mock(Event)
+        mock_event.is_a_vote = False
+        mock_event.tracking_id = 'some-id'
         mock_event_class.return_value = mock_event
 
         Receiver.onEvent(mock_receiver, 'target', {

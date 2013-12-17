@@ -20,10 +20,16 @@ __author__ = 'Michael Gruber, Maximilien Riehl'
 from unittest import TestCase
 
 from yadtreceiver.events import (Event,
-                                 IncompleteEventDataException, PayloadIntegrityException, InvalidEventTypeException)
+                                 IncompleteEventDataException,
+                                 PayloadIntegrityException,
+                                 InvalidEventTypeException)
 
 
 class EventTests(TestCase):
+
+    def test_should_raise_exception_when_payload_attribute_is_missing_in_vote(self):
+        self.assertRaises(IncompleteEventDataException,
+                          Event, 'target-name', {'id': 'vote'})
 
     def test_should_raise_exception_when_command_attribute_is_missing_in_request(self):
         self.assertRaises(IncompleteEventDataException, Event,
@@ -89,6 +95,14 @@ class EventTests(TestCase):
 
         self.assertEqual(
             'target[target-name] requested command "command" using arguments "arg1 arg2 arg3"', str(event))
+
+    def test_should_return_description_of_vote(self):
+        event = Event('target-name', {'id': 'vote',
+                                      'payload': 42
+                                      })
+
+        self.assertEqual(
+            'Vote with value 42', str(event))
 
     def test_should_return_description_of_heartbeat(self):
         event = Event('target-name', {'id': 'heartbeat',
