@@ -41,10 +41,11 @@ class YadtreceiverVotingTests(TestCase):
         receiver.states = {'foo': None}
         event = Mock()
         event.arguments = ['--tracking-id=foo']
+        event.target = 'target'
         Receiver.handle_request(receiver, event)
 
         receiver.broadcaster._sendEvent.assert_called_with(
-            'vote', data='1234-5678', tracking_id='foo')
+            'vote', data='1234-5678', tracking_id='foo', target='target')
 
     @patch('yadtreceiver.random_uuid')
     def test_should_initialize_fsm_when_handling_request(self, uuid_fun):

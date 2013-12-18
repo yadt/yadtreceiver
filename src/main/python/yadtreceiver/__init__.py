@@ -95,7 +95,8 @@ class Receiver(service.Service):
             log.msg('Voting %r for request with tracking-id %r' % (vote, tracking_id))
             self.broadcaster._sendEvent('vote',
                                         data=vote,
-                                        tracking_id=tracking_id)
+                                        tracking_id=tracking_id,
+                                        target=event.target)
 
         def cleanup_fsm(_):
             log.msg('Cleaning up fsm which is in state %r' % self.states[tracking_id].current)
