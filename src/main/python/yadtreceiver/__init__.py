@@ -230,20 +230,24 @@ class Receiver(service.Service):
         event = events.Event(target, event_data)
 
         if event.is_a_vote:
-            log.msg("Go vote %r for tracking id %r" % (event.vote, event.tracking_id))
-            own_vote = self.states[event.tracking_id].vote
+            log.msg('Got vote %r for tracking id %r' % (event.vote, event.tracking_id))
+            voting_fsm = self.states.get(event.tracking_id)
+            if not voting_fsm:
+                log.msg('Ignoring vote %r because I have already lost' % event.vote)
+                return
+            own_vote = voting_fsm.vote
             is_a_fold = (own_vote < event.vote)
 
             if is_a_fold:
                 log.msg(
                     'Folding due to vote %r being higher than own vote %r' %
                     (event.vote, own_vote))
-                self.states[event.tracking_id].fold()
+                voting_fsm.fold()
             else:
                 log.msg(
                     'Calling due to vote %r being lower than own vote %r' %
                     (event.vote, own_vote))
-                self.states[event.tracking_id].call()
+                voting_fsm.call()
 
         elif event.is_a_request:
             try:
