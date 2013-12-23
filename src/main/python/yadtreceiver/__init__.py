@@ -300,7 +300,7 @@ class Receiver(service.Service):
 
         log.msg('Connecting to broadcaster on %s:%s' % (host, port))
 
-        self.broadcaster = WampBroadcaster(host, port, 'yadtreceiver')
+        self.broadcaster = WampBroadcaster(host, port, None)
         self.broadcaster.addOnSessionOpenHandler(self.onConnect)
         self.broadcaster.connect()
 

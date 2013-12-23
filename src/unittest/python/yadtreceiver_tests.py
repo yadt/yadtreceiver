@@ -70,7 +70,7 @@ class YadtReceiverTests (unittest.TestCase):
         receiver._connect_broadcaster()
 
         self.assertEquals(
-            call('broadcaster-host', 1234, 'yadtreceiver'), mock_wamb.call_args)
+            call('broadcaster-host', 1234, None), mock_wamb.call_args)
 
     @patch('yadtreceiver.WampBroadcaster')
     def test_should_add_session_handler_to_broadcaster_when_connecting_broadcaster(self, mock_wamb):
