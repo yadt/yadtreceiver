@@ -50,6 +50,9 @@ case "${1:-}" in
             echo "$0 running (pid $PID), returning 0" && exit 0
         fi
     ;;
+    restart)
+        service yadtreceiver stop && service yadtreceiver start
+    ;;
     *)
         echo "Usage: $0 {start|stop|status}" >&2 && exit 3
     ;;
