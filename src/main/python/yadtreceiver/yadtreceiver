@@ -54,6 +54,6 @@ case "${1:-}" in
         service yadtreceiver stop && service yadtreceiver start
     ;;
     *)
-        echo "Usage: $0 {start|stop|status}" >&2 && exit 3
+        echo "Usage: $0 {start|stop|status|restart}" >&2 && exit 3
     ;;
 esac
