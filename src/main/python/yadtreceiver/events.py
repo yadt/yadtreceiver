@@ -40,13 +40,15 @@ TYPE_REQUEST = 'request'
 TYPE_SERVICE_CHANGE = 'service-change'
 TYPE_HEARTBEAT = 'heartbeat'
 TYPE_VOTE = 'vote'
+TYPE_ERROR_INFO = 'error-info'
 
 KNOWN_EVENT_TYPES = [TYPE_COMMAND,
                      TYPE_FULL_UPDATE,
                      TYPE_REQUEST,
                      TYPE_SERVICE_CHANGE,
                      TYPE_HEARTBEAT,
-                     TYPE_VOTE]
+                     TYPE_VOTE,
+                     TYPE_ERROR_INFO]
 
 
 class IncompleteEventDataException(Exception):
@@ -111,8 +113,14 @@ class Event (object):
         if self.is_a_command:
             self._initialize_command()
 
+        if self.is_an_error_info:
+            self._initialize_error_info()
+
     def _initialize_vote(self):
         self.vote = self._ensure_attribute_in_data(ATTRIBUTE_PAYLOAD)
+
+    def _initialize_error_info(self):
+        pass
 
     def _initialize_request(self):
         self.command = self._ensure_attribute_in_data(ATTRIBUTE_COMMAND)
@@ -166,6 +174,10 @@ class Event (object):
         return self.event_type == TYPE_REQUEST
 
     @property
+    def is_an_error_info(self):
+        return self.event_type == TYPE_ERROR_INFO
+
+    @property
     def is_a_full_update(self):
         return self.event_type == TYPE_FULL_UPDATE
 
@@ -207,6 +219,9 @@ class Event (object):
 
         if self.is_a_vote:
             return 'Vote with value {0}'.format(self.vote)
+
+        if self.is_an_error_info:
+            return 'Error info from target {0}'.format(self.target)
 
         raise NotImplementedError(
             'Unknown event type {0}'.format(self.event_type))

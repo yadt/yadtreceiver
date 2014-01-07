@@ -104,6 +104,14 @@ class EventTests(TestCase):
         self.assertEqual(
             'Vote with value 42', str(event))
 
+    def test_should_return_description_of_error_info(self):
+        event = Event('target-name', {'id': 'error-info',
+                                      'target': 'foo'
+                                      })
+
+        self.assertEqual(
+            'Error info from target target-name', str(event))
+
     def test_should_return_description_of_heartbeat(self):
         event = Event('target-name', {'id': 'heartbeat',
                                       'type': 'event',
