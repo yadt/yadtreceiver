@@ -49,6 +49,8 @@ def set_properties(project):
     project.build_depends_on('mock')
     project.build_depends_on('coverage')
 
+    project.set_property('verbose', True)
+
     project.set_property('coverage_break_build', True)
     project.set_property('coverage_threshold_warn', 85)
 
