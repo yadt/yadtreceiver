@@ -66,10 +66,9 @@ class EventTests(TestCase):
         self.assertRaises(PayloadIntegrityException, Event,
                           'target-name', payload_with_no_state_in_service_change)
 
-    def test_should_raise_exception_when_event_type_unknown(self):
-        invalid_event_data = {'id': 'spameggs'}
-        self.assertRaises(
-            InvalidEventTypeException, Event, 'target-name', invalid_event_data)
+    def test_should_not_raise_exception_when_event_type_unknown(self):
+        unknown_type_data = {'id': 'spameggs'}
+        Event('target-name', unknown_type_data)
 
     def test_should_return_description_of_multiple_service_changes(self):
         event = Event('target-name', {'id': 'service-change',

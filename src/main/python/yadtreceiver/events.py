@@ -160,8 +160,6 @@ class Event (object):
             raise InvalidEventTypeException(self, None)
 
         event_type = self.data[ATTRIBUTE_TYPE]
-        if not event_type in KNOWN_EVENT_TYPES:
-            raise InvalidEventTypeException(self, event_type)
         return event_type
 
     def _ensure_attribute_in_data(self, attribute_name):
