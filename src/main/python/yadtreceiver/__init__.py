@@ -92,7 +92,8 @@ class Receiver(service.Service):
         vote = str(random_uuid())
 
         def broadcast_vote(_):
-            log.msg('Voting %r for request with tracking-id %r' % (vote, tracking_id))
+            log.msg('Voting %r for request with tracking-id %r' %
+                    (vote, tracking_id))
             self.broadcaster._sendEvent('vote',
                                         data=vote,
                                         tracking_id=tracking_id,
@@ -117,7 +118,8 @@ class Receiver(service.Service):
             command (using the python_command and script_to_execute from
             the configuration).
         """
-        log.msg('I have won the vote for %r, starting it now..' % (event.target))
+        log.msg('I have won the vote for %r, starting it now..' %
+                (event.target))
         try:
             self.publish_start(event)
 
@@ -136,6 +138,9 @@ class Receiver(service.Service):
                 hostname, self.broadcaster, event.target, command_with_arguments, tracking_id=tracking_id)
 
             target_dir = self.get_target_directory(event.target)
+            #  event data is unicode, not string yet, so convert it first
+            command_and_arguments_list = map(lambda v: str(v), command_and_arguments_list)
+
             reactor.spawnProcess(process_protocol, python_command,
                                  command_and_arguments_list, env={}, path=target_dir)
         except Exception as e:
@@ -232,7 +237,8 @@ class Receiver(service.Service):
         if event.is_a_vote:
             voting_fsm = self.states.get(event.tracking_id)
             if not voting_fsm:
-                log.msg('Ignoring vote %r because I have already lost' % event.vote)
+                log.msg(
+                    'Ignoring vote %r because I have already lost' % event.vote)
                 return
             own_vote = voting_fsm.vote
             is_a_fold = (own_vote < event.vote)
