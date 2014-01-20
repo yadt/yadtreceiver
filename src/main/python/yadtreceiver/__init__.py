@@ -100,8 +100,8 @@ class Receiver(service.Service):
                                         target=event.target)
 
         def cleanup_fsm(_):
-            log.msg('Cleaning up fsm, %d left in memory' % len(self.states))
             del self.states[tracking_id]
+            log.msg('Cleaned up fsm, %d left in memory' % len(self.states))
 
         self.states[tracking_id] = create_voting_fsm(tracking_id,
                                                      vote,
