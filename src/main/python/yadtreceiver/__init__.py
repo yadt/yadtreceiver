@@ -99,7 +99,7 @@ class Receiver(service.Service):
                                         target=event.target)
 
         def cleanup_fsm(_):
-            log.msg('Cleaning up fsm which is in state %r' % self.states[tracking_id].current)
+            log.msg('Cleaning up fsm, %d left in memory' % len(self.states))
             del self.states[tracking_id]
 
         self.states[tracking_id] = create_voting_fsm(tracking_id,
@@ -117,7 +117,7 @@ class Receiver(service.Service):
             command (using the python_command and script_to_execute from
             the configuration).
         """
-        log.msg('Spawning process for %r' % event.target)
+        log.msg('I have won the vote for %r, starting it now..' % (event.target))
         try:
             self.publish_start(event)
 
