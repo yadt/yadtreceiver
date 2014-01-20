@@ -26,10 +26,10 @@ from twisted.python import log
 
 from yadtreceiver import events
 
-try:  # pragma: no cover
+try:
     import cStringIO
     StringIO = cStringIO
-except:  # pragma: no cover
+except:
     import StringIO
 
 
