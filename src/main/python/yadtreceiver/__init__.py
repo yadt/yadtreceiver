@@ -152,7 +152,11 @@ class Receiver(service.Service):
         """
         log.err(_stuff=Exception(message), _why=message)
         self.broadcaster.publish_cmd_for_target(
-            event.target, event.command, events.FAILED, message)
+            event.target,
+            event.command,
+            events.FAILED,
+            message,
+            tracking_id=event.tracking_id)
 
     def publish_start(self, event):
         """
@@ -163,7 +167,11 @@ class Receiver(service.Service):
             hostname, event.target, event.command, event.arguments)
         log.msg(message)
         self.broadcaster.publish_cmd_for_target(
-            event.target, event.command, events.STARTED, message)
+            event.target,
+            event.command,
+            events.STARTED,
+            message,
+            tracking_id=event.tracking_id)
 
     def onConnect(self):
         """

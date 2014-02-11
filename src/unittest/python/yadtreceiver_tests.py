@@ -308,14 +308,18 @@ class YadtReceiverTests (unittest.TestCase):
 
         mock_event = Mock(Event)
         mock_event.target = 'devabc123'
+        mock_event.tracking_id = 'any-tracking-id'
         mock_event.command = 'yadtshell'
         mock_event.arguments = ['update']
 
         Receiver.publish_failed(mock_receiver, mock_event, 'It failed!')
 
-        self.assertEquals(
-            call('devabc123', 'yadtshell', 'failed', 'It failed!'),
-            mock_broadcaster.publish_cmd_for_target.call_args)
+        mock_broadcaster.publish_cmd_for_target.assert_called_with(
+            'devabc123',
+            'yadtshell',
+            'failed',
+            'It failed!',
+            tracking_id='any-tracking-id')
 
     @patch('yadtreceiver.log')
     def test_should_publish_event_about_started_command_on_target(self, mock_log):
@@ -325,14 +329,19 @@ class YadtReceiverTests (unittest.TestCase):
         mock_receiver.broadcaster = mock_broadcaster
 
         mock_event = Mock(Event)
+        mock_event.tracking_id = 'any-tracking-id'
         mock_event.target = 'devabc123'
         mock_event.command = 'yadtshell'
         mock_event.arguments = ['update']
 
         Receiver.publish_start(mock_receiver, mock_event)
 
-        self.assertEquals(
-            call('devabc123', 'yadtshell', 'started', '(hostname) target[devabc123] request: command="yadtshell", arguments=[\'update\']'), mock_broadcaster.publish_cmd_for_target.call_args)
+        mock_broadcaster.publish_cmd_for_target.assert_called_with(
+            'devabc123',
+            'yadtshell',
+            'started',
+            '(hostname) target[devabc123] request: command="yadtshell", arguments=[\'update\']',
+            tracking_id='any-tracking-id')
 
     @patch('yadtreceiver.events.Event')
     def test_should_handle_request(self, mock_event_class):
