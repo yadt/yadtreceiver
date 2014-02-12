@@ -121,8 +121,6 @@ class Receiver(service.Service):
         log.msg('I have won the vote for %r, starting it now..' %
                 (event.target))
         try:
-            self.publish_start(event)
-
             hostname = str(self.configuration['hostname'])
             python_command = str(self.configuration['python_command'])
             script_to_execute = str(self.configuration['script_to_execute'])
@@ -131,11 +129,12 @@ class Receiver(service.Service):
                 python_command, script_to_execute] + event.arguments
             command_with_arguments = ' '.join(command_and_arguments_list)
 
-            tracking_id = _determine_tracking_id(command_and_arguments_list)
-            self.states[tracking_id].spawned()
+            event.tracking_id = _determine_tracking_id(command_and_arguments_list)
+            self.publish_start(event)
 
+            self.states[event.tracking_id].spawned()
             process_protocol = ProcessProtocol(
-                hostname, self.broadcaster, event.target, command_with_arguments, tracking_id=tracking_id)
+                hostname, self.broadcaster, event.target, command_with_arguments, tracking_id=event.tracking_id)
 
             target_dir = self.get_target_directory(event.target)
             #  event data is unicode, not string yet, so convert it first
