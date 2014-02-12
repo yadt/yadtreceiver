@@ -138,7 +138,7 @@ class Receiver(service.Service):
 
             target_dir = self.get_target_directory(event.target)
             #  event data is unicode, not string yet, so convert it first
-            command_and_arguments_list = map(lambda v: str(v), command_and_arguments_list)
+            command_and_arguments_list = map(lambda possible_unicode: str(possible_unicode), command_and_arguments_list)
 
             reactor.spawnProcess(process_protocol, python_command,
                                  command_and_arguments_list, env={}, path=target_dir)
