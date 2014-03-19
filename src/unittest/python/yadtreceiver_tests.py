@@ -225,6 +225,33 @@ class YadtReceiverTests (unittest.TestCase):
 
     @patch('yadtreceiver.reactor')
     @patch('yadtreceiver.ProcessProtocol')
+    @patch('yadtreceiver.log')
+    def test_should_spawn_new_process_on_reactor_even_when_not_registered(self, _, mock_protocol, mock_reactor):
+        mock_protocol.return_value = 'mock-protocol'
+        mock_receiver = Mock(Receiver)
+        mock_broadcaster = Mock()
+        mock_receiver.broadcaster = mock_broadcaster
+        mock_receiver.get_target_directory.return_value = '/etc/yadtshell/targets/devabc123'
+        mock_receiver.states = {}
+
+        mock_receiver.configuration = {'hostname': 'hostname',
+                                       'python_command': '/usr/bin/python',
+                                       'script_to_execute': '/usr/bin/yadtshell'}
+
+        mock_event = Mock(Event)
+        mock_event.target = 'devabc123'
+        mock_event.command = 'yadtshell'
+        mock_event.arguments = ['update']
+
+        Receiver.perform_request(mock_receiver, mock_event, Mock())
+
+        self.assertEquals(call('hostname', mock_broadcaster, 'devabc123',
+                          '/usr/bin/python /usr/bin/yadtshell update', tracking_id=None), mock_protocol.call_args)
+        self.assertEquals(call('mock-protocol', '/usr/bin/python', [
+                          '/usr/bin/python', '/usr/bin/yadtshell', 'update'], path='/etc/yadtshell/targets/devabc123', env={}), mock_reactor.spawnProcess.call_args)
+
+    @patch('yadtreceiver.reactor')
+    @patch('yadtreceiver.ProcessProtocol')
     def test_should_broadcast_error_when_spawning_fails(self, mock_protocol, mock_reactor):
         mock_protocol.side_effect = RuntimeError('Booom!')
         mock_receiver = Mock(Receiver)

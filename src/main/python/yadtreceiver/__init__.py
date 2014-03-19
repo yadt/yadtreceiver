@@ -124,7 +124,6 @@ class Receiver(service.Service):
             hostname = str(self.configuration['hostname'])
             python_command = str(self.configuration['python_command'])
             script_to_execute = str(self.configuration['script_to_execute'])
-
             command_and_arguments_list = [
                 python_command, script_to_execute] + event.arguments
             command_with_arguments = ' '.join(command_and_arguments_list)
@@ -132,7 +131,11 @@ class Receiver(service.Service):
             event.tracking_id = _determine_tracking_id(command_and_arguments_list)
             self.publish_start(event)
 
-            self.states[event.tracking_id].spawned()
+            if event.tracking_id in self.states:
+                self.states[event.tracking_id].spawned()
+            else:
+                log.err('Tracking ID %r not registered with my FSM, but handling it anyway.' % event.tracking_id)
+
             process_protocol = ProcessProtocol(
                 hostname, self.broadcaster, event.target, command_with_arguments, tracking_id=event.tracking_id)
 
