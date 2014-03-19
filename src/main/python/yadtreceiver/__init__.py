@@ -146,7 +146,7 @@ class Receiver(service.Service):
             reactor.spawnProcess(process_protocol, python_command,
                                  command_and_arguments_list, env={}, path=target_dir)
         except Exception as e:
-            self.publish_failed(event, e.message)
+            self.publish_failed(event, "%s : %s" % (type(e), e.message))
 
     def publish_failed(self, event, message):
         """

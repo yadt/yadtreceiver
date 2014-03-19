@@ -271,7 +271,7 @@ class YadtReceiverTests (unittest.TestCase):
 
         Receiver.perform_request(mock_receiver, mock_event, Mock())
 
-        mock_receiver.publish_failed.assert_called_with(mock_event, 'Booom!')
+        mock_receiver.publish_failed.assert_called_with(mock_event, "<type 'exceptions.RuntimeError'> : Booom!")
 
     @patch('yadtreceiver.reactor')
     @patch('yadtreceiver.ProcessProtocol')
