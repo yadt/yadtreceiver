@@ -220,7 +220,7 @@ class Receiver(service.Service):
         """
         reactor.callLater(delay, self._refresh_connection)
         log.msg('Might want to refresh connection now.')
-        if self._should_refresh_connection() and not first_call:
+        if not first_call and self._should_refresh_connection():
             log.msg(
                 'Closing connection to broadcaster. This should force a connection-refresh.')
             self.broadcaster.client.sendClose()
