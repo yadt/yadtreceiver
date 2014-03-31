@@ -409,6 +409,7 @@ class YadtReceiverTests (unittest.TestCase):
     @patch('yadtreceiver.reactor')
     def test_should_queue_call_to_refresh_connection(self, mock_reactor):
         mock_receiver = Mock(Receiver)
+        mock_receiver.broadcaster = Mock()
 
         Receiver._refresh_connection(mock_receiver, 123)
 
@@ -548,7 +549,52 @@ class YadtReceiverTests (unittest.TestCase):
             'foo', mock_receiver.onEvent)
 
 
-class YadtReceiverFilesytemWatcherTests (unittest.TestCase):
+class ConnectionRefreshTests(unittest.TestCase):
+
+    @patch('yadtreceiver.datetime')
+    def test_should_refresh_when_connected_and_hour_is_2_am(self, datetime):
+        time = Mock()
+        datetime.now.return_value = time
+        time.hour = 2
+        receiver = Mock(Receiver)
+        receiver.broadcaster = Mock()
+        receiver.broadcaster.client = Mock()
+
+        self.assertTrue(Receiver._should_refresh_connection(receiver))
+
+    @patch('yadtreceiver.datetime')
+    def test_should_not_refresh_when_no_broadcaster_but_hour_is_2_am(self, datetime):
+        time = Mock()
+        datetime.now.return_value = time
+        time.hour = 2
+        receiver = Mock(Receiver)
+
+        self.assertFalse(Receiver._should_refresh_connection(receiver))
+
+    @patch('yadtreceiver.datetime')
+    def test_should_not_refresh_when_no_broadcastclient_but_hour_is_2_am(self, datetime):
+        time = Mock()
+        datetime.now.return_value = time
+        time.hour = 2
+        receiver = Mock(Receiver)
+        receiver.broadcaster = Mock()
+        receiver.broadcaster.client = None
+
+        self.assertFalse(Receiver._should_refresh_connection(receiver))
+
+    @patch('yadtreceiver.datetime')
+    def test_should_not_refresh_when_connected_but_hour_is_not_2_am(self, datetime):
+        time = Mock()
+        datetime.now.return_value = time
+        time.hour = 8
+        receiver = Mock(Receiver)
+        receiver.broadcaster = Mock()
+        receiver.broadcaster.client = Mock()
+
+        self.assertFalse(Receiver._should_refresh_connection(receiver))
+
+
+class YadtReceiverFilesytemWatcherTests(unittest.TestCase):
 
     def setUp(self):
         self.CREATE = 0x40000100

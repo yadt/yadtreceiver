@@ -29,6 +29,7 @@ import os
 import traceback
 import functools
 from uuid import uuid4 as random_uuid
+from datetime import datetime
 
 from twisted.application import service
 from twisted.internet import inotify, reactor
@@ -201,17 +202,28 @@ class Receiver(service.Service):
             log.msg('subscribing to target "%s".' % targetname)
             self.broadcaster.client.subscribe(targetname, self.onEvent)
 
+    def _should_refresh_connection(self):
+        if not hasattr(self, 'broadcaster') or not self.broadcaster.client:
+            log.msg('Not connected, cannot refresh connection')
+            return False  # no connection, cannot refresh
+
+        if not datetime.now().hour == 2:  # only refresh at 2:xx a.m.
+            log.msg("It's not 2:xx a.m., no connection-refresh now.")
+            return False
+
+        return True
+
     def _refresh_connection(self, delay=60 * 60, first_call=False):
         """
             When connected, closes connection to force a clean reconnect,
             except on first_call
         """
         reactor.callLater(delay, self._refresh_connection)
-        if hasattr(self, 'broadcaster') and self.broadcaster.client:
-            if not first_call:
-                log.msg(
-                    'Closing connection to broadcaster. This should force a connection-refresh.')
-                self.broadcaster.client.sendClose()
+        log.msg('Might want to refresh connection now.')
+        if self._should_refresh_connection() and not first_call:
+            log.msg(
+                'Closing connection to broadcaster. This should force a connection-refresh.')
+            self.broadcaster.client.sendClose()
 
     def onConnectionLost(self, reason):
         """
