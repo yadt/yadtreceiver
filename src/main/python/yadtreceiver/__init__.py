@@ -207,8 +207,9 @@ class Receiver(service.Service):
             log.msg('Not connected, cannot refresh connection')
             return False  # no connection, cannot refresh
 
-        if not datetime.now().hour == 2:  # only refresh at 2:xx a.m.
-            log.msg("It's not 2:xx a.m., no connection-refresh now.")
+        current_hour = datetime.now().hour
+        if not current_hour == 2:  # only refresh at 2:xx a.m.
+            log.msg("It's %d:xx, not 2:xx a.m., no connection-refresh now." % current_hour)
             return False
 
         return True
