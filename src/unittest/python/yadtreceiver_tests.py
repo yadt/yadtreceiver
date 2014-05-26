@@ -19,6 +19,7 @@ import yadtreceiver
 __author__ = 'Michael Gruber'
 
 import unittest
+from collections import defaultdict
 
 from mock import Mock, call, patch, MagicMock
 from twisted.python.logfile import LogFile
@@ -29,7 +30,6 @@ from yadtreceiver import (__version__,
                           FileSystemWatcher,
                           _write_metrics,
                           _reset_metrics,
-                          METRICS,
                           )
 from yadtreceiver.configuration import ReceiverConfig
 from yadtreceiver.events import Event
@@ -665,14 +665,21 @@ class WriteMetricsToFileTests(unittest.TestCase):
         configuration = {'metrics_directory': '/tmp/metrics',
                          'metrics_file': '/tmp/metrics/yrc.metrics'
                          }
+
         yrc = Receiver()
         yrc.set_configuration(configuration)
-        METRICS['foo'] = 42
-        file_ = MagicMock(spec=file)
-        open_.return_value = file_
+
+        old_metrics = yadtreceiver.METRICS
+        yadtreceiver.METRICS = defaultdict(lambda: 0)
+        yadtreceiver.METRICS['foo'] = 42
+        open_.return_value = MagicMock(spec=file)
+
         yrc.write_metrics_to_file()
+
         open_.assert_called_once_with('/tmp/metrics/yrc.metrics')
-        file.write.assert_called_once_with('foo')
+        file_handle = open_.return_value.__enter__.return_value
+        file_handle.write.assert_called_once_with('foo=42\n')
+        yadtreceiver.METRICS = old_metrics
 
 
 class TestResetMetrics(unittest.TestCase):

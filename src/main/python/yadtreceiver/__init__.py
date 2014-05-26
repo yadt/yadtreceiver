@@ -350,10 +350,10 @@ class Receiver(service.Service):
         self.broadcaster.connect()
 
     def write_metrics_to_file(self):
-        # get metrics file from config
         # check if directory exists and create otherwise
-        # open file and write metrics
-        pass
+        metrics_file_name = self.configuration['metrics_file']
+        with open(metrics_file_name) as metrics_file:
+            _write_metrics(METRICS, metrics_file)
 
 
 def _determine_tracking_id(command_and_arguments_list):
