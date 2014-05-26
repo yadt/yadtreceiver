@@ -659,6 +659,7 @@ class MetricsTests(unittest.TestCase):
                           [call('metric2=42\n'),
                            call('metric1=21\n')])
 
+    @patch.dict('yadtreceiver.METRICS', {'foo': 42}, clear=True)
     @patch('yadtreceiver.open', create=True)
     def test_write_metrics_to_file(self, open_):
         # initialize a receiver with given configuration
@@ -668,18 +669,11 @@ class MetricsTests(unittest.TestCase):
 
         yrc = Receiver()
         yrc.set_configuration(configuration)
-
-        old_metrics = yadtreceiver.METRICS
-        yadtreceiver.METRICS = defaultdict(lambda: 0)
-        yadtreceiver.METRICS['foo'] = 42
         open_.return_value = MagicMock(spec=file)
-
         yrc.write_metrics_to_file()
-
         open_.assert_called_once_with('/tmp/metrics/yrc.metrics')
         file_handle = open_.return_value.__enter__.return_value
         file_handle.write.assert_called_once_with('foo=42\n')
-        yadtreceiver.METRICS = old_metrics
 
 
 class TestResetMetrics(unittest.TestCase):
