@@ -636,7 +636,7 @@ class YadtReceiverFilesytemWatcherTests(unittest.TestCase):
         self.assertTrue(mock_inotify.INotify().startReading.called)
 
 
-class WriteMetricsToFileTests(unittest.TestCase):
+class MetricsTests(unittest.TestCase):
 
     def test_should_not_write_anything_when_no_metrics_given(self):
         mock_file = Mock()
