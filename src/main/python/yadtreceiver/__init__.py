@@ -42,6 +42,18 @@ import events
 from protocols import ProcessProtocol
 from voting import create_voting_fsm
 
+def _write_metrics(metrics, metrics_file):
+    for metric_name in metrics:
+        metrics_file.write("{0}={1}\n".format(metric_name, metrics[metric_name]))
+
+
+def _reset_metrics(metrics):
+    for metric_name in metrics.keys():
+        if metrics[metric_name] == 0:
+            del metrics[metric_name]
+        else:
+            metrics[metric_name] = 0
+
 
 class ReceiverException(Exception):
 

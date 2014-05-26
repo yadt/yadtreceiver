@@ -23,7 +23,13 @@ import unittest
 from mock import Mock, call, patch
 from twisted.python.logfile import LogFile
 
-from yadtreceiver import __version__, Receiver, ReceiverException, FileSystemWatcher
+from yadtreceiver import (__version__,
+                          Receiver,
+                          ReceiverException,
+                          FileSystemWatcher,
+                          _write_metrics,
+                          _reset_metrics,
+                          )
 from yadtreceiver.configuration import ReceiverConfig
 from yadtreceiver.events import Event
 from twisted.python import filepath
@@ -627,3 +633,54 @@ class YadtReceiverFilesytemWatcherTests(unittest.TestCase):
         fs = FileSystemWatcher('/foo/bar')
         fs.startService()
         self.assertTrue(mock_inotify.INotify().startReading.called)
+
+
+class WriteMetricsToFileTests(unittest.TestCase):
+
+    def test_should_not_write_anything_when_no_metrics_given(self):
+        mock_file = Mock()
+        metrics = {}
+
+        _write_metrics(metrics, mock_file)
+
+        self.assertFalse(mock_file.write.called)
+
+    def test_should_write_metrics(self):
+        mock_file = Mock()
+        metrics = {
+            "metric1": 21,
+            "metric2": 42
+        }
+
+        _write_metrics(metrics, mock_file)
+
+        self.assertEquals(mock_file.write.call_args_list,
+                          [call('metric2=42\n'),
+                           call('metric1=21\n')])
+
+
+class TestResetMetrics(unittest.TestCase):
+
+    def test_should_remove_metrics_when_they_are_empty(self):
+        metrics = {
+            "empty": 0,
+            "empty_long": 0L,
+        }
+
+        _reset_metrics(metrics)
+
+        self.assertEquals(metrics,
+                          {})
+
+    def test_should_just_reset_metrics_when_they_are_not_empty(self):
+        metrics = {
+            "full": 42,
+            "full_long": 42L,
+        }
+
+        _reset_metrics(metrics)
+
+        self.assertEquals(metrics,
+                          {"full": 0,
+                           "full_long": 0,
+                           })
