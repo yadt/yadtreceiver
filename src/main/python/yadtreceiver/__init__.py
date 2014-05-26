@@ -29,6 +29,7 @@ import os
 import traceback
 import functools
 from uuid import uuid4 as random_uuid
+from collections import defaultdict
 from datetime import datetime
 
 from twisted.application import service
@@ -41,6 +42,9 @@ from yadtbroadcastclient import WampBroadcaster
 import events
 from protocols import ProcessProtocol
 from voting import create_voting_fsm
+
+METRICS = defaultdict(lambda: 0)
+
 
 def _write_metrics(metrics, metrics_file):
     for metric_name in metrics:
