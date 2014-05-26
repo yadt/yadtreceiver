@@ -145,7 +145,11 @@ class ReceiverConfigLoader (object):
         """
             @return: the derived metrics_file or None
         """
-        pass
+        metrics_directory = self._parser.get_option(SECTION_RECEIVER, 'metrics_directory',
+                None)
+        if metrics_directory is not None:
+            return os.path.join(metrics_directory, 'ybr.metrics')
+
 
 class ReceiverConfig(object):
 
