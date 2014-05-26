@@ -159,7 +159,8 @@ class ReceiverConfig(object):
             'python_command': parser.get_python_command(),
             'script_to_execute': parser.get_script_to_execute(),
             'targets': parser.get_targets(),
-            'targets_directory': parser.get_targets_directory()
+            'targets_directory': parser.get_targets_directory(),
+            'metrics_directory': parser.get_metrics_directory(),
         }
         self.compute_allowed_targets()
 
