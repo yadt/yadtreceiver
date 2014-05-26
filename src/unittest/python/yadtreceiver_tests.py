@@ -675,6 +675,12 @@ class MetricsTests(unittest.TestCase):
         file_handle = open_.return_value.__enter__.return_value
         file_handle.write.assert_called_once_with('foo=42\n')
 
+    def test_publish_start_should_increment_metric(self):
+        pass
+
+    def test_publish_failed_should_increment_metric(self):
+        pass
+
 
 class TestResetMetrics(unittest.TestCase):
 
