@@ -133,6 +133,8 @@ class ReceiverConfigLoader (object):
         """
         return self._parser.read_configuration_file(filename)
 
+    def get_metrics_directory(self):
+        pass
 
 class ReceiverConfig(object):
 
