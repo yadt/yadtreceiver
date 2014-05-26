@@ -345,6 +345,12 @@ class Receiver(service.Service):
         self.broadcaster.addOnSessionOpenHandler(self.onConnect)
         self.broadcaster.connect()
 
+    def write_metrics_to_file(self):
+        # get metrics file from config
+        # check if directory exists and create otherwise
+        # open file and write metrics
+        pass
+
 
 def _determine_tracking_id(command_and_arguments_list):
     tracking_id = None
