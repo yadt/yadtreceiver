@@ -134,7 +134,12 @@ class ReceiverConfigLoader (object):
         return self._parser.read_configuration_file(filename)
 
     def get_metrics_directory(self):
-        pass
+        """
+            @return: the metrics_directory from the receiver configuration and
+            None otherwise
+        """
+        return self._parser.get_option(SECTION_RECEIVER, 'metrics_directory',
+                None)
 
 class ReceiverConfig(object):
 
