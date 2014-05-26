@@ -163,6 +163,19 @@ class ReceiverConfigLoaderTests (unittest.TestCase):
         self.assertEqual(
             call('filename.cfg'), mock_parser.read_configuration_file.call_args)
 
+    def test_should_return_metrics_directory(self):
+        mock_loader = Mock(ReceiverConfigLoader)
+        mock_parser = Mock(YadtConfigParser)
+        mock_parser.get_option.return_value = '/tmp/metrics'
+        mock_loader._parser = mock_parser
+
+        actual_metrics_directory = ReceiverConfigLoader.get_metrics_directory(
+            mock_loader)
+
+        self.assertEqual('/tmp/metrics', actual_metrics_directory)
+        self.assertEqual(
+            call(SECTION_RECEIVER, 'metrics_directory', None), mock_parser.get_option.call_args)
+
 
 class LoadTest (unittest.TestCase):
 
