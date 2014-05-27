@@ -376,7 +376,7 @@ class Receiver(service.Service):
                 return
 
         metrics_file_name = self.configuration['metrics_file']
-        with open(metrics_file_name) as metrics_file:
+        with open(metrics_file_name, 'w') as metrics_file:
             _write_metrics(METRICS, metrics_file)
 
     def schedule_write_metrics(self, delay=30, first_call=False):

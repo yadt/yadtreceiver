@@ -676,7 +676,7 @@ class MetricsTests(unittest.TestCase):
         open_.return_value = MagicMock(spec=file)
         path_.return_value = True
         yrc.write_metrics_to_file()
-        open_.assert_called_once_with('/tmp/metrics/yrc.metrics')
+        open_.assert_called_once_with('/tmp/metrics/yrc.metrics', 'w')
         file_handle = open_.return_value.__enter__.return_value
         file_handle.write.assert_called_once_with('foo=42\n')
 
@@ -696,7 +696,7 @@ class MetricsTests(unittest.TestCase):
         open_.return_value = MagicMock(spec=file)
         path_.return_value = False
         yrc.write_metrics_to_file()
-        open_.assert_called_once_with('/tmp/metrics/yrc.metrics')
+        open_.assert_called_once_with('/tmp/metrics/yrc.metrics', 'w')
         file_handle = open_.return_value.__enter__.return_value
         file_handle.write.assert_called_once_with('foo=42\n')
         makedirs_.assert_called_once_with('/tmp/metrics')
