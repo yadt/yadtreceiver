@@ -39,7 +39,7 @@ class VotingFsmTests(TestCase):
 
         self.assertEqual(self.fsm.current, 'finish')
 
-    def test_should_invoke_callbacks_on_success(self):
+    def test_should_invoke_callbacks_on_win(self):
         broadcast_vote = Mock()
         spawn = Mock()
         cleanup = Mock()
@@ -61,7 +61,7 @@ class VotingFsmTests(TestCase):
 
         self.assertEqual(fsm.current, 'finish')
 
-    def test_should_invoke_callbacks_on_failure(self):
+    def test_should_invoke_callbacks_on_lose(self):
         broadcast_vote = Mock()
         spawn = Mock()
         cleanup = Mock()
