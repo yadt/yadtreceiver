@@ -714,13 +714,6 @@ class MetricsTests(unittest.TestCase):
         self.assertFalse(path_.called)
 
 
-    def test_publish_start_should_increment_metric(self):
-        pass
-
-    def test_publish_failed_should_increment_metric(self):
-        pass
-
-
 class TestResetMetrics(unittest.TestCase):
 
     def test_should_remove_metrics_when_they_are_empty(self):
