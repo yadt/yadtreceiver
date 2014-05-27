@@ -231,6 +231,7 @@ class LoadTest (unittest.TestCase):
         mock_loader.get_targets.return_value = set(['dev123'])
         mock_loader.get_targets_directory.return_value = '/etc/yadtshell/targets'
         mock_loader.get_metrics_directory.return_value = '/tmp/metrics'
+        mock_loader.get_metrics_file.return_value = '/tmp/metrics/yrc.metrics'
         mock_loader_class.return_value = mock_loader
 
         actual_configuration = load('abc')
@@ -260,6 +261,10 @@ class LoadTest (unittest.TestCase):
         self.assertEqual(call(), mock_loader.get_metrics_directory.call_args)
         self.assertEqual('/tmp/metrics',
                          actual_configuration['metrics_directory'])
+
+        self.assertEqual(call(), mock_loader.get_metrics_file.call_args)
+        self.assertEqual('/tmp/metrics/yrc.metrics',
+                         actual_configuration['metrics_file'])
 
 
 class ReceiverConfigTests(unittest.TestCase):
