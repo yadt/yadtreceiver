@@ -29,11 +29,9 @@ def create_voting_fsm(tracking_id,
     fsm = Fysom({
         'initial': 'negotiating',
         'events': [
-            {'name': 'call', 'src':
-                'negotiating', 'dst': 'negotiating'},
+            {'name': 'call', 'src': 'negotiating', 'dst': 'negotiating'},
             {'name': 'fold', 'src': 'negotiating', 'dst': 'finish'},
-            {'name': 'showdown', 'src':
-                'negotiating', 'dst': 'spawning'},
+            {'name': 'showdown', 'src': 'negotiating', 'dst': 'spawning'},
             {'name': 'spawned', 'src': 'spawning', 'dst': 'finish'},
             {'name': 'showdown', 'src': 'finish', 'dst': 'finish'}
         ],
