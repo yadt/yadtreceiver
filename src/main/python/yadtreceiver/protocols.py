@@ -70,7 +70,7 @@ class ProcessProtocol(protocol.ProcessProtocol):
         message = '(%s) target[%s] request finished: "%s" succeeded.' \
                   % (self.hostname, self.target, self.readable_command)
         log.msg(message)
-        METRICS['messages_finished.%s' % (self.target)] += 1
+        METRICS['commands_succeeded.%s' % (self.target)] += 1
         self.error_buffer.close()
         self.broadcaster.publish_cmd_for_target(
             self.target, self.readable_command, events.FINISHED,
@@ -86,7 +86,7 @@ class ProcessProtocol(protocol.ProcessProtocol):
         error_message = '(%s) target[%s] request "%s" failed: return code was %s.' \
                         % (self.hostname, self.target, self.readable_command, return_code)
         log.err(error_message)
-        METRICS['messages_failed.%s' % (self.target)] += 1
+        METRICS['commands_failed.%s' % (self.target)] += 1
         self.broadcaster.publish_cmd_for_target(
             self.target, self.readable_command, events.FAILED,
             message=error_output, tracking_id=self.tracking_id)

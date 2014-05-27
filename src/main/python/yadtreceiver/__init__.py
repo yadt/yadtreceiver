@@ -179,7 +179,7 @@ class Receiver(service.Service):
             Publishes a event to signal that the command on the target failed.
         """
         log.err(_stuff=Exception(message), _why=message)
-        METRICS['messages_failed.%s' % (event.target)] += 1
+        METRICS['commands_failed.%s' % (event.target)] += 1
         self.broadcaster.publish_cmd_for_target(
             event.target,
             event.command,
@@ -195,7 +195,7 @@ class Receiver(service.Service):
         message = '(%s) target[%s] request: command="%s", arguments=%s' % (
             hostname, event.target, event.command, event.arguments)
         log.msg(message)
-        METRICS['messages_started.%s' % (event.target)] += 1
+        METRICS['commands_started.%s' % (event.target)] += 1
         self.broadcaster.publish_cmd_for_target(
             event.target,
             event.command,

@@ -73,7 +73,7 @@ class ProcessProtocolTests (unittest.TestCase):
 
         self.assertEquals(call('dev123', '/usr/bin/python abc', 'finished',
                           '(hostname) target[dev123] request finished: "/usr/bin/python abc" succeeded.', tracking_id='tracking-id'), mock_broadcaster.publish_cmd_for_target.call_args)
-        self.assertEqual(METRICS['messages_finished.dev123'], 1)
+        self.assertEqual(METRICS['commands_succeeded.dev123'], 1)
 
     @patch('yadtreceiver.protocols.log')
     @patch.dict('yadtreceiver.METRICS', {}, clear=True)
@@ -96,7 +96,7 @@ class ProcessProtocolTests (unittest.TestCase):
                                message='Someone has shut down the internet.',
                                tracking_id='tracking_id'),
                           mock_broadcaster.publish_cmd_for_target.call_args)
-        self.assertEqual(METRICS['messages_failed.dev123'], 1)
+        self.assertEqual(METRICS['commands_failed.dev123'], 1)
 
     @patch('yadtreceiver.protocols.log')
     def test_should_accumulate_error_output(self, mock_log):
