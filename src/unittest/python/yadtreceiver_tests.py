@@ -333,6 +333,7 @@ class YadtReceiverTests (unittest.TestCase):
         self.assertEqual(call('hostname', mock_broadcaster, 'devabc123',
                          expected_command_with_arguments, tracking_id=None), mock_protocol.call_args)
 
+    @patch.dict('yadtreceiver.METRICS', {}, clear=True)
     @patch('yadtreceiver.log')
     def test_should_publish_event_about_failed_command_on_target(self, mock_log):
         mock_receiver = Mock(Receiver)
@@ -353,7 +354,9 @@ class YadtReceiverTests (unittest.TestCase):
             'failed',
             'It failed!',
             tracking_id='any-tracking-id')
+        self.assertEqual(yadtreceiver.METRICS['messages_failed.devabc123'], 1)
 
+    @patch.dict('yadtreceiver.METRICS', {}, clear=True)
     @patch('yadtreceiver.log')
     def test_should_publish_event_about_started_command_on_target(self, mock_log):
         mock_receiver = Mock(Receiver)
@@ -375,6 +378,7 @@ class YadtReceiverTests (unittest.TestCase):
             'started',
             '(hostname) target[devabc123] request: command="yadtshell", arguments=[\'update\']',
             tracking_id='any-tracking-id')
+        self.assertEqual(yadtreceiver.METRICS['messages_started.devabc123'], 1)
 
     @patch('yadtreceiver.events.Event')
     def test_should_handle_request(self, mock_event_class):
