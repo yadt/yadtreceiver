@@ -31,7 +31,7 @@ import functools
 from uuid import uuid4 as random_uuid
 from collections import defaultdict
 from datetime import datetime
-import time
+from time import time
 
 from twisted.application import service
 from twisted.internet import inotify, reactor
