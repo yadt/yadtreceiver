@@ -684,7 +684,7 @@ class MetricsTests(unittest.TestCase):
     @patch('yadtreceiver.open', create=True)
     @patch('os.path.isdir')
     @patch('os.makedirs')
-    def test_write_metrics_to_file_create_file_if_not_exsists(self,
+    def test_write_metrics_to_file_create_directory_if_it_not_exsists(self,
             makedirs_, path_, open_):
         # initialize a receiver with given configuration
         configuration = {'metrics_directory': '/tmp/metrics',
