@@ -710,6 +710,7 @@ class MetricsTests(unittest.TestCase):
                          }
         yrc = Receiver()
         yrc.set_configuration(configuration)
+        yrc.write_metrics_to_file()
         self.assertFalse(open_.called)
         self.assertFalse(path_.called)
 
