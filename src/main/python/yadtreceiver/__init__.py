@@ -124,11 +124,15 @@ class Receiver(service.Service):
             del self.states[tracking_id]
             log.msg('Cleaned up fsm for %s, %d left in memory' % (event.target, len(self.states)))
 
+        def fold(_):
+            METRICS['voting_folds'] += 1
+
         self.states[tracking_id] = create_voting_fsm(tracking_id,
                                                      vote,
                                                      broadcast_vote,
                                                      functools.partial(
                                                          self.perform_request, event),
+                                                     fold,
                                                      cleanup_fsm)
 
         reactor.callLater(10, self.states[tracking_id].showdown)
@@ -141,6 +145,7 @@ class Receiver(service.Service):
         """
         log.msg('I have won the vote for %r, starting it now..' %
                 (event.target))
+        METRICS['voting_wins'] += 1
         try:
             hostname = str(self.configuration['hostname'])
             python_command = str(self.configuration['python_command'])

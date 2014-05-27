@@ -25,6 +25,7 @@ def create_voting_fsm(tracking_id,
                       vote,
                       broadcast_vote,
                       spawn_yadtshell,
+                      fold,
                       cleanup_fsm):
     fsm = Fysom({
         'initial': 'negotiating',
@@ -38,7 +39,8 @@ def create_voting_fsm(tracking_id,
         'callbacks': {
             'onnegotiating': broadcast_vote,
             'onspawning': spawn_yadtshell,
-            'onfinish': cleanup_fsm
+            'onfinish': cleanup_fsm,
+            'onfold': fold,
         }
     })
     fsm.tracking_id = tracking_id
