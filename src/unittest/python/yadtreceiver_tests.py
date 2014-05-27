@@ -19,7 +19,6 @@ import yadtreceiver
 __author__ = 'Michael Gruber'
 
 import unittest
-from collections import defaultdict
 
 from mock import Mock, call, patch, MagicMock
 from twisted.python.logfile import LogFile
