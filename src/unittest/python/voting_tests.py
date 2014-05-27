@@ -39,7 +39,7 @@ class VotingFsmTests(TestCase):
 
         self.assertEqual(self.fsm.current, 'finish')
 
-    def test_should_invoke_callbacks(self):
+    def test_should_invoke_callbacks_on_success(self):
         broadcast_vote = Mock()
         spawn = Mock()
         cleanup = Mock()
@@ -58,3 +58,24 @@ class VotingFsmTests(TestCase):
 
         fsm.spawned()
         cleanup.assert_called_with(ANY)
+
+        self.assertEqual(fsm.current, 'finish')
+
+    def test_should_invoke_callbacks_on_failure(self):
+        broadcast_vote = Mock()
+        spawn = Mock()
+        cleanup = Mock()
+        fold = Mock()
+        fsm = create_voting_fsm('tracking-id',
+                                'vote',
+                                broadcast_vote,
+                                spawn,
+                                fold,
+                                cleanup)
+
+        broadcast_vote.assert_called_with(ANY)
+
+        fsm.fold()
+        fold.assert_called_with(ANY)
+
+        self.assertEqual(fsm.current, 'finish')
