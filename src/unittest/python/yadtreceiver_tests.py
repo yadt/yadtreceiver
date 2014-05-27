@@ -661,7 +661,8 @@ class MetricsTests(unittest.TestCase):
 
     @patch.dict('yadtreceiver.METRICS', {'foo': 42}, clear=True)
     @patch('yadtreceiver.open', create=True)
-    def test_write_metrics_to_file(self, open_):
+    @patch('os.path.isdir')
+    def test_write_metrics_to_file(self, path_, open_):
         # initialize a receiver with given configuration
         configuration = {'metrics_directory': '/tmp/metrics',
                          'metrics_file': '/tmp/metrics/yrc.metrics'
@@ -670,10 +671,45 @@ class MetricsTests(unittest.TestCase):
         yrc = Receiver()
         yrc.set_configuration(configuration)
         open_.return_value = MagicMock(spec=file)
+        path_.return_value = True
         yrc.write_metrics_to_file()
         open_.assert_called_once_with('/tmp/metrics/yrc.metrics')
         file_handle = open_.return_value.__enter__.return_value
         file_handle.write.assert_called_once_with('foo=42\n')
+
+    @patch.dict('yadtreceiver.METRICS', {'foo': 42}, clear=True)
+    @patch('yadtreceiver.open', create=True)
+    @patch('os.path.isdir')
+    @patch('os.makedirs')
+    def test_write_metrics_to_file_create_file_if_not_exsists(self,
+            makedirs_, path_, open_):
+        # initialize a receiver with given configuration
+        configuration = {'metrics_directory': '/tmp/metrics',
+                         'metrics_file': '/tmp/metrics/yrc.metrics'
+                         }
+
+        yrc = Receiver()
+        yrc.set_configuration(configuration)
+        open_.return_value = MagicMock(spec=file)
+        path_.return_value = False
+        yrc.write_metrics_to_file()
+        open_.assert_called_once_with('/tmp/metrics/yrc.metrics')
+        file_handle = open_.return_value.__enter__.return_value
+        file_handle.write.assert_called_once_with('foo=42\n')
+        makedirs_.assert_called_once_with('/tmp/metrics')
+
+    @patch('yadtreceiver.open', create=True)
+    @patch('os.path.isdir')
+    def test_write_metrics_to_file_is_noop_with_no_metrics_directory(self,
+            path_, open_):
+        configuration = {'metrics_directory': None,
+                         'metrics_file': None,
+                         }
+        yrc = Receiver()
+        yrc.set_configuration(configuration)
+        self.assertFalse(open_.called)
+        self.assertFalse(path_.called)
+
 
     def test_publish_start_should_increment_metric(self):
         pass

@@ -351,6 +351,18 @@ class Receiver(service.Service):
 
     def write_metrics_to_file(self):
         # check if directory exists and create otherwise
+
+        metrics_directory = self.configuration['metrics_directory']
+        if not metrics_directory:
+            return
+
+        if not os.path.isdir(metrics_directory):
+            try:
+                os.makedirs(metrics_directory)
+            except Exception as e:
+                log.err("Cannot create metrics directory : {0}".format(e))
+                return
+
         metrics_file_name = self.configuration['metrics_file']
         with open(metrics_file_name) as metrics_file:
             _write_metrics(METRICS, metrics_file)
