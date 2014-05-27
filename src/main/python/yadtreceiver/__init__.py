@@ -31,6 +31,7 @@ import functools
 from uuid import uuid4 as random_uuid
 from collections import defaultdict
 from datetime import datetime
+import time
 
 from twisted.application import service
 from twisted.internet import inotify, reactor
@@ -38,6 +39,7 @@ from twisted.python import filepath, log
 from twisted.python.logfile import LogFile
 
 from yadtbroadcastclient import WampBroadcaster
+from .scheduling import seconds_to_midnight
 
 import events
 from voting import create_voting_fsm
@@ -369,6 +371,21 @@ class Receiver(service.Service):
         metrics_file_name = self.configuration['metrics_file']
         with open(metrics_file_name) as metrics_file:
             _write_metrics(METRICS, metrics_file)
+
+    def schedule_write_metrics(self, delay=30, first_call=False):
+        reactor.callLater(delay, self.schedule_write_metrics)
+        if not first_call:
+            start = time()
+            self.write_metrics_to_file()
+            write_duration = time() - start
+            log.msg("Wrote metrics to file in {0} seconds".format(write_duration))
+            METRICS["last_write_duration"] = write_duration
+
+    def reset_metrics_at_midnight(cls, first_call=False):
+        reactor.callLater(seconds_to_midnight(), cls.reset_metrics_at_midnight)
+        if not first_call:
+            log.msg("Resetting metrics")
+            _reset_metrics(METRICS)
 
 
 def _determine_tracking_id(command_and_arguments_list):
