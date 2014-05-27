@@ -350,7 +350,6 @@ class Receiver(service.Service):
         self.broadcaster.connect()
 
     def write_metrics_to_file(self):
-        # check if directory exists and create otherwise
 
         metrics_directory = self.configuration['metrics_directory']
         if not metrics_directory:
