@@ -185,7 +185,7 @@ class ReceiverConfigLoaderTests (unittest.TestCase):
         actual_metrics_file = ReceiverConfigLoader.get_metrics_file(
             mock_loader)
 
-        self.assertEqual('/tmp/metrics/ybr.metrics', actual_metrics_file)
+        self.assertEqual('/tmp/metrics/yrc.metrics', actual_metrics_file)
         self.assertEqual(
             call(SECTION_RECEIVER, 'metrics_directory', None), mock_parser.get_option.call_args)
 
