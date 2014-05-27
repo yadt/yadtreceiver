@@ -25,6 +25,7 @@ from twisted.internet import protocol
 from twisted.python import log
 
 from yadtreceiver import events
+from yadtreceiver import METRICS
 
 try:
     import cStringIO

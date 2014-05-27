@@ -40,10 +40,12 @@ from twisted.python.logfile import LogFile
 from yadtbroadcastclient import WampBroadcaster
 
 import events
-from protocols import ProcessProtocol
 from voting import create_voting_fsm
 
 METRICS = defaultdict(lambda: 0)
+
+# delayed import so that METRICS is importable from ProcessProtocol
+from protocols import ProcessProtocol
 
 
 def _write_metrics(metrics, metrics_file):
