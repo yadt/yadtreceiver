@@ -280,7 +280,7 @@ class Receiver(service.Service):
         event = events.Event(target, event_data)
 
         if event.is_a_vote:
-            voting_fsm = self.states.get(event.tracking_id)
+            voting_fsm = self.states[event.tracking_id]
             if not voting_fsm:
                 log.msg(
                     'Ignoring vote %r because I have already lost' % event.vote)
