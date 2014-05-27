@@ -257,7 +257,7 @@ class LoadTest (unittest.TestCase):
         self.assertEqual('/etc/yadtshell/targets',
                          actual_configuration['targets_directory'])
 
-        self.assertEqual(call(), mock_loader.get_targets_directory.call_args)
+        self.assertEqual(call(), mock_loader.get_metrics_directory.call_args)
         self.assertEqual('/tmp/metrics',
                          actual_configuration['metrics_directory'])
 
