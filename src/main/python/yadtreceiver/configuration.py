@@ -171,6 +171,7 @@ class ReceiverConfig(object):
             'targets': parser.get_targets(),
             'targets_directory': parser.get_targets_directory(),
             'metrics_directory': parser.get_metrics_directory(),
+            'metrics_file': parser.get_metrics_file(),
         }
         self.compute_allowed_targets()
 
