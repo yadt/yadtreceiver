@@ -339,6 +339,8 @@ class Receiver(service.Service):
         log.msg('yadtreceiver version %s' % __version__)
         self._client_watchdog()
         self._refresh_connection(first_call=True)
+        self.schedule_write_metrics(first_call=True)
+        self.reset_metrics_at_midnight(first_call=True)
 
     def stopService(self):
         """
