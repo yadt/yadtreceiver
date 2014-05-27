@@ -182,7 +182,7 @@ class ReceiverConfig(object):
             new_allowed_targets = glob(
                 os.path.join(self['targets_directory'], target_glob))
             allowed_targets.extend(new_allowed_targets)
-        allowed_targets = [ _path_to_name(target) for target in allowed_targets ]
+        allowed_targets = [_path_to_name(target) for target in allowed_targets]
         self.configuration['allowed_targets'] = allowed_targets
 
     def reload_targets(self):
