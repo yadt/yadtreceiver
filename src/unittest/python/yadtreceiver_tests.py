@@ -20,10 +20,16 @@ __author__ = 'Michael Gruber'
 
 import unittest
 
-from mock import Mock, call, patch
+from mock import Mock, call, patch, MagicMock
 from twisted.python.logfile import LogFile
 
-from yadtreceiver import __version__, Receiver, ReceiverException, FileSystemWatcher
+from yadtreceiver import (__version__,
+                          Receiver,
+                          ReceiverException,
+                          FileSystemWatcher,
+                          _write_metrics,
+                          _reset_metrics,
+                          )
 from yadtreceiver.configuration import ReceiverConfig
 from yadtreceiver.events import Event
 from twisted.python import filepath
@@ -327,6 +333,7 @@ class YadtReceiverTests (unittest.TestCase):
         self.assertEqual(call('hostname', mock_broadcaster, 'devabc123',
                          expected_command_with_arguments, tracking_id=None), mock_protocol.call_args)
 
+    @patch.dict('yadtreceiver.METRICS', {}, clear=True)
     @patch('yadtreceiver.log')
     def test_should_publish_event_about_failed_command_on_target(self, mock_log):
         mock_receiver = Mock(Receiver)
@@ -347,7 +354,9 @@ class YadtReceiverTests (unittest.TestCase):
             'failed',
             'It failed!',
             tracking_id='any-tracking-id')
+        self.assertEqual(yadtreceiver.METRICS['commands_failed.devabc123'], 1)
 
+    @patch.dict('yadtreceiver.METRICS', {}, clear=True)
     @patch('yadtreceiver.log')
     def test_should_publish_event_about_started_command_on_target(self, mock_log):
         mock_receiver = Mock(Receiver)
@@ -369,6 +378,7 @@ class YadtReceiverTests (unittest.TestCase):
             'started',
             '(hostname) target[devabc123] request: command="yadtshell", arguments=[\'update\']',
             tracking_id='any-tracking-id')
+        self.assertEqual(yadtreceiver.METRICS['commands_started.devabc123'], 1)
 
     @patch('yadtreceiver.events.Event')
     def test_should_handle_request(self, mock_event_class):
@@ -627,3 +637,106 @@ class YadtReceiverFilesytemWatcherTests(unittest.TestCase):
         fs = FileSystemWatcher('/foo/bar')
         fs.startService()
         self.assertTrue(mock_inotify.INotify().startReading.called)
+
+
+class MetricsTests(unittest.TestCase):
+
+    def test_should_not_write_anything_when_no_metrics_given(self):
+        mock_file = Mock()
+        metrics = {}
+
+        _write_metrics(metrics, mock_file)
+
+        self.assertFalse(mock_file.write.called)
+
+    def test_should_write_metrics(self):
+        mock_file = Mock()
+        metrics = {
+            "metric1": 21,
+            "metric2": 42
+        }
+
+        _write_metrics(metrics, mock_file)
+
+        self.assertEquals(mock_file.write.call_args_list,
+                          [call('metric2=42\n'),
+                           call('metric1=21\n')])
+
+    @patch.dict('yadtreceiver.METRICS', {'foo': 42}, clear=True)
+    @patch('yadtreceiver.open', create=True)
+    @patch('os.path.isdir')
+    def test_write_metrics_to_file(self, path_, open_):
+        # initialize a receiver with given configuration
+        configuration = {'metrics_directory': '/tmp/metrics',
+                         'metrics_file': '/tmp/metrics/yrc.metrics'
+                         }
+
+        yrc = Receiver()
+        yrc.set_configuration(configuration)
+        open_.return_value = MagicMock(spec=file)
+        path_.return_value = True
+        yrc.write_metrics_to_file()
+        open_.assert_called_once_with('/tmp/metrics/yrc.metrics', 'w')
+        file_handle = open_.return_value.__enter__.return_value
+        file_handle.write.assert_called_once_with('foo=42\n')
+
+    @patch.dict('yadtreceiver.METRICS', {'foo': 42}, clear=True)
+    @patch('yadtreceiver.open', create=True)
+    @patch('os.path.isdir')
+    @patch('os.makedirs')
+    def test_write_metrics_to_file_create_directory_if_it_not_exsists(self,
+            makedirs_, path_, open_):
+        # initialize a receiver with given configuration
+        configuration = {'metrics_directory': '/tmp/metrics',
+                         'metrics_file': '/tmp/metrics/yrc.metrics'
+                         }
+
+        yrc = Receiver()
+        yrc.set_configuration(configuration)
+        open_.return_value = MagicMock(spec=file)
+        path_.return_value = False
+        yrc.write_metrics_to_file()
+        open_.assert_called_once_with('/tmp/metrics/yrc.metrics', 'w')
+        file_handle = open_.return_value.__enter__.return_value
+        file_handle.write.assert_called_once_with('foo=42\n')
+        makedirs_.assert_called_once_with('/tmp/metrics')
+
+    @patch('yadtreceiver.open', create=True)
+    @patch('os.path.isdir')
+    def test_write_metrics_to_file_is_noop_with_no_metrics_directory(self,
+            path_, open_):
+        configuration = {'metrics_directory': None,
+                         'metrics_file': None,
+                         }
+        yrc = Receiver()
+        yrc.set_configuration(configuration)
+        yrc.write_metrics_to_file()
+        self.assertFalse(open_.called)
+        self.assertFalse(path_.called)
+
+
+class TestResetMetrics(unittest.TestCase):
+
+    def test_should_remove_metrics_when_they_are_empty(self):
+        metrics = {
+            "empty": 0,
+            "empty_long": 0L,
+        }
+
+        _reset_metrics(metrics)
+
+        self.assertEquals(metrics,
+                          {})
+
+    def test_should_just_reset_metrics_when_they_are_not_empty(self):
+        metrics = {
+            "full": 42,
+            "full_long": 42L,
+        }
+
+        _reset_metrics(metrics)
+
+        self.assertEquals(metrics,
+                          {"full": 0,
+                           "full_long": 0,
+                           })

@@ -163,6 +163,32 @@ class ReceiverConfigLoaderTests (unittest.TestCase):
         self.assertEqual(
             call('filename.cfg'), mock_parser.read_configuration_file.call_args)
 
+    def test_should_return_metrics_directory(self):
+        mock_loader = Mock(ReceiverConfigLoader)
+        mock_parser = Mock(YadtConfigParser)
+        mock_parser.get_option.return_value = '/tmp/metrics'
+        mock_loader._parser = mock_parser
+
+        actual_metrics_directory = ReceiverConfigLoader.get_metrics_directory(
+            mock_loader)
+
+        self.assertEqual('/tmp/metrics', actual_metrics_directory)
+        self.assertEqual(
+            call(SECTION_RECEIVER, 'metrics_directory', None), mock_parser.get_option.call_args)
+
+    def test_should_return_metrics_file(self):
+        mock_loader = Mock(ReceiverConfigLoader)
+        mock_parser = Mock(YadtConfigParser)
+        mock_parser.get_option.return_value = '/tmp/metrics'
+        mock_loader._parser = mock_parser
+
+        actual_metrics_file = ReceiverConfigLoader.get_metrics_file(
+            mock_loader)
+
+        self.assertEqual('/tmp/metrics/yrc.metrics', actual_metrics_file)
+        self.assertEqual(
+            call(SECTION_RECEIVER, 'metrics_directory', None), mock_parser.get_option.call_args)
+
 
 class LoadTest (unittest.TestCase):
 
@@ -204,6 +230,8 @@ class LoadTest (unittest.TestCase):
         mock_loader.get_log_filename.return_value = '/var/log/somewhere/rec.log'
         mock_loader.get_targets.return_value = set(['dev123'])
         mock_loader.get_targets_directory.return_value = '/etc/yadtshell/targets'
+        mock_loader.get_metrics_directory.return_value = '/tmp/metrics'
+        mock_loader.get_metrics_file.return_value = '/tmp/metrics/yrc.metrics'
         mock_loader_class.return_value = mock_loader
 
         actual_configuration = load('abc')
@@ -229,6 +257,14 @@ class LoadTest (unittest.TestCase):
         self.assertEqual(call(), mock_loader.get_targets_directory.call_args)
         self.assertEqual('/etc/yadtshell/targets',
                          actual_configuration['targets_directory'])
+
+        self.assertEqual(call(), mock_loader.get_metrics_directory.call_args)
+        self.assertEqual('/tmp/metrics',
+                         actual_configuration['metrics_directory'])
+
+        self.assertEqual(call(), mock_loader.get_metrics_file.call_args)
+        self.assertEqual('/tmp/metrics/yrc.metrics',
+                         actual_configuration['metrics_file'])
 
 
 class ReceiverConfigTests(unittest.TestCase):

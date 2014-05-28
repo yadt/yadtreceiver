@@ -25,22 +25,22 @@ def create_voting_fsm(tracking_id,
                       vote,
                       broadcast_vote,
                       spawn_yadtshell,
+                      fold,
                       cleanup_fsm):
     fsm = Fysom({
         'initial': 'negotiating',
         'events': [
-            {'name': 'call', 'src':
-                'negotiating', 'dst': 'negotiating'},
+            {'name': 'call', 'src': 'negotiating', 'dst': 'negotiating'},
             {'name': 'fold', 'src': 'negotiating', 'dst': 'finish'},
-            {'name': 'showdown', 'src':
-                'negotiating', 'dst': 'spawning'},
+            {'name': 'showdown', 'src': 'negotiating', 'dst': 'spawning'},
             {'name': 'spawned', 'src': 'spawning', 'dst': 'finish'},
             {'name': 'showdown', 'src': 'finish', 'dst': 'finish'}
         ],
         'callbacks': {
             'onnegotiating': broadcast_vote,
             'onspawning': spawn_yadtshell,
-            'onfinish': cleanup_fsm
+            'onfinish': cleanup_fsm,
+            'onfold': fold,
         }
     })
     fsm.tracking_id = tracking_id

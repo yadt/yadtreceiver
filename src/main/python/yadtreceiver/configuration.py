@@ -133,6 +133,23 @@ class ReceiverConfigLoader (object):
         """
         return self._parser.read_configuration_file(filename)
 
+    def get_metrics_directory(self):
+        """
+            @return: the metrics_directory from the receiver configuration and
+            None otherwise
+        """
+        return self._parser.get_option(SECTION_RECEIVER, 'metrics_directory',
+                None)
+
+    def get_metrics_file(self):
+        """
+            @return: the derived metrics_file or None
+        """
+        metrics_directory = self._parser.get_option(SECTION_RECEIVER, 'metrics_directory',
+                None)
+        if metrics_directory is not None:
+            return os.path.join(metrics_directory, 'yrc.metrics')
+
 
 class ReceiverConfig(object):
 
@@ -152,7 +169,9 @@ class ReceiverConfig(object):
             'python_command': parser.get_python_command(),
             'script_to_execute': parser.get_script_to_execute(),
             'targets': parser.get_targets(),
-            'targets_directory': parser.get_targets_directory()
+            'targets_directory': parser.get_targets_directory(),
+            'metrics_directory': parser.get_metrics_directory(),
+            'metrics_file': parser.get_metrics_file(),
         }
         self.compute_allowed_targets()
 
@@ -164,7 +183,7 @@ class ReceiverConfig(object):
             new_allowed_targets = glob(
                 os.path.join(self['targets_directory'], target_glob))
             allowed_targets.extend(new_allowed_targets)
-        allowed_targets = [ _path_to_name(target) for target in allowed_targets ]
+        allowed_targets = [_path_to_name(target) for target in allowed_targets]
         self.configuration['allowed_targets'] = allowed_targets
 
     def reload_targets(self):

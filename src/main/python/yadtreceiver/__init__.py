@@ -29,7 +29,9 @@ import os
 import traceback
 import functools
 from uuid import uuid4 as random_uuid
+from collections import defaultdict
 from datetime import datetime
+from time import time
 
 from twisted.application import service
 from twisted.internet import inotify, reactor
@@ -37,10 +39,28 @@ from twisted.python import filepath, log
 from twisted.python.logfile import LogFile
 
 from yadtbroadcastclient import WampBroadcaster
+from .scheduling import seconds_to_midnight
 
 import events
-from protocols import ProcessProtocol
 from voting import create_voting_fsm
+
+METRICS = defaultdict(lambda: 0)
+
+# delayed import so that METRICS is importable from ProcessProtocol
+from protocols import ProcessProtocol
+
+
+def _write_metrics(metrics, metrics_file):
+    for metric_name in metrics:
+        metrics_file.write("{0}={1}\n".format(metric_name, metrics[metric_name]))
+
+
+def _reset_metrics(metrics):
+    for metric_name in metrics.keys():
+        if metrics[metric_name] == 0:
+            del metrics[metric_name]
+        else:
+            metrics[metric_name] = 0
 
 
 class ReceiverException(Exception):
@@ -104,11 +124,15 @@ class Receiver(service.Service):
             del self.states[tracking_id]
             log.msg('Cleaned up fsm for %s, %d left in memory' % (event.target, len(self.states)))
 
+        def fold(_):
+            METRICS['voting_folds'] += 1
+
         self.states[tracking_id] = create_voting_fsm(tracking_id,
                                                      vote,
                                                      broadcast_vote,
                                                      functools.partial(
                                                          self.perform_request, event),
+                                                     fold,
                                                      cleanup_fsm)
 
         reactor.callLater(10, self.states[tracking_id].showdown)
@@ -121,6 +145,7 @@ class Receiver(service.Service):
         """
         log.msg('I have won the vote for %r, starting it now..' %
                 (event.target))
+        METRICS['voting_wins'] += 1
         try:
             hostname = str(self.configuration['hostname'])
             python_command = str(self.configuration['python_command'])
@@ -154,6 +179,7 @@ class Receiver(service.Service):
             Publishes a event to signal that the command on the target failed.
         """
         log.err(_stuff=Exception(message), _why=message)
+        METRICS['commands_failed.%s' % (event.target)] += 1
         self.broadcaster.publish_cmd_for_target(
             event.target,
             event.command,
@@ -169,6 +195,7 @@ class Receiver(service.Service):
         message = '(%s) target[%s] request: command="%s", arguments=%s' % (
             hostname, event.target, event.command, event.arguments)
         log.msg(message)
+        METRICS['commands_started.%s' % (event.target)] += 1
         self.broadcaster.publish_cmd_for_target(
             event.target,
             event.command,
@@ -258,7 +285,7 @@ class Receiver(service.Service):
         event = events.Event(target, event_data)
 
         if event.is_a_vote:
-            voting_fsm = self.states.get(event.tracking_id)
+            voting_fsm = self.states[event.tracking_id]
             if not voting_fsm:
                 log.msg(
                     'Ignoring vote %r because I have already lost' % event.vote)
@@ -312,6 +339,8 @@ class Receiver(service.Service):
         log.msg('yadtreceiver version %s' % __version__)
         self._client_watchdog()
         self._refresh_connection(first_call=True)
+        self.schedule_write_metrics(first_call=True)
+        self.reset_metrics_at_midnight(first_call=True)
 
     def stopService(self):
         """
@@ -332,6 +361,38 @@ class Receiver(service.Service):
         self.broadcaster = WampBroadcaster(host, port, 'yadtreceiver')
         self.broadcaster.addOnSessionOpenHandler(self.onConnect)
         self.broadcaster.connect()
+
+    def write_metrics_to_file(self):
+
+        metrics_directory = self.configuration['metrics_directory']
+        if not metrics_directory:
+            return
+
+        if not os.path.isdir(metrics_directory):
+            try:
+                os.makedirs(metrics_directory)
+            except Exception as e:
+                log.err("Cannot create metrics directory : {0}".format(e))
+                return
+
+        metrics_file_name = self.configuration['metrics_file']
+        with open(metrics_file_name, 'w') as metrics_file:
+            _write_metrics(METRICS, metrics_file)
+
+    def schedule_write_metrics(self, delay=30, first_call=False):
+        reactor.callLater(delay, self.schedule_write_metrics)
+        if not first_call:
+            start = time()
+            self.write_metrics_to_file()
+            write_duration = time() - start
+            log.msg("Wrote metrics to file in {0} seconds".format(write_duration))
+            METRICS["last_write_duration"] = write_duration
+
+    def reset_metrics_at_midnight(cls, first_call=False):
+        reactor.callLater(seconds_to_midnight(), cls.reset_metrics_at_midnight)
+        if not first_call:
+            log.msg("Resetting metrics")
+            _reset_metrics(METRICS)
 
 
 def _determine_tracking_id(command_and_arguments_list):

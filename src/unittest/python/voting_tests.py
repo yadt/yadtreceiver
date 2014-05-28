@@ -11,7 +11,9 @@ class VotingFsmTests(TestCase):
                                      'vote',
                                      lambda _: 'broadcasted vote',
                                      lambda _: 'spawned program',
-                                     lambda _: 'cleaned up')
+                                     lambda _: 'folded',
+                                     lambda _: 'cleaned up',
+                                     )
 
     def test_should_start_in_negotiating_state(self):
         self.assertEqual(self.fsm.current, 'negotiating')
@@ -37,14 +39,16 @@ class VotingFsmTests(TestCase):
 
         self.assertEqual(self.fsm.current, 'finish')
 
-    def test_should_invoke_callbacks(self):
+    def test_should_invoke_callbacks_on_win(self):
         broadcast_vote = Mock()
         spawn = Mock()
         cleanup = Mock()
+        fold = Mock()
         fsm = create_voting_fsm('tracking-id',
                                 'vote',
                                 broadcast_vote,
                                 spawn,
+                                fold,
                                 cleanup)
 
         broadcast_vote.assert_called_with(ANY)
@@ -54,3 +58,24 @@ class VotingFsmTests(TestCase):
 
         fsm.spawned()
         cleanup.assert_called_with(ANY)
+
+        self.assertEqual(fsm.current, 'finish')
+
+    def test_should_invoke_callbacks_on_lose(self):
+        broadcast_vote = Mock()
+        spawn = Mock()
+        cleanup = Mock()
+        fold = Mock()
+        fsm = create_voting_fsm('tracking-id',
+                                'vote',
+                                broadcast_vote,
+                                spawn,
+                                fold,
+                                cleanup)
+
+        broadcast_vote.assert_called_with(ANY)
+
+        fsm.fold()
+        fold.assert_called_with(ANY)
+
+        self.assertEqual(fsm.current, 'finish')
