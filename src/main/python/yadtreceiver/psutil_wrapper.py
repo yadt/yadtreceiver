@@ -17,23 +17,36 @@ class Process(object):
 
     def __init__(self, process):
         self.pid = process.pid
-        try:
-            self._name = process.name()
-            self._cwd = process.cwd()
-            self._cmdline = process.cmdline()
-        except TypeError:
-            self._name = process.name
-            self._cwd = process.getcwd()
-            self._cmdline = process.cmdline
+        self.process = process
+        self._cmdline = None
+        self._cwd = None
+        self._name = None
 
     def name(self):
+        if not self._name:
+            try:
+                return self.process.name()
+            except TypeError:  # in old psutil, name is a field
+                return self.process.name
         return self._name
 
     def cwd(self):
+        if not self._cwd:
+            try:
+                return self.process.cwd()
+            except AttributeError:  # old psutil does not have cwd()
+                return self.process.getcwd()
         return self._cwd
 
+
     def cmdline(self):
+        if not self._cmdline:
+            try:
+                self._cmdline = self.process.cmdline()
+            except TypeError:  # in old psutil, cmdline is a field
+                self._cmdline = self.process.cmdline
         return self._cmdline
+
 
 
 def get_processes():

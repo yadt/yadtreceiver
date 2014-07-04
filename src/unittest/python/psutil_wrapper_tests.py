@@ -27,10 +27,10 @@ class BackwardsCompatibilityTests(TestCase):
 
     @patch("yadtreceiver.psutil_wrapper.psutil")
     def test_old_psutil(self, psutil):
-        p1 = Mock()
+        p1 = lambda: None  # object with settable fields
         p1.name = "python"
         p1.cmdline = ["foo", "bar"]
-        p1.getcwd.return_value = "/any/dir"
+        p1.getcwd = lambda: "/any/dir"
         p1.pid = 42
         processes = [p1]
         psutil.process_iter.return_value = (p for p in processes)
