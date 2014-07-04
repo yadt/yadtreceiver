@@ -25,9 +25,12 @@ __author__ = 'Arne Hilmann, Michael Gruber, Marcel Wolf, Daniel Clerc'
 
 from twisted.application import service
 from twisted.internet.defer import setDebugging
+from twisted.internet import reactor
+from twisted.web import server
 
 from yadtreceiver import __version__, Receiver, FileSystemWatcher
 from yadtreceiver.configuration import load
+from yadtreceiver.app_status import AppStatusResource
 
 setDebugging(True)
 
@@ -43,3 +46,6 @@ fs = FileSystemWatcher(
 fs.setServiceParent(application)
 fs.onChangeCallbacks = dict(
     create=receiver.subscribeTarget, delete=receiver.unsubscribeTarget)
+
+site = server.Site(AppStatusResource(receiver))
+reactor.listenTCP(8080, site)
