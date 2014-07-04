@@ -16,33 +16,37 @@ class AppStatusResourceTests(TestCase):
     def test_should_cache_hostname_when_instantiated(self):
         self.assertEqual(self.app_status.hostname, "any-hostname")
 
-    @patch("yadtreceiver.app_status.psutil")
+    @patch("yadtreceiver.psutil_wrapper.psutil")
     def test_should_filter_processes_when_they_are_not_python(self, psutil):
         p1 = Mock()
         p1.name.return_value = "python"
-        p1.cmdline.return_value = ["bar", "foo", "rebar"]
+        p1.cmdline.return_value = ["bar", "searchterm", "rebar"]
         p2 = Mock()
         p2.name.return_value = "java"
-        p2.cmdline.return_value = ["bar", "foo", "rebar"]
+        p2.cmdline.return_value = ["bar", "searchterm", "rebar"]
         psutil.process_iter.return_value = [p1, p2]
 
-        self.assertEqual(self.app_status.get_python_processes_containing("foo"),
-                         [p1])
+        result = self.app_status.get_python_processes_containing("searchterm")
 
-    @patch("yadtreceiver.app_status.psutil")
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0].cmdline(), ["bar", "searchterm", "rebar"])
+
+    @patch("yadtreceiver.psutil_wrapper.psutil")
     def test_should_filter_processes_when_they_are_not_matching_the_term(self, psutil):
         p1 = Mock()
         p1.name.return_value = "python"
-        p1.cmdline.return_value = ["bar", "foo", "rebar"]
+        p1.cmdline.return_value = ["bar", "searchterm", "rebar"]
         p2 = Mock()
         p2.name.return_value = "python"
         p2.cmdline.return_value = ["bar", "fuuuuu", "rebar"]
         psutil.process_iter.return_value = [p1, p2]
 
-        self.assertEqual(self.app_status.get_python_processes_containing("foo"),
-                         [p1])
+        result = self.app_status.get_python_processes_containing("searchterm")
 
-    @patch("yadtreceiver.app_status.psutil")
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0].cmdline(), ["bar", "searchterm", "rebar"])
+
+    @patch("yadtreceiver.psutil_wrapper.psutil")
     def test_should_filter_processes_when_they_are_neither_python_nor_matching_the_term(self, psutil):
         p1 = Mock()
         p1.name.return_value = "python"
@@ -52,8 +56,10 @@ class AppStatusResourceTests(TestCase):
         p2.cmdline.return_value = ["bar", "fuuuuu", "rebar"]
         psutil.process_iter.return_value = [p1, p2]
 
-        self.assertEqual(self.app_status.get_python_processes_containing("foo"),
-                         [p1])
+        result = self.app_status.get_python_processes_containing("foo")
+
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0].name(), "python")
 
     @patch("yadtreceiver.app_status.AppStatusResource.get_python_processes_containing")
     def test_should_return_yadtshell_processes(self, processes):

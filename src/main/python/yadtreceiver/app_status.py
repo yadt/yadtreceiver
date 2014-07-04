@@ -7,7 +7,8 @@ except ImportError:
     from io import StringIO
 
 from twisted.web import resource
-import psutil
+
+from yadtreceiver.psutil_wrapper import get_processes
 
 
 class AppStatusResource(resource.Resource):
@@ -38,7 +39,7 @@ class AppStatusResource(resource.Resource):
         return rendered_commands
 
     def get_python_processes_containing(self, script_name):
-        python_processes = filter(lambda p: p.name() == "python", psutil.process_iter())
+        python_processes = filter(lambda p: p.name() == "python", get_processes())
         matching_processes = filter(lambda p: script_name in p.cmdline(), python_processes)
         return matching_processes
 
