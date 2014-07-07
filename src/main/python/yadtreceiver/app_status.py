@@ -24,6 +24,7 @@ class AppStatusResource(resource.Resource):
         super(type(self), self).__init__()
 
     def render_GET(self, request):
+        request.setHeader('Content-Type', 'application/json')
         status_json = {
         "name": "yadtreceiver on {0}".format(self.hostname),
         "running_commands": self.get_list_of_running_yadtshell_processes_spawned_by_receiver(),
