@@ -12,6 +12,7 @@ try:
 except ImportError:
     import json
 
+import yadtreceiver
 from yadtreceiver.psutil_wrapper import get_processes
 
 
@@ -26,7 +27,7 @@ class AppStatusResource(resource.Resource):
     def render_GET(self, request):
         request.setHeader('Content-Type', 'application/json')
         status_json = {
-        "name": "yadtreceiver on {0}".format(self.hostname),
+        "name": "yadtreceiver v{0} on {1}".format(yadtreceiver.__version__, self.hostname),
         "running_commands": self.get_list_of_running_yadtshell_processes_spawned_by_receiver(),
         }
         return json.dumps(status_json, indent=4)
