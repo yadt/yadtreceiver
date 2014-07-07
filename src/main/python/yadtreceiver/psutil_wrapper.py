@@ -13,6 +13,17 @@ The function get_processes does not block on newer psutil versions and
 always returns items where contents are exposed through methods.
 """
 
+def safe_access(default_value):
+    def safe_inner(func):
+        def wrapped(*args):
+            try:
+                return func(*args)
+            except psutil.AccessDenied:
+                return default_value
+        return wrapped
+    return safe_inner
+
+
 class Process(object):
 
     def __init__(self, process):
@@ -30,6 +41,7 @@ class Process(object):
                 return self.process.name
         return self._name
 
+    @safe_access("unknown")
     def cwd(self):
         if not self._cwd:
             try:
@@ -38,7 +50,6 @@ class Process(object):
                 return self.process.getcwd()
         return self._cwd
 
-
     def cmdline(self):
         if not self._cmdline:
             try:
@@ -46,7 +57,6 @@ class Process(object):
             except TypeError:  # in old psutil, cmdline is a field
                 self._cmdline = self.process.cmdline
         return self._cmdline
-
 
 
 def get_processes():

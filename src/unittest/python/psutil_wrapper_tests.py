@@ -1,8 +1,36 @@
 from unittest import TestCase
 
 from mock import patch, Mock
+from psutil import AccessDenied
 
-from yadtreceiver.psutil_wrapper import get_processes
+from yadtreceiver.psutil_wrapper import get_processes, safe_access
+
+
+class SafeWrapperTests(TestCase):
+
+    def test_should_return_default_value_when_raising_access_denied(self):
+        @safe_access("default-value")
+        def function(arg1, arg2):
+            raise AccessDenied("boom")
+            return 42
+
+        self.assertEqual(function("foo", 4), "default-value")
+
+    def test_should_return_value_when_not_raising(self):
+        @safe_access("default-value")
+        def function(arg1, arg2):
+            return 42
+
+        self.assertEqual(function("foo", 4), 42)
+
+    def test_should_raise_when_not_raising_access_denied(self):
+        @safe_access("default-value")
+        def function(arg1, arg2):
+            raise RuntimeError("not an access denied")
+            return 42
+
+        self.assertRaises(RuntimeError, function, "foo", "bar")
+
 
 
 class BackwardsCompatibilityTests(TestCase):
