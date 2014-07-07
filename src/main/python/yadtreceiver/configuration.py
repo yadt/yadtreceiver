@@ -50,6 +50,7 @@ DEFAULT_PYTHON_COMMAND = '/usr/bin/python'
 DEFAULT_SCRIPT_TO_EXECUTE = '/usr/bin/yadtshell'
 DEFAULT_TARGETS = set()
 DEFAULT_TARGETS_DIRECTORY = '/etc/yadtshell/targets/'
+DEFAULT_APP_STATUS_PORT = "8080"
 
 SECTION_BROADCASTER = 'broadcaster'
 SECTION_RECEIVER = 'receiver'
@@ -67,6 +68,13 @@ class ReceiverConfigLoader (object):
             the configuration file.
         """
         self._parser = YadtConfigParser()
+
+    def get_app_status_port(self):
+        """
+            @return: the app status port from the configuration file as int,
+                     otherwise DEFAULT_APP_STATUS_PORT.
+        """
+        return self._parser.get_option_as_int(SECTION_RECEIVER, 'app_status_port', DEFAULT_APP_STATUS_PORT)
 
     def get_broadcaster_host(self):
         """
@@ -171,6 +179,7 @@ class ReceiverConfig(object):
             'targets_directory': parser.get_targets_directory(),
             'metrics_directory': parser.get_metrics_directory(),
             'metrics_file': parser.get_metrics_file(),
+            'app_status_port': parser.get_app_status_port(),
         }
         self.compute_allowed_targets()
 

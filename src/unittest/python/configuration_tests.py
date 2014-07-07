@@ -30,6 +30,7 @@ from yadtreceiver.configuration import (DEFAULT_BROADCASTER_HOST,
                                         DEFAULT_TARGETS_DIRECTORY,
                                         SECTION_BROADCASTER,
                                         SECTION_RECEIVER,
+                                        DEFAULT_APP_STATUS_PORT,
                                         ReceiverConfigLoader,
                                         ReceiverConfig,
                                         load)
@@ -69,6 +70,20 @@ class ReceiverConfigLoaderTests (unittest.TestCase):
         self.assertEqual(8081, actual_broadcaster_port)
         self.assertEqual(
             call(SECTION_BROADCASTER, 'port', DEFAULT_BROADCASTER_PORT), mock_parser.get_option_as_int.call_args)
+
+    def test_should_return_broadcaster_port_option(self):
+        mock_loader = Mock(ReceiverConfigLoader)
+        mock_parser = Mock(YadtConfigParser)
+        mock_parser.get_option_as_int.return_value = 42
+        mock_loader._parser = mock_parser
+
+        actual_app_status_port = ReceiverConfigLoader.get_app_status_port(
+            mock_loader)
+
+        self.assertEqual(42, actual_app_status_port)
+        self.assertEqual(
+            call(SECTION_RECEIVER, 'app_status_port', DEFAULT_APP_STATUS_PORT), mock_parser.get_option_as_int.call_args)
+
 
     @patch('yadtreceiver.configuration.socket')
     def test_should_return_hostname_from_receiver_section(self, mock_socket):

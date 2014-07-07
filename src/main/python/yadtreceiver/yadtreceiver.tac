@@ -48,4 +48,4 @@ fs.onChangeCallbacks = dict(
     create=receiver.subscribeTarget, delete=receiver.unsubscribeTarget)
 
 site = server.Site(AppStatusResource(receiver))
-reactor.listenTCP(8080, site)
+reactor.listenTCP(configuration.get("app_status_port"), site)
