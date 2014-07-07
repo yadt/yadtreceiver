@@ -43,7 +43,7 @@ from yadtcommons.configuration import YadtConfigParser
 
 
 DEFAULT_BROADCASTER_HOST = 'localhost'
-DEFAULT_BROADCASTER_PORT = 8081
+DEFAULT_BROADCASTER_PORT = "8081"
 
 DEFAULT_LOG_FILENAME = '/var/log/yadtreceiver.log'
 DEFAULT_PYTHON_COMMAND = '/usr/bin/python'
