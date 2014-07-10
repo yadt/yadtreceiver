@@ -45,6 +45,7 @@ targets_directory = /spam/eggs/targets
 script_to_execute = /spam/eggs/yadtshell
 python_command = /spam/eggs/python
 hostname = spameggs
+app_status_port = 42
 
 [broadcaster]
 host = broadcaster.domain.tld
@@ -57,6 +58,8 @@ port = 8081
             '/spam/eggs/yadtreceiver.log', actual_configuration['log_filename'])
         self.assertEqual(
             set(['spam', 'eggs']), actual_configuration['targets'])
+        self.assertEqual(
+            42, actual_configuration['app_status_port'])
         self.assertEqual(
             '/spam/eggs/targets', actual_configuration['targets_directory'])
         self.assertEqual(

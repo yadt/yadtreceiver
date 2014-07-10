@@ -42,6 +42,7 @@ default_task = ['analyze', 'publish']
 def set_properties(project):
     project.depends_on('PyYAML')
     project.depends_on('Twisted')
+    project.depends_on('psutil')
     project.depends_on('yadtbroadcast-client')
     project.depends_on('yadtcommons')
     project.depends_on('fysom')
