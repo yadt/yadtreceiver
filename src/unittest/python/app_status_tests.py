@@ -16,6 +16,18 @@ class AppStatusResourceTests(TestCase):
     def test_should_cache_hostname_when_instantiated(self):
         self.assertEqual(self.app_status.hostname, "any-hostname")
 
+    @patch("yadtreceiver.app_status.AppStatusResource.get_list_of_running_yadtshell_processes_spawned_by_receiver")
+    def test_should_cache_hostname_when_instantiated(self, processes):
+        processes.return_value = ["process-1", "process-2"]
+
+        get_result = self.app_status.render_GET(Mock())
+
+        self.assertEqual(get_result, '''{
+    "running_commands": [
+        "process-1", \n        "process-2"
+    ], \n    "name": "yadtreceiver v${version} on any-hostname"
+}''')
+
     @patch("yadtreceiver.psutil_wrapper.psutil")
     def test_should_filter_processes_when_they_are_not_python(self, psutil):
         p1 = Mock()
