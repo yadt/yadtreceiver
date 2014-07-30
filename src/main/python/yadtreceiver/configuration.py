@@ -92,7 +92,7 @@ class ReceiverConfigLoader (object):
 
     def get_hostname(self):
         """
-            @return: if a hostname is given in the configration file it will
+            @return: if a hostname is given in the configuration file it will
                      return it, otherwise it will return the host name as
                      given by socket.gethostname
         """
