@@ -1,1 +1,3 @@
-/sbin/chkconfig --del yadtreceiver
+if [ $1 = 0 ]; then
+  /sbin/chkconfig --del yadtreceiver
+fi
