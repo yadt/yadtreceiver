@@ -225,7 +225,7 @@ class YadtReceiverTests (unittest.TestCase):
         Receiver.perform_request(mock_receiver, mock_event, Mock())
 
         self.assertEquals(call('hostname', mock_broadcaster, 'devabc123',
-                          '/usr/bin/python /usr/bin/yadtshell update', tracking_id=None), mock_protocol.call_args)
+                               '/usr/bin/python /usr/bin/yadtshell update', tracking_id=None), mock_protocol.call_args)
         self.assertEquals(call('mock-protocol', '/usr/bin/python', [
                           '/usr/bin/python', '/usr/bin/yadtshell', 'update'], path='/etc/yadtshell/targets/devabc123', env={}), mock_reactor.spawnProcess.call_args)
 
@@ -252,7 +252,7 @@ class YadtReceiverTests (unittest.TestCase):
         Receiver.perform_request(mock_receiver, mock_event, Mock())
 
         self.assertEquals(call('hostname', mock_broadcaster, 'devabc123',
-                          '/usr/bin/python /usr/bin/yadtshell update', tracking_id=None), mock_protocol.call_args)
+                               '/usr/bin/python /usr/bin/yadtshell update', tracking_id=None), mock_protocol.call_args)
         self.assertEquals(call('mock-protocol', '/usr/bin/python', [
                           '/usr/bin/python', '/usr/bin/yadtshell', 'update'], path='/etc/yadtshell/targets/devabc123', env={}), mock_reactor.spawnProcess.call_args)
 
@@ -331,7 +331,7 @@ class YadtReceiverTests (unittest.TestCase):
         expected_command_with_arguments = '/usr/bin/python /usr/bin/yadtshell update'
 
         self.assertEqual(call('hostname', mock_broadcaster, 'devabc123',
-                         expected_command_with_arguments, tracking_id=None), mock_protocol.call_args)
+                              expected_command_with_arguments, tracking_id=None), mock_protocol.call_args)
 
     @patch.dict('yadtreceiver.METRICS', {}, clear=True)
     @patch('yadtreceiver.log')
@@ -703,7 +703,7 @@ class MetricsTests(unittest.TestCase):
     @patch('os.path.isdir')
     @patch('os.makedirs')
     def test_write_metrics_to_file_create_directory_if_it_not_exsists(self,
-            makedirs_, path_, open_):
+                                                                      makedirs_, path_, open_):
         # initialize a receiver with given configuration
         configuration = {'metrics_directory': '/tmp/metrics',
                          'metrics_file': '/tmp/metrics/yrc.metrics'
@@ -722,7 +722,7 @@ class MetricsTests(unittest.TestCase):
     @patch('yadtreceiver.open', create=True)
     @patch('os.path.isdir')
     def test_write_metrics_to_file_is_noop_with_no_metrics_directory(self,
-            path_, open_):
+                                                                     path_, open_):
         configuration = {'metrics_directory': None,
                          'metrics_file': None,
                          }
