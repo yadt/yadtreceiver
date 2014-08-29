@@ -397,6 +397,24 @@ class YadtReceiverTests (unittest.TestCase):
             call(mock_event), mock_receiver.handle_request.call_args)
 
     @patch('yadtreceiver.events.Event')
+    def test_should_handle_request_with_wamp_v2(self, mock_event_class):
+        mock_receiver = Mock(Receiver)
+        mock_receiver.states = {None: Mock()}
+        mock_event = Mock(Event)
+        mock_event.is_a_vote = False
+        mock_event_class.return_value = mock_event
+
+        Receiver.onEvent(mock_receiver, {  # wamp v2: no topic in onEvent
+                         'id': 'request',
+                         'cmd': 'command',
+                         'args': 'args'})
+
+        self.assertEqual(
+            call(None, {'id': 'request', 'cmd': 'command', 'args': 'args'}), mock_event_class.call_args)
+        self.assertEqual(
+            call(mock_event), mock_receiver.handle_request.call_args)
+
+    @patch('yadtreceiver.events.Event')
     @patch('yadtreceiver.log')
     def test_should_publish_event_about_failed_request_when_handle_request_fails(self, mock_log, mock_event_class):
         mock_receiver = Mock(Receiver)

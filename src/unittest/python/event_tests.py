@@ -27,6 +27,18 @@ from yadtreceiver.events import (Event,
 
 class EventTests(TestCase):
 
+    def test_should_create_event_with_target(self):
+        event = Event("any-target", {"id": "any-id"})
+        self.assertEqual(event.target, "any-target")
+
+    def test_should_create_event_without_target(self):
+        event = Event(None, {"id": "any-id"})
+        self.assertEqual(event.target, None)
+
+    def test_should_create_event_with_target_from_payload_if_possible(self):
+        event = Event(None, {"id": "any-id", "target": "any-target"})
+        self.assertEqual(event.target, "any-target")
+
     def test_should_raise_exception_when_payload_attribute_is_missing_in_vote(self):
         self.assertRaises(IncompleteEventDataException,
                           Event, 'target-name', {'id': 'vote'})

@@ -277,11 +277,20 @@ class Receiver(service.Service):
                 log.msg('(scheduling next try in %s seconds)' % delay)
             return self._connect_broadcaster()
 
-    def onEvent(self, target, event_data):
+    def onEvent(self, *args):
         """
             Will be called when receiving an event from the broadcaster.
             See onConnect which subscribes to the targets.
         """
+
+        try:
+            # Wamp v1: onEvent is callbacked with topic and event
+            target, event_data = args
+        except ValueError:
+            # Wamp v2: onEvent is callbacked with event
+            event_data, = args
+            target = None
+
         event = events.Event(target, event_data)
 
         if event.is_a_vote:

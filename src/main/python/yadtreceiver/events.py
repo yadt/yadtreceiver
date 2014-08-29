@@ -96,7 +96,7 @@ class PayloadIntegrityException(Exception):
 class Event (object):
 
     def __init__(self, target, data):
-        self.target = target
+        self.target = target or data.get('target')
         self.data = data
         self.tracking_id = data.get('tracking_id')
         self.event_type = self._ensure_is_valid_event_type()
