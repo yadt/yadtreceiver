@@ -81,7 +81,7 @@ class Receiver(service.Service):
         self.configuration.reload_targets()
         if targetname in self.configuration['allowed_targets']:
             log.msg('subscribing to target "%s".' % targetname)
-            self.broadcaster.client.subscribe(targetname, self.onEvent)
+            self.broadcaster.client.subscribe(self.onEvent, unicode(targetname))
         else:
             log.msg(
                 "Can't subscribe to target %s. Target not in allowed targets." %
@@ -227,7 +227,7 @@ class Receiver(service.Service):
 
         for targetname in targets:
             log.msg('subscribing to target "%s".' % targetname)
-            self.broadcaster.client.subscribe(targetname, self.onEvent)
+            self.broadcaster.client.subscribe(self.onEvent, unicode(targetname))
 
     def _should_refresh_connection(self):
         if not hasattr(self, 'broadcaster') or not self.broadcaster.client:
