@@ -92,19 +92,6 @@ class YadtReceiverTests (unittest.TestCase):
         self.assertEquals(
             call(receiver.onConnect), mock_broadcaster_client.addOnSessionOpenHandler.call_args)
 
-    @patch('yadtreceiver.WampBroadcaster')
-    def test_should_connect_broadcaster_when_connecting_broadcaster(self, mock_wamb):
-        receiver = Receiver()
-        configuration = {'broadcaster_host': 'broadcaster-host',
-                         'broadcaster_port': 1234}
-        receiver.set_configuration(configuration)
-        mock_broadcaster_client = Mock()
-        mock_wamb.return_value = mock_broadcaster_client
-
-        receiver._connect_broadcaster()
-
-        self.assertEquals(call(), mock_broadcaster_client.connect.call_args)
-
     @patch('yadtreceiver.log')
     @patch('__builtin__.exit')
     def test_should_exit_when_no_target_configured(self, mock_exit, mock_log):
