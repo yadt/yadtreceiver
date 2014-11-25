@@ -353,7 +353,6 @@ class Receiver(service.Service):
 
         self.broadcaster = WampBroadcaster(host, port, 'yadtreceiver')
         self.broadcaster.addOnSessionOpenHandler(self.onConnect)
-        self.broadcaster.connect()
 
     def write_metrics_to_file(self):
 
