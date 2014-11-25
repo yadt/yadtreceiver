@@ -261,22 +261,6 @@ class Receiver(service.Service):
         log.err('connection lost: %s' % reason)
         self.broadcaster.client = None
 
-    def _client_watchdog(self, delay=1):
-        """
-            Checks periodically if broadcaster.client is set
-            (see also onConnectionLost), tries to reconnect after a
-            delay (delay after failed connect: 1, 2, 4, 8, 16, 32, 60, 60, ...
-            seconds)
-        """
-        if hasattr(self, 'broadcaster') and self.broadcaster.client:
-            reactor.callLater(1, self._client_watchdog)
-        else:
-            reactor.callLater(delay, self._client_watchdog, min(60, 2 * delay))
-            log.err('broadcast.client not set, trying to connect')
-            if delay > 1:
-                log.msg('(scheduling next try in %s seconds)' % delay)
-            return self._connect_broadcaster()
-
     def onEvent(self, *args):
         """
             Will be called when receiving an event from the broadcaster.
@@ -346,7 +330,7 @@ class Receiver(service.Service):
         """
         self.initialize_twisted_logging()
         log.msg('yadtreceiver version %s' % __version__)
-        self._client_watchdog()
+        self._connect_broadcaster()
         self._refresh_connection(first_call=True)
         self.schedule_write_metrics(first_call=True)
         self.reset_metrics_at_midnight(first_call=True)
