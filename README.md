@@ -49,6 +49,11 @@ distribution.
 sudo service yadtreceiver start
 ```
 
+## Clustering
+The receiver can be operated in a cluster by subscribing several receivers to the same target. They will then decide which receiver fulfills the request by issuing votes and using the following state machine:
+
+![the voting state machine](https://raw.github.com/yadt/yadtreceiver/master/voting.png)
+
 ## License
 
 Copyright (C) 2013-2014 Immobilien Scout GmbH
