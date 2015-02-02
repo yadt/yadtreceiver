@@ -81,7 +81,7 @@ class Receiver(service.Service):
         self.configuration.reload_targets()
         if targetname in self.configuration['allowed_targets']:
             log.msg('subscribing to target "%s".' % targetname)
-            self.broadcaster.client.subscribe(targetname, self.onEvent)
+            self.broadcaster.client.subscribe(self.onEvent, unicode(targetname))
         else:
             log.msg(
                 "Can't subscribe to target %s. Target not in allowed targets." %
@@ -227,7 +227,7 @@ class Receiver(service.Service):
 
         for targetname in targets:
             log.msg('subscribing to target "%s".' % targetname)
-            self.broadcaster.client.subscribe(targetname, self.onEvent)
+            self.broadcaster.client.subscribe(self.onEvent, unicode(targetname))
 
     def _should_refresh_connection(self):
         if not hasattr(self, 'broadcaster') or not self.broadcaster.client:
@@ -260,22 +260,6 @@ class Receiver(service.Service):
         """
         log.err('connection lost: %s' % reason)
         self.broadcaster.client = None
-
-    def _client_watchdog(self, delay=1):
-        """
-            Checks periodically if broadcaster.client is set
-            (see also onConnectionLost), tries to reconnect after a
-            delay (delay after failed connect: 1, 2, 4, 8, 16, 32, 60, 60, ...
-            seconds)
-        """
-        if hasattr(self, 'broadcaster') and self.broadcaster.client:
-            reactor.callLater(1, self._client_watchdog)
-        else:
-            reactor.callLater(delay, self._client_watchdog, min(60, 2 * delay))
-            log.err('broadcast.client not set, trying to connect')
-            if delay > 1:
-                log.msg('(scheduling next try in %s seconds)' % delay)
-            return self._connect_broadcaster()
 
     def onEvent(self, *args):
         """
@@ -346,7 +330,7 @@ class Receiver(service.Service):
         """
         self.initialize_twisted_logging()
         log.msg('yadtreceiver version %s' % __version__)
-        self._client_watchdog()
+        self._connect_broadcaster()
         self._refresh_connection(first_call=True)
         self.schedule_write_metrics(first_call=True)
         self.reset_metrics_at_midnight(first_call=True)
@@ -369,7 +353,6 @@ class Receiver(service.Service):
 
         self.broadcaster = WampBroadcaster(host, port, 'yadtreceiver')
         self.broadcaster.addOnSessionOpenHandler(self.onConnect)
-        self.broadcaster.connect()
 
     def write_metrics_to_file(self):
 
