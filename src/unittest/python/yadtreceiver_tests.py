@@ -556,14 +556,6 @@ class YadtReceiverFilesytemWatcherTests(unittest.TestCase):
         fs.onChange('watch', self.PATH, self.CREATE)
         self.assertTrue(mock_receiver.subscribeTarget.called)
 
-    def test_for_mock_callback_delete(self):
-        mock_receiver = Mock(Receiver)
-        fs = FileSystemWatcher('/foo/bar')
-        fs.onChangeCallbacks = dict(create=mock_receiver.subscribeTarget,
-                                    delete=mock_receiver.unsubscribeTarget)
-        fs.onChange('watch', self.PATH, self.DELETE)
-        self.assertTrue(mock_receiver.unsubscribeTarget.called)
-
     @patch('yadtreceiver.inotify')
     def test_inotify_is_started(self, mock_inotify):
         fs = FileSystemWatcher('/foo/bar')

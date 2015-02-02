@@ -399,21 +399,17 @@ class FileSystemWatcher(service.Service):
 
     def __init__(self, path_to_watch):
         self.SUBFOLDER_CREATE = 0x40000100
-        self.SUBFOLDER_DELETE = 0x40000200
-
         self.path = path_to_watch
 
     def startService(self):
-        in_watch_mask = (self.SUBFOLDER_CREATE | self.SUBFOLDER_DELETE)
+        in_watch_mask = self.SUBFOLDER_CREATE
         notifier = inotify.INotify()
         notifier.startReading()
         notifier.watch(filepath.FilePath(self.path), mask=in_watch_mask,
                        callbacks=[self.onChange])
 
     def onChange(self, watch, path, mask):
-        if mask in (self.SUBFOLDER_CREATE, self.SUBFOLDER_DELETE):
+        if mask == self.SUBFOLDER_CREATE:
             callback = self.onChangeCallbacks['create']
-            if mask == self.SUBFOLDER_DELETE:
-                callback = self.onChangeCallbacks['delete']
             target = path.basename()
             callback(target)

@@ -44,8 +44,7 @@ receiver.setServiceParent(application)
 fs = FileSystemWatcher(
     configuration.get('targets_directory', '/etc/yadtshell/targets/'))
 fs.setServiceParent(application)
-fs.onChangeCallbacks = dict(
-    create=receiver.subscribeTarget, delete=receiver.unsubscribeTarget)
+fs.onChangeCallbacks = dict(create=receiver.subscribeTarget)
 
 site = server.Site(AppStatusResource(receiver))
 reactor.listenTCP(configuration.get("app_status_port"), site)
