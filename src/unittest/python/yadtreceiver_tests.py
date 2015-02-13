@@ -35,6 +35,12 @@ from yadtreceiver.events import Event
 from twisted.python import filepath
 
 
+class ConfigurationDict(dict):
+
+    def reload_targets(self):
+        pass
+
+
 class YadtReceiverTests (unittest.TestCase):
 
     def test_if_this_test_fails_maybe_you_have_yadtreceiver_installed_locally(self):
@@ -96,9 +102,10 @@ class YadtReceiverTests (unittest.TestCase):
     @patch('__builtin__.exit')
     def test_should_exit_when_no_target_configured(self, mock_exit, mock_log):
         receiver = Receiver()
-        receiver.set_configuration({'allowed_targets': set(),
-                                    'broadcaster_host': 'broadcaster_host',
-                                    'broadcaster_port': 1234})
+        configuration = ConfigurationDict(allowed_targets=set(),
+                                          broadcaster_host='broadcaster_host',
+                                          broadcaster_port=1234)
+        receiver.set_configuration(configuration)
         mock_broadcaster_client = Mock()
         receiver.broadcaster = mock_broadcaster_client
 
@@ -118,9 +125,11 @@ class YadtReceiverTests (unittest.TestCase):
         receiver = Receiver()
         mock_broadcaster_client = Mock()
         receiver.broadcaster = mock_broadcaster_client
-        receiver.set_configuration({'allowed_targets': set(['devabc123']),
-                                    'broadcaster_host': 'broadcaster_host',
-                                    'broadcaster_port': 1234})
+        configuration = ConfigurationDict(allowed_targets=set(['devabc123']),
+                                          broadcaster_host='broadcaster_host',
+                                          broadcaster_port=1234)
+        receiver.set_configuration(configuration)
+
         receiver.onConnect()
 
         self.assertEquals(call(receiver.onEvent, 'devabc123'),
@@ -130,10 +139,10 @@ class YadtReceiverTests (unittest.TestCase):
         receiver = Receiver()
         mock_broadcaster_client = Mock()
         receiver.broadcaster = mock_broadcaster_client
-        receiver.set_configuration(
-            {'allowed_targets': set(['dev01', 'dev02', 'dev03']),
-             'broadcaster_host': 'broadcaster_host',
-             'broadcaster_port': 1234})
+        configuration = ConfigurationDict(allowed_targets=set(['dev01', 'dev02', 'dev03']),
+                                          broadcaster_host='broadcaster_host',
+                                          broadcaster_port=1234)
+        receiver.set_configuration(configuration)
 
         receiver.onConnect()
 

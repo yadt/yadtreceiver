@@ -219,6 +219,7 @@ class Receiver(service.Service):
         log.msg('Successfully connected to broadcaster on %s:%s' %
                 (host, port))
 
+        self.configuration.reload_targets()
         targets = sorted(self.configuration['allowed_targets'])
 
         if not targets:
