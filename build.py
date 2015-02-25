@@ -27,6 +27,7 @@ use_plugin('python.pydev')
 use_plugin('copy_resources')
 
 use_plugin('python.flake8')
+use_plugin('python.sonarqube')
 
 authors = [Author('Arne Hilmann', 'arne.hilmann@gmail.com'),
            Author('Maximilien Riehl', 'maximilien.riehl@gmail.com'),
@@ -74,6 +75,6 @@ def set_properties(project):
 def set_properties_for_teamcity(project):
     import os
     project.version = '%s-%s' % (project.version, os.environ.get('BUILD_NUMBER', 0))
-    project.default_task = ['install_build_dependencies', 'analyze', 'package']
+    project.default_task = ['install_build_dependencies', 'analyze', 'package', 'run_sonar_analysis']
     project.get_property('distutils_commands').append('bdist_rpm')
     project.set_property('teamcity_output', True)
