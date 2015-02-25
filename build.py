@@ -75,8 +75,6 @@ def set_properties(project):
 def set_properties_for_teamcity(project):
     import os
     project.version = '%s-%s' % (project.version, os.environ.get('BUILD_NUMBER', 0))
-    # for sonar analysis
-    project.build_depends_on("pylint")
     project.default_task = ['install_build_dependencies', 'analyze', 'package', 'run_sonar_analysis']
     project.get_property('distutils_commands').append('bdist_rpm')
     project.set_property('teamcity_output', True)
