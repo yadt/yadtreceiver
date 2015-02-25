@@ -58,10 +58,11 @@ class IncompleteEventDataException(Exception):
     """
 
     def __init__(self, event, attribute_name):
-        error_message = 'Event "{1}" on target {0} is missing attribute "{2}", event dump : {3}'.format(event.target,
-                                                                                                        event.event_type,
-                                                                                                        attribute_name,
-                                                                                                        event.data)
+        error_message = 'Event "{1}" on target {0} is missing attribute "{2}", event dump : {3}'.format(
+            event.target,
+            event.event_type,
+            attribute_name,
+            event.data)
         super(IncompleteEventDataException, self).__init__(error_message)
 
 
@@ -151,7 +152,7 @@ class Event (object):
         return service_states
 
     def _ensure_payload_entry_contains_attribute(self, payload_entry, attribute_name):
-        if not attribute_name in payload_entry:
+        if attribute_name not in payload_entry:
             raise PayloadIntegrityException(self, attribute_name)
         return payload_entry[attribute_name]
 
@@ -163,7 +164,7 @@ class Event (object):
         return event_type
 
     def _ensure_attribute_in_data(self, attribute_name):
-        if not attribute_name in self.data:
+        if attribute_name not in self.data:
             raise IncompleteEventDataException(self, attribute_name)
         return self.data[attribute_name]
 
@@ -197,7 +198,8 @@ class Event (object):
 
     def __str__(self):
         if self.is_a_request:
-            return 'target[{0}] requested command "{1}" using arguments "{2}"'.format(self.target, self.command, self.arguments)
+            return 'target[{0}] requested command "{1}" using arguments "{2}"'.format(
+                self.target, self.command, self.arguments)
 
         if self.is_a_full_update:
             return 'target[{0}] full update of status information.'.format(self.target)
@@ -208,9 +210,11 @@ class Event (object):
 
         if self.is_a_command:
             if hasattr(self, 'message') and self.message is not None:
-                return '(broadcaster) target[{0}] command "{1}" {2}: {3}'.format(self.target, self.command, self.state, self.message)
+                return '(broadcaster) target[{0}] command "{1}" {2}: {3}'.format(
+                    self.target, self.command, self.state, self.message)
             else:
-                return '(broadcaster) target[{0}] command "{1}" {2}.'.format(self.target, self.command, self.state)
+                return '(broadcaster) target[{0}] command "{1}" {2}.'.format(
+                    self.target, self.command, self.state)
 
         if self.is_a_heartbeat:
             return 'Heartbeat on {0}'.format(self.target)

@@ -13,6 +13,7 @@ The function get_processes does not block on newer psutil versions and
 always returns items where contents are exposed through methods.
 """
 
+
 def safe_access(default_value):
     def safe_inner(func):
         def wrapped(*args):

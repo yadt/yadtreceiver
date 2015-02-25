@@ -22,9 +22,6 @@
     module.
 """
 
-__author__ = 'Arne Hilmann, Maximilien Riehl, Michael Gruber, Marcel Wolf, Daniel Clerc'
-__version__ = '${version}'
-
 import os
 import traceback
 import functools
@@ -44,10 +41,12 @@ from .scheduling import seconds_to_midnight
 import events
 from voting import create_voting_fsm
 
+__version__ = '${version}'
+
 METRICS = defaultdict(lambda: 0)
 
 # delayed import so that METRICS is importable from ProcessProtocol
-from protocols import ProcessProtocol
+from protocols import ProcessProtocol  # noqa
 
 
 def _write_metrics(metrics, metrics_file):

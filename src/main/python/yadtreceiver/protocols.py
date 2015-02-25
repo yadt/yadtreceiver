@@ -19,8 +19,6 @@
     how the receiver interacts with spawned processes.
 """
 
-__author__ = 'Michael Gruber, Maximilien Riehl'
-
 from twisted.internet import protocol
 from twisted.python import log
 

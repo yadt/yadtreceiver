@@ -26,6 +26,8 @@ use_plugin('python.distutils')
 use_plugin('python.pydev')
 use_plugin('copy_resources')
 
+use_plugin('python.flake8')
+
 authors = [Author('Arne Hilmann', 'arne.hilmann@gmail.com'),
            Author('Maximilien Riehl', 'maximilien.riehl@gmail.com'),
            Author('Michael Gruber', 'aelgru@gmail.com')]

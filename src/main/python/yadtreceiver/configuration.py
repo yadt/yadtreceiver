@@ -31,8 +31,6 @@
 
 """
 
-__author__ = 'Michael Gruber'
-
 import os
 import socket
 
@@ -147,7 +145,7 @@ class ReceiverConfigLoader (object):
             None otherwise
         """
         return self._parser.get_option(SECTION_RECEIVER, 'metrics_directory',
-                None)
+                                       None)
 
     def get_metrics_file(self):
         """

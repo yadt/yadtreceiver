@@ -1,10 +1,5 @@
 from socket import gethostname
-from string import Template
 from os.path import basename
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
 
 from twisted.web import resource
 try:
@@ -27,8 +22,8 @@ class AppStatusResource(resource.Resource):
     def render_GET(self, request):
         request.setHeader('Content-Type', 'application/json')
         status_json = {
-        "name": "yadtreceiver v{0} on {1}".format(yadtreceiver.__version__, self.hostname),
-        "running_commands": self.get_list_of_running_yadtshell_processes_spawned_by_receiver(),
+            "name": "yadtreceiver v{0} on {1}".format(yadtreceiver.__version__, self.hostname),
+            "running_commands": self.get_list_of_running_yadtshell_processes_spawned_by_receiver(),
         }
         return json.dumps(status_json, indent=4)
 
